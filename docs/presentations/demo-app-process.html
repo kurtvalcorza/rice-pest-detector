@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building the Demo App with an Agent — Rice-Pest Counter Case Study</title>
+<!-- Fonts: (Bricolage Grotesque / DM Sans / JetBrains Mono) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== warm-notebook :root ===== */
+:root {
+  --color-bg: #FAF7F2;
+  --color-bg-warm: #F5F0E8;
+  --color-bg-code: #1E1E2E;
+  --color-surface-card: #FFFFFF;
+  --color-surface-card-alt: #FDF9F3;
+  --color-border: #E5DFD6;
+  --color-border-light: #EEEBE5;
+  --color-title: #2C2A28;
+  --color-text-body: #2C2A28;
+  --color-text-muted: #9E9790;
+  --color-text-subtle: #6B6560;
+  --color-accent: #D94F30;
+  --color-accent-hover: #C4432A;
+  --color-accent-light: #FDEEE9;
+  --color-accent-muted: #E8836C;
+  --color-success: #2D8B55;
+  --color-error: #C93B3B;
+  --color-warning: #D4A843;
+  --color-actor-1: #D94F30;
+  --color-actor-2: #2A7B9B;
+  --color-actor-3: #7B6DAA;
+  --color-actor-4: #D4A843;
+  --color-actor-5: #2D8B55;
+  --code-keyword: #CBA6F7;
+  --code-string: #A6E3A1;
+  --code-function: #89B4FA;
+  --code-comment: #6C7086;
+  --code-number: #FAB387;
+  --code-property: #F9E2AF;
+  --code-operator: #94E2D5;
+  --code-tag: #F38BA8;
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', Fira Code, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(44,42,40,0.05);
+  --shadow-md: 0 4px 12px rgba(44,42,40,0.08);
+  --shadow-lg: 0 8px 24px rgba(44,42,40,0.1);
+  --shadow-xl: 0 16px 48px rgba(44,42,40,0.12);
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --ease-in-out: cubic-bezier(0.65,0,0.35,1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+/* ===== Responsive scale (viewport-fitting contract: every size uses clamp) ===== */
+:root {
+  --title-size: clamp(1.6rem, 5vw, 4rem);
+  --h2-size: clamp(1.2rem, 3.2vw, 2.4rem);
+  --h3-size: clamp(0.95rem, 1.8vw, 1.35rem);
+  --body-size: clamp(0.75rem, 1.45vw, 1.1rem);
+  --small-size: clamp(0.62rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1rem, 4vw, 4rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.75rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.9rem);
+}
+
+/* ===== Viewport fitting: mandatory base styles ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+body { background: var(--color-bg); color: var(--color-text-body); font-family: var(--font-body); font-size: var(--body-size); line-height: 1.5; }
+.slide {
+  width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+  scroll-snap-align: start; display: flex; flex-direction: column; position: relative;
+  background:
+    radial-gradient(circle at 1px 1px, var(--color-border-light) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--color-bg);
+}
+.slide-content {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  max-height: 100%; overflow: hidden; padding: var(--slide-padding); gap: var(--content-gap);
+}
+.bottom-bar {
+  display: flex; justify-content: space-between; padding: 0 var(--slide-padding) clamp(0.5rem, 1.5vh, 1rem);
+  font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-muted);
+}
+
+/* ===== Typography ===== */
+h1, h2, h3 { font-family: var(--font-display); color: var(--color-title); line-height: 1.08; letter-spacing: -0.02em; }
+h1 { font-size: var(--title-size); font-weight: 800; }
+h2 { font-size: var(--h2-size); font-weight: 700; }
+h3 { font-size: var(--h3-size); font-weight: 700; }
+p, li, td, th { font-size: var(--body-size); }
+.tag { font-family: var(--font-mono); font-size: var(--small-size); text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-accent); font-weight: 600; }
+.muted { color: var(--color-text-subtle); }
+.small { font-size: var(--small-size); }
+.accent { color: var(--color-accent); }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+code { background: var(--color-accent-light); color: var(--color-accent-hover); padding: 0.05em 0.35em; border-radius: 4px; }
+ul.clean { list-style: none; display: flex; flex-direction: column; gap: var(--element-gap); }
+ul.clean li { padding-left: 1.3em; position: relative; }
+ul.clean li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.55em; height: 0.55em; border-radius: 2px; background: var(--color-accent); }
+
+/* ===== Components ===== */
+.card { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: clamp(0.6rem, 1.6vw, 1.2rem); box-shadow: var(--shadow-sm); }
+.grid { display: grid; gap: var(--element-gap); }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+.g4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
+.stat { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.6rem, 4.5vw, 3.4rem); color: var(--color-accent); line-height: 1; }
+.quote { font-family: var(--font-display); font-size: clamp(1.1rem, 2.8vw, 2.1rem); font-weight: 600; line-height: 1.25; border-left: 6px solid var(--color-accent); padding-left: clamp(0.75rem, 2vw, 1.5rem); color: var(--color-title); }
+.quote small { display: block; margin-top: 0.6em; font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-muted); font-weight: 400; }
+table { width: 100%; border-collapse: collapse; background: var(--color-surface-card); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+th { text-align: left; font-family: var(--font-mono); font-size: var(--small-size); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-subtle); background: var(--color-bg-warm); padding: 0.55em 0.9em; }
+td { padding: 0.5em 0.9em; border-top: 1px solid var(--color-border-light); vertical-align: top; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); }
+.code-block { background: var(--color-bg-code); color: #CDD6F4; border-radius: var(--radius-md); padding: clamp(0.7rem, 1.6vw, 1.2rem); font-family: var(--font-mono); font-size: clamp(0.62rem, 1.15vw, 0.92rem); line-height: 1.55; white-space: pre; overflow: hidden; }
+.code-block .k { color: var(--code-keyword); } .code-block .s { color: var(--code-string); } .code-block .c { color: var(--code-comment); } .code-block .n { color: var(--code-number); } .code-block .f { color: var(--code-function); }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: var(--small-size); padding: 0.2em 0.65em; border-radius: var(--radius-full); background: var(--color-accent-light); color: var(--color-accent-hover); }
+.pill.ok { background: #E3F2E8; color: var(--color-success); }
+.pill.no { background: #F8E4E4; color: var(--color-error); }
+.pill.wait { background: #FBF3DE; color: #9A7A22; }
+.two-col { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--content-gap); align-items: center; }
+.shot { max-height: min(62vh, 560px); width: auto; max-width: 100%; border-radius: 22px; border: 6px solid #2C2A28; box-shadow: var(--shadow-xl); justify-self: center; }
+
+/* Stepper (plan) */
+.stepper { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); gap: var(--element-gap); counter-reset: step; }
+.step { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 0.6em 0.75em; font-size: var(--small-size); position: relative; }
+.step b { display: block; font-family: var(--font-display); font-size: var(--h3-size); color: var(--color-accent); }
+
+/* Stack diagram (layered bands) */
+.stack { display: flex; flex-direction: column; gap: clamp(3px, 0.6vh, 7px); }
+.band { display: grid; grid-template-columns: clamp(6rem, 14vw, 11rem) 1fr; align-items: stretch; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--color-border); background: var(--color-surface-card); }
+.band .lbl { font-family: var(--font-mono); font-size: var(--small-size); font-weight: 600; color: #fff; padding: 0.45em 0.7em; display: flex; align-items: center; }
+.band .items { display: flex; flex-wrap: wrap; gap: 0.35em; padding: 0.4em 0.6em; align-items: center; }
+.chip { font-family: var(--font-mono); font-size: var(--small-size); background: var(--color-bg-warm); border: 1px solid var(--color-border); border-radius: 6px; padding: 0.12em 0.5em; white-space: nowrap; }
+
+/* Architecture diagram */
+.arch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--element-gap); align-items: start; }
+.lane { background: var(--color-surface-card-alt); border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 0.6em; display: flex; flex-direction: column; gap: 0.45em; }
+.lane h3 { font-size: var(--small-size); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-subtle); }
+.node { background: var(--color-surface-card); border: 1px solid var(--color-border); border-left: 4px solid var(--c, var(--color-accent)); border-radius: 6px; padding: 0.35em 0.55em; font-size: var(--small-size); line-height: 1.3; }
+.node b { font-family: var(--font-mono); font-weight: 600; }
+.arrow { text-align: center; color: var(--color-text-muted); font-size: var(--small-size); line-height: 1; }
+
+/* Section header slides */
+.slide.section { background: var(--color-title); }
+.slide.section h2 { color: #FAF7F2; font-size: var(--title-size); }
+.slide.section .tag { color: var(--color-accent-muted); }
+.slide.section .bottom-bar { color: rgba(250,247,242,0.45); }
+.line-accent { width: clamp(3rem, 10vw, 7rem); height: 6px; background: var(--color-accent); border-radius: 3px; }
+
+/* ===== Reveal animations ===== */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out); }
+.slide.visible .reveal { opacity: 1; transform: none; }
+.slide.visible .d1 { transition-delay: 90ms; } .slide.visible .d2 { transition-delay: 180ms; } .slide.visible .d3 { transition-delay: 270ms; } .slide.visible .d4 { transition-delay: 360ms; }
+@media (prefers-reduced-motion: reduce) { .reveal { transition: opacity 0.3s ease; transform: none; } html { scroll-behavior: auto; } }
+
+/* ===== Progress bar + nav dots ===== */
+.progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--color-accent); width: 0; z-index: 20; transition: width var(--duration-normal) var(--ease-out); }
+.dots { position: fixed; right: clamp(6px, 1.2vw, 18px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 5px; z-index: 20; }
+.dots button { width: 7px; height: 7px; border-radius: 50%; border: none; background: var(--color-border); cursor: pointer; padding: 0; }
+.dots button.active { background: var(--color-accent); transform: scale(1.4); }
+
+/* ===== Height breakpoints ===== */
+@media (max-height: 700px) { :root { --slide-padding: clamp(0.75rem, 3vw, 2.5rem); --content-gap: clamp(0.4rem, 1.5vw, 1rem); } .shot { max-height: 52vh; } }
+@media (max-height: 600px) { :root { --body-size: clamp(0.68rem, 1.3vw, 0.95rem); } .code-block { font-size: 0.62rem; } .card { padding: 0.45rem 0.6rem; } .card h3 { font-size: 0.85rem; } .card p { line-height: 1.3; } }
+@media (max-height: 500px) { :root { --h2-size: clamp(1rem, 2.6vw, 1.8rem); --title-size: clamp(1.3rem, 4vw, 2.8rem); } .dots { display: none; } }
+@media (max-width: 760px) { .two-col, .arch { grid-template-columns: 1fr; } .shot { max-height: 38vh; } }
+/* Contrast (WCAG AA >= 4.5:1), review 2026-10-16 */
+.tag { color: #B23A22; }
+.pill { color: #A8361F; } .pill.ok { color: #1F6E40; } .pill.no { color: #A82E2E; } .pill.wait { color: #7A5F14; }
+.bottom-bar, .arrow { color: var(--color-text-subtle); }
+.slide.section .tag { color: var(--color-accent-muted); }
+.slide a { color: #B23A22; text-decoration: underline; text-underline-offset: 2px; } .slide a:hover { color: var(--color-accent); }
+aside.notes { display: none; }
+#notes-panel { display: none; position: fixed; left: 0; right: 0; bottom: 0; max-height: 38vh; overflow: auto; z-index: 30; background: var(--color-title); color: #FAF7F2; font-size: var(--body-size); line-height: 1.5; padding: 0.9rem clamp(1rem, 4vw, 4rem); box-shadow: var(--shadow-xl); }
+#notes-panel.open { display: block; }
+#notes-panel b { font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-accent-muted); display: block; margin-bottom: 0.3em; }
+#notes-sheet { display: none; padding: 2rem clamp(1rem, 5vw, 4rem); max-width: 920px; margin: 0 auto; color: var(--color-text); }
+#notes-sheet .ns-item { padding: 0.8rem 0; border-bottom: 1px solid var(--color-border); break-inside: avoid; }
+#notes-sheet h1 { font-size: 1.6rem; margin-bottom: 0.3rem; } #notes-sheet .ns-item h2 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+body.notes-sheet main, body.notes-sheet #notes-panel, body.notes-sheet .progress, body.notes-sheet .dots { display: none !important; }
+body.notes-sheet { overflow: auto; scroll-snap-type: none; } body.notes-sheet #notes-sheet { display: block; }
+.n-part { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-accent-muted); margin: 0.7em 0 0.15em; }
+#notes-panel p, #notes-sheet p { margin: 0 0 0.4em; }
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+<nav class="dots" aria-label="Slide navigation"></nav>
+<main>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide" aria-label="Title">
+  <div class="slide-content">
+    <p class="tag reveal">Coding with AI Agents · case study</p>
+    <h1 class="reveal d1">Building the <span class="accent">demo app</span><br>with an agent</h1>
+    <p class="reveal d2 muted" style="max-width: 52ch;">How an AI coding agent, directed by one person, planned, built, tested and documented an on-device rice-pest counter for Android in two days, then extended it to three models. A teaching demonstration, not a tool for farmers.</p>
+    <div class="reveal d3" style="display:flex; gap:.5em; flex-wrap:wrap;">
+      <span class="pill">15–18 Oct 2026</span><span class="pill">Flutter + ONNX Runtime</span><span class="pill">RT-DETR · RF-DETR · D-FINE</span><span class="pill">Android</span>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>01</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>This case study follows how one person directed an AI coding agent to plan, build, test and document an on-device rice-pest counter for Android over two days, 15–16 Oct 2026, and how it was extended on 17–18 Oct to download, switch and compare three published models. The app uses Flutter and ONNX Runtime; it began with an RT-DETR-r18vd model and now defaults to r50-v5 (RT-DETR-r50vd), with RF-DETR-M and D-FINE-L as alternatives. The app was first briefed as a tool for farmers; the project has since been scoped as a teaching demonstration, so the app is not made for farmers, is not official and has not been validated in the field.</p><p class="n-part">Presenting</p><p>Open the “Demo app (Android)” section of the repository’s <code>README.md</code> alongside the deck so people can check each claim. Ask the room: what would you need to decide before an agent writes any code?</p></aside>
+</section>
+
+<!-- ============ 2. THE QUESTION ============ -->
+<section class="slide" aria-label="The opening question">
+  <div class="slide-content">
+    <p class="tag reveal">It started with one question</p>
+    <p class="quote reveal d1">“if we were to build this rice pest detector app, what's your recommended tech stack”<small>Prompt 1 · the project owner</small></p>
+    <div class="grid g2 reveal d2">
+      <div class="card"><h3>First answer</h3><p class="muted">Python + ONNX Runtime on CPU, an offline-first local web app (FastAPI + server-rendered pages), SQLite, Docker or a Windows bundle.</p></div>
+      <div class="card"><h3>The catch it named</h3><p class="muted">The stack depends on <b>who uses it and where</b>. Field staff on laptops, a central lab and farmers on phones each need a different app.</p></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>02</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>It began with one open question to the agent: what tech stack would you recommend for this app? The first answer was a laptop-style setup: Python and ONNX Runtime on a CPU, an offline-first local web app built with FastAPI and server-rendered pages, SQLite for storage, packaged with Docker or as a Windows bundle. More useful than the stack was the catch the agent named: the right stack depends on who uses the app and where. Field staff on laptops, a central lab and farmers on phones each need a different app. That question about users drives every decision that follows; the first brief chose farmers on phones.</p><p class="n-part">Presenting</p><p>Ask the room who they think the users were before moving to slide 4. Pitfall: do not present the first answer as wrong; it was a reasonable default until the users were known.</p></aside>
+</section>
+
+<!-- ============ 3. SECTION: PLAN ============ -->
+<section class="slide section" aria-label="Section: Plan">
+  <div class="slide-content" style="align-items:flex-start;">
+    <p class="tag reveal">Section 01</p>
+    <h2 class="reveal d1">Plan before code</h2>
+    <div class="line-accent reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>03</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 01 covers planning. Before any code was written, the agent worked in plan mode, put each product decision to the owner as a multiple-choice question and produced a written plan for approval.</p><p class="n-part">Presenting</p><p>Ask the room how they usually start with an agent: with code, or with a plan?</p></aside>
+</section>
+
+<!-- ============ 4. DECISIONS ============ -->
+<section class="slide" aria-label="Decisions">
+  <div class="slide-content">
+    <p class="tag reveal">Plan mode · one multiple-choice question at a time</p>
+    <h2 class="reveal d1">The owner made every product call</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Decision</th><th>Choice</th><th>Why it mattered</th></tr></thead>
+      <tbody>
+        <tr><td>Users</td><td><b>Farmers on phones</b></td><td class="muted">On-device model, Android first</td></tr>
+        <tr><td>Scope</td><td><b>MVP while the model is fixed</b></td><td class="muted">Build against a fake detector now</td></tr>
+        <tr><td>Output</td><td><b>Counts + refer to expert</b></td><td class="muted">No spray or treatment advice</td></tr>
+        <tr><td>Framework</td><td><b>Flutter</b></td><td class="muted">One codebase, iOS later</td></tr>
+        <tr><td>Languages</td><td><b>Filipino, English, regional</b></td><td class="muted">gen-l10n string files</td></tr>
+        <tr><td>Photos</td><td><b>On-device only</b></td><td class="muted">No server, simplest for privacy law</td></tr>
+        <tr><td>Code location</td><td><b>Inside rice-pest-detector</b></td><td class="muted">Model and app versioned together</td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted small">These were the first brief (15 Oct). The project is now a teaching demo: not made for farmers, not official, not validated in the field.</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>04</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>In plan mode the agent researches and writes a plan but changes no code until it is approved. It asked one multiple-choice question at a time and the owner chose. The first brief named farmers on phones, which meant an on-device model, Android first; the project has since been scoped as a teaching demonstration, not made for farmers. The scope was an MVP (minimum viable product) built against a fake detector while the model was being fixed. The output is counts plus a referral to an expert, never spray or treatment advice. Flutter gives one codebase, with iOS later. Filipino, English and regional languages live in gen-l10n string files. Photos stay on the device, and the app sits inside the rice-pest-detector repository so model and app are versioned together. See <code>docs/specs/2026-10-15-demo-app-design.md</code>.</p><p class="n-part">Presenting</p><p>Walk down the “Why it mattered” column, not the choices. Ask: which of these could the agent have decided on its own? Likely answer: none safely, because each carries a product, privacy or risk call.</p></aside>
+</section>
+
+<!-- ============ 5. CONSTRAINTS ============ -->
+<section class="slide" aria-label="Constraints">
+  <div class="slide-content">
+    <p class="tag reveal">What the plan had to respect</p>
+    <h2 class="reveal d1">The model was not ready, and the plan said so</h2>
+    <div class="grid g4 reveal d2">
+      <div class="card"><div class="stat">0</div><p class="muted small">detections at the 0.5 threshold in training run r18-1</p></div>
+      <div class="card"><div class="stat">2/4</div><p class="muted small">sex classes below 0.70 mAP50, so the app reports species only</p></div>
+      <div class="card"><div class="stat">Out</div><p class="muted small">of scope: phone photos and decisions without expert review (model card)</p></div>
+      <div class="card"><div class="stat">6</div><p class="muted small">release gates before any real use of the counts</p></div>
+    </div>
+    <p class="reveal d3 muted">So the MVP was built on a fake detector and a tiny test model behind a preview notice. With no real model installed, the app now says so and does not count.</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>05</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The plan was honest about the model. Training run r18-1 kept 0 detections at the specified 0.5 confidence threshold. The model labels each species as female or male, and 2 of these 4 sex classes scored below 0.70 mAP50 (mean average precision at 50% box overlap, a standard detection score), so the app reports species only. The model card puts phone photos, and decisions made without expert review, out of scope. Six release gates stand between the app and any real use of its counts. So the MVP was built on a fake detector and a tiny test model behind a preview notice. Now, with no real model installed, the app says so and does not count.</p><p class="n-part">Presenting</p><p>Open <code>docs/model-card.md</code> and show the out-of-scope uses. Ask: why build an app before the model is ready? Answer: the plan separates app work from model work, so each can be tested on its own. Pitfall: this is the state when the plan was written; do not imply the model is now field-ready. A later model, r50-v5, meets the model quality gates on the held-out test split (18 Oct), but the other release gates are still open.</p></aside>
+</section>
+
+<!-- ============ 6. PLAN STEPS ============ -->
+<section class="slide" aria-label="The plan">
+  <div class="slide-content">
+    <p class="tag reveal">Approved plan · each step tested before the next</p>
+    <h2 class="reveal d1">Nine build steps</h2>
+    <div class="stepper reveal d2">
+      <div class="step"><b>1</b>Scaffold, Detector interface, FakeDetector</div>
+      <div class="step"><b>2</b>Post-processing vs golden outputs</div>
+      <div class="step"><b>3</b>Pre-processing parity with Python</div>
+      <div class="step"><b>4</b>ONNX Runtime on the device</div>
+      <div class="step"><b>5</b>Counting and review flags</div>
+      <div class="step"><b>6</b>Screens, history, share sheet</div>
+      <div class="step"><b>7</b>Filipino and English</div>
+      <div class="step"><b>8</b>Pinned model download</div>
+      <div class="step"><b>9</b>Device test</div>
+    </div>
+    <p class="reveal d3 muted small">Reuse, not rewrite: the Python inference contract, the existing Python tool's counting rules and test fixtures, and its pinned model download.</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>06</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The approved plan had nine build steps, and each had to pass its tests before the next began. It runs from a scaffold with a Detector interface and a FakeDetector (a stand-in that returns recorded results), through post-processing and pre-processing checked against Python, ONNX Runtime on the device, counting and review flags, screens with history and the share sheet, Filipino and English, and a pinned model download, to a device test. The plan reused rather than rewrote existing work: the Python inference contract (<code>docs/inference-contract.md</code>), the existing Python tool’s counting rules and test fixtures, and its pinned model download.</p><p class="n-part">Presenting</p><p>Point out that steps 2 and 3 come before the phone runs any model. Ask: why test the maths before the device? Likely question: what does “pinned” mean? Answer: the download is tied to one file’s SHA-256 hash, so only that exact file installs.</p></aside>
+</section>
+
+<!-- ============ 7. SECTION: BUILD ============ -->
+<section class="slide section" aria-label="Section: Build">
+  <div class="slide-content" style="align-items:flex-start;">
+    <p class="tag reveal">Section 02</p>
+    <h2 class="reveal d1">Build it, test-first</h2>
+    <div class="line-accent reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>07</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 02 shows the build itself. The work was mostly test-first: tests were seen to fail before the code that makes them pass, and where code came first, a deliberate break showed the test could fail, so each step had a clear stop condition.</p><p class="n-part">Presenting</p><p>Ask who in the room has written a failing test before writing the code. Slides 12–14 carry the core lessons of this section.</p></aside>
+</section>
+
+<!-- ============ 8. TECH STACK DIAGRAM ============ -->
+<section class="slide" aria-label="Tech stack diagram">
+  <div class="slide-content">
+    <p class="tag reveal">Tech stack</p>
+    <h2 class="reveal d1">From open data to a phone</h2>
+    <div class="stack reveal d2">
+      <div class="band"><div class="lbl" style="background:var(--color-actor-1)">Device</div><div class="items"><span class="chip">Android phones</span><span class="chip">Android 36 emulator (WHPX)</span></div></div>
+      <div class="band"><div class="lbl" style="background:var(--color-actor-1)">App</div><div class="items"><span class="chip">Flutter 3.47.7</span><span class="chip">Dart 3.13.5</span><span class="chip">gen-l10n</span><span class="chip">image</span><span class="chip">image_picker</span><span class="chip">share_plus</span><span class="chip">path_provider</span><span class="chip">http · crypto</span></div></div>
+      <div class="band"><div class="lbl" style="background:var(--color-actor-2)">Inference</div><div class="items"><span class="chip">flutter_onnxruntime 1.9.0</span><span class="chip">ONNX Runtime 1.28</span><span class="chip">Dart port of the contract</span></div></div>
+      <div class="band"><div class="lbl" style="background:var(--color-actor-2)">Model</div><div class="items"><span class="chip">r50-v5 (RT-DETR-r50vd), default</span><span class="chip">RF-DETR-M · D-FINE-L</span><span class="chip">ONNX opset 17 · 122–172 MB</span><span class="chip">4 classes</span><span class="chip">on Kaggle</span></div></div>
+      <div class="band"><div class="lbl" style="background:var(--color-actor-3)">Python tools</div><div class="items"><span class="chip">Python 3.12</span><span class="chip">PyTorch 2.14 (CPU)</span><span class="chip">transformers 5.20.1</span><span class="chip">Pillow 12.3</span><span class="chip">onnx 1.23 · onnxruntime 1.31</span></div></div>
+      <div class="band"><div class="lbl" style="background:var(--color-actor-4)">Training</div><div class="items"><span class="chip">Colab GPU</span><span class="chip">generated notebook</span><span class="chip">checkpoints on Drive</span></div></div>
+      <div class="band"><div class="lbl" style="background:var(--color-actor-5)">Data</div><div class="items"><span class="chip"><a href="https://doi.org/10.5281/zenodo.20066074" target="_blank" rel="noopener">Deleña et al., Zenodo</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span><span class="chip">5,453 images · 70/15/15 by family</span></div></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>08</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>This slide lists the whole stack, from open data to a phone. The data is the Deleña et al. dataset on Zenodo under a CC BY 4.0 licence: 5,453 images split 70/15/15 by family, where a family is an image with its augmented variants, so augmented copies of one photo cannot land on both sides of the split. Training ran on a Colab GPU from a generated notebook, with checkpoints on Drive. The app now offers three models exported to ONNX (opset 17, 4 classes) and published on Kaggle: r50-v5 (RT-DETR-r50vd, 171.7 MB), the default, plus RF-DETR-M (122.0 MB) and D-FINE-L (125.2 MB). The first build used RT-DETR-r18vd (80.75 MB). Training now uses transformers 5.20.1, which fixed a loss bug in 4.57.6. On the phone, a Flutter 3.47.7 and Dart 3.13.5 app calls ONNX Runtime 1.28 through flutter_onnxruntime 1.9.0 and a Dart port of the inference contract.</p><p class="n-part">Presenting</p><p>Do not read every version aloud; slide 28 has them. Ask: why does the app need a Dart port of the contract? Answer: the phone runs no Python, so the same steps must be rewritten in Dart and tested for parity.</p></aside>
+</section>
+
+<!-- ============ 9. ARCHITECTURE DIAGRAM ============ -->
+<section class="slide" aria-label="App architecture diagram">
+  <div class="slide-content">
+    <p class="tag reveal">App architecture</p>
+    <h2 class="reveal d1">Screens talk to interfaces, so tests can use fakes</h2>
+    <div class="arch reveal d2">
+      <div class="lane">
+        <h3>Screens</h3>
+        <div class="node"><b>Home</b> · notice, photo buttons, history</div>
+        <div class="arrow">↓</div>
+        <div class="node"><b>Result</b> · species counts, review flags, Share</div>
+        <div class="node"><b>About</b> · use, privacy, licences</div>
+        <h3 style="margin-top:.4em">Services</h3>
+        <div class="node" style="--c:var(--color-actor-2)"><b>PhotoSource</b> → camera / gallery</div>
+        <div class="node" style="--c:var(--color-actor-2)"><b>History</b> → one JSON file</div>
+        <div class="node" style="--c:var(--color-actor-2)"><b>Sharer</b> → Android share sheet</div>
+      </div>
+      <div class="lane">
+        <h3>Detector pipeline</h3>
+        <div class="node" style="--c:var(--color-actor-3)"><b>decode</b> · JPEG + EXIF → upright RGB</div>
+        <div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-3)"><b>preprocess</b> · Pillow-bilinear 640² · ÷255 · NCHW</div>
+        <div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-3)"><b>ONNX Runtime</b> · logits, pred_boxes</div>
+        <div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-3)"><b>postprocess</b> · sigmoid, max, ≥ threshold</div>
+        <div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-3)"><b>counting</b> · species counts, review flags</div>
+      </div>
+      <div class="lane">
+        <h3>Model chosen at start-up</h3>
+        <div class="node" style="--c:var(--color-success)"><b>published</b> · pinned, SHA-256 verified <span class="pill wait">none yet</span></div>
+        <div class="arrow">else ↓</div>
+        <div class="node" style="--c:var(--color-warning)"><b>demo</b> · r50-v5 pinned from Kaggle, or real weights in app storage, verified <span class="pill ok">pinned</span></div>
+        <div class="arrow">else ↓</div>
+        <div class="node" style="--c:var(--color-text-muted)"><b>none</b> · notice shown, counting disabled</div>
+        <h3 style="margin-top:.4em">In tests</h3>
+        <div class="node"><b>FakeDetector</b> replays recorded detections</div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>09</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Screens talk to interfaces rather than concrete code, so tests can swap in fakes. Home shows the notice, photo buttons and history; Result shows species counts, review flags and Share; About covers use, privacy and licences. Services wrap the camera or gallery, a history kept in one JSON file and the Android share sheet. The detector pipeline decodes the JPEG upright, resizes it to 640×640 the way Pillow does, scales pixel values to 0–1, runs ONNX Runtime, keeps scores at or above the threshold and counts. At start-up the app picks a model: published (pinned and SHA-256 verified; no model has passed every gate, so there is none yet), else demo, else none, which disables counting. The pin points at r50-v5 on Kaggle as a demo model: the home screen offers the download, checks its size and SHA-256, and then counts with the Demo notice.</p><p class="n-part">Presenting</p><p>Trace one photo down the pipeline column aloud. Ask: what happens with no model? Answer: a notice appears and counting is disabled. Pitfall: anyone can download r50-v5, but only as a demo model; do not call it validated, official or fit for farmers.</p></aside>
+</section>
+
+<!-- ============ 10. TOOLCHAIN ============ -->
+<section class="slide" aria-label="Toolchain setup">
+  <div class="slide-content">
+    <p class="tag reveal">Prompt: “Install Flutter + Android SDK”</p>
+    <h2 class="reveal d1">Setting up the toolchain, with checks and consent</h2>
+    <ul class="clean reveal d2">
+      <li>Flutter cloned from the official repository into a folder without spaces: Flutter breaks on paths with spaces. Analytics switched off.</li>
+      <li>Android command-line tools downloaded, then <b>checked against Google's published SHA-256</b> before extracting.</li>
+      <li>The SDK licences were accepted only after an explicit yes from the owner (“Yes, accept and install”).</li>
+      <li>An Android 36 emulator: x86_64, Windows hardware acceleration (WHPX).</li>
+      <li>Python ONNX tools came from the repo's own <code>export</code> extra, already planned for the model's export step.</li>
+    </ul>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>10</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Installing Flutter and the Android SDK was itself an agent task, done with checks and consent. Flutter was cloned from the official repository into a folder without spaces, because Flutter breaks on paths with spaces, and analytics were switched off. The Android command-line tools were checked against Google’s published SHA-256 hash before extracting. The SDK licences were accepted only after the owner said “Yes, accept and install”. The emulator runs Android 36 on x86_64 with Windows hardware acceleration (WHPX). The Python ONNX tools came from the repository’s own export extra. The “Build and test” section of <code>README.md</code> lists the paths used.</p><p class="n-part">Presenting</p><p>Ask: why should an agent stop for a yes before accepting a licence? Answer: accepting terms is a commitment the person makes, not the agent. Pitfall: do not wave the hash check away as a detail; it is how you know the download is genuine.</p></aside>
+</section>
+
+<!-- ============ 11. PARITY APPROACH ============ -->
+<section class="slide" aria-label="Parity approach">
+  <div class="slide-content">
+    <p class="tag reveal">Steps 2–3</p>
+    <h2 class="reveal d1">The phone must see exactly what Python sees</h2>
+    <div class="two-col">
+      <ul class="clean reveal d2">
+        <li>A Python tool writes <b>golden fixtures</b> from the reference code: EXIF cases, resizes, post-processing.</li>
+        <li><b>No photos are stored.</b> Test images are patterns that Dart rebuilds from the same formula.</li>
+        <li>Dart resizes the pattern and compares the result <b>byte for byte</b> (SHA-256) with Python's.</li>
+        <li>Shapes include real phone photos: 4032×3024 in both orientations.</li>
+      </ul>
+      <div class="code-block reveal d3"><span class="c">// same formula in Python and Dart</span>
+<span class="k">value</span>(x, y, c) =
+  (x*<span class="n">7</span> + y*<span class="n">13</span> + c*<span class="n">101</span>
+   + (x*y) % <span class="n">31</span>) % <span class="n">256</span>
+
+<span class="c">// test: Dart resize == Pillow resize</span>
+<span class="f">expect</span>(sha256(dart),
+       fixture[<span class="s">'resized_sha256'</span>])</div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>11</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The app must see exactly what the Python reference sees, or its counts mean nothing. A Python tool, <code>tools/export_app_fixtures.py</code>, writes golden fixtures (known-correct outputs) from the reference code: EXIF cases, resizes and post-processing. EXIF is metadata in a JPEG that records, among other things, how the camera was held. No photos are stored: test images are patterns that Python and Dart both rebuild from the formula on the slide. Dart resizes each pattern and compares the result byte for byte with Python’s, using a SHA-256 hash. The shapes include real phone photo sizes, 4032×3024 in both orientations.</p><p class="n-part">Presenting</p><p>Show <code>app/test/fixtures/</code> and <code>app/test/contract_test.dart</code>. Ask: why use a formula instead of real photos? Answer: there is nothing to store or licence, and both languages can regenerate the image exactly.</p></aside>
+</section>
+
+<!-- ============ 12. LESSON: PILLOW ============ -->
+<section class="slide" aria-label="Lesson: Pillow pass order">
+  <div class="slide-content">
+    <p class="tag reveal">Lesson · don't guess, read the source</p>
+    <h2 class="reveal d1">Byte-exact on every shape but one</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><h3>Symptom</h3><p class="muted">One pixel in a 3×1200 test image was off by one level.</p></div>
+      <div class="card"><h3>Investigation</h3><p class="muted">A first guess at Pillow's rule was wrong on 26 probed shapes. Reading <a href="https://github.com/python-pillow/Pillow/blob/12.3.0/src/libImaging/Resample.c" target="_blank" rel="noopener">Pillow 12.3's C source</a> settled it: only inputs under ~10 px wide differ.</p></div>
+      <div class="card"><h3>Decision</h3><p class="muted">No camera takes a 3-pixel-wide photo, so the app <b>rejects photos under 32 px</b> instead of chasing the edge case.</p></div>
+    </div>
+    <p class="reveal d3 small muted">Result: byte-identical on all 8 fixture shapes, from 37×23 up to 4032×3024.</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>12</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>One check failed: in a 3×1200 test image, a single pixel was off by one level. A first guess at Pillow’s resize rule was wrong on 26 probed shapes. Reading the C source of Pillow 12.3 settled it: only inputs under about 10 pixels wide differ, because Pillow orders its resize passes differently for them. No camera takes a 3-pixel-wide photo, so the decision was to reject photos under 32 pixels rather than chase the edge case. The result: byte-identical output on all 8 fixture shapes, from 37×23 up to 4032×3024. When a guess fails, read the source, then make a deliberate scope call.</p><p class="n-part">Presenting</p><p>Ask: was rejecting tiny photos a shortcut? Answer: no; it is a recorded scope decision with a reason. Pitfall: do not present guessing as the method. Reading the source is what ended the search.</p></aside>
+</section>
+
+<!-- ============ 13. LESSON: EXIF ============ -->
+<section class="slide" aria-label="Lesson: EXIF double rotation">
+  <div class="slide-content">
+    <p class="tag reveal">Lesson · tests catch library surprises</p>
+    <h2 class="reveal d1">A photo that would have been rotated twice</h2>
+    <div class="grid g2 reveal d2">
+      <div class="card"><h3>What the test found</h3><p class="muted">The <code>image</code> package already applies a JPEG's EXIF rotation, then clears the tag. Our contract would have applied it again.</p></div>
+      <div class="card"><h3>The fix</h3><p class="muted">Decode returns the photo <b>upright</b>; the contract then runs with orientation 1. A test checks all 8 EXIF orientations against Pillow's behaviour.</p></div>
+    </div>
+    <p class="reveal d3 small muted">The same test run also caught a bug in the test itself: <code>ColorUint8(77)</code> makes a 77-channel colour, not grey 77.</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>13</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>A test against Pillow found that the Dart <code>image</code> package already applies a JPEG’s EXIF rotation and then clears the tag. The inference contract would have rotated the photo a second time. The fix: decoding returns the photo upright, and the contract then runs with orientation 1, meaning no rotation. A test, <code>app/test/decode_test.dart</code>, checks all 8 EXIF orientations against Pillow’s behaviour. The same run also caught a bug in the test itself: <code>ColorUint8(77)</code> makes a colour with 77 channels, not a grey value of 77. Tests catch surprises in libraries, and in the tests too.</p><p class="n-part">Presenting</p><p>Ask: why would a library rotating the image be a problem? Answer: the contract assumed it had to rotate, so the photo would be turned twice. Pitfall: do not blame the library; its behaviour simply differed from what the contract assumed.</p></aside>
+</section>
+
+<!-- ============ 14. ON DEVICE ============ -->
+<section class="slide" aria-label="On-device ONNX and the Impeller hang">
+  <div class="slide-content">
+    <p class="tag reveal">Step 4 · prompts: “Status check”, “Ok”</p>
+    <h2 class="reveal d1">ONNX on the emulator, and a 40-minute hang</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><h3>Test model</h3><p class="muted">A 9.9 KB ONNX file with the real input and output names. It returned known golden outputs, so the device result could be checked exactly.</p></div>
+      <div class="card"><h3>The hang</h3><p class="muted">The app installed and launched, but no Dart output ever appeared. The likely cause: Flutter's Impeller renderer on a headless, software-rendered emulator.</p></div>
+      <div class="card"><h3>The fix</h3><p class="muted">Run device tests through <code>flutter drive --no-enable-impeller</code>. All 3 device tests pass, including the 0.5-boundary detection.</p></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>14</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Step 4 ran ONNX Runtime on the emulator. A 9.9 KB test model with the real input and output names returned known golden outputs, so the device result could be checked exactly. Then the app installed and launched, but no Dart output ever appeared: a 40-minute hang. The likely cause was Flutter’s Impeller renderer on a headless, software-rendered emulator. The fix was to run device tests through <code>flutter drive --no-enable-impeller</code>. All 3 device tests then passed, including a detection exactly at the 0.5 boundary. The owner’s prompts during this step were short: “Status check” and “Ok”.</p><p class="n-part">Presenting</p><p>Show the <code>flutter drive</code> command in the README. Likely question: slide 29 says 1 device test, not 3. Answer: the 9.9 KB test model was later removed so that no install shows counts from a non-real model, and the remaining device test checks the app starting with no model.</p></aside>
+</section>
+
+<!-- ============ 15. SCREENS ============ -->
+<section class="slide" aria-label="Screens and languages">
+  <div class="slide-content">
+    <div class="two-col">
+      <div>
+        <p class="tag reveal">Steps 6–8 · prompt: “Continue to working app”</p>
+        <h2 class="reveal d1">Screens, languages, history</h2>
+        <ul class="clean reveal d2" style="margin-top:var(--content-gap)">
+          <li>Home, Result and About screens. Every result offers “Share the counts”.</li>
+          <li>English and Filipino. A test fails if any string suggests spraying or a treatment.</li>
+          <li>History is one JSON file on the phone, written safely, and recovers from corruption.</li>
+          <li>A model download pinned to a SHA-256, or a copy from USB or LAN. With no model installed, the app says so and does not count.</li>
+        </ul>
+      </div>
+      <img class="shot reveal d3" src="demo-app-process-assets/app-preview_processed.png" alt="App home screen in preview mode: notice that counts come from a test model, buttons to take or choose a photo, empty history">
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>15</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Steps 6–8 produced the working app, prompted by “Continue to working app”. There are Home, Result and About screens, and every result offers a share button, now “Share the counts” (first “Share with your technician”, renamed when the app became a teaching demo). The app is in English and Filipino, and a test fails if any string suggests spraying or a treatment. History is one JSON file on the phone, written safely, and it recovers from corruption. The model arrives by a download pinned to a SHA-256 hash, or as a copy from USB or LAN; with no model installed, the app says so and does not count. The screenshot shows the home screen in preview mode, when counts came from a test model.</p><p class="n-part">Presenting</p><p>Ask: why test the wording as well as the code? Answer: a treatment suggestion is a safety risk the model card rules out. Pitfall: the Filipino text is still a draft awaiting review by a native speaker; do not present it as final.</p></aside>
+</section>
+
+<!-- ============ 16. SECTION: REAL MODEL ============ -->
+<section class="slide section" aria-label="Section: Real model">
+  <div class="slide-content" style="align-items:flex-start;">
+    <p class="tag reveal">Section 03</p>
+    <h2 class="reveal d1">Put the real model in</h2>
+    <div class="line-accent reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>16</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 03 puts the real trained weights into the app and shows what happened when the model met the threshold the spec had set.</p><p class="n-part">Presenting</p><p>Ask the room to predict: if training finished, why might the app still count nothing?</p></aside>
+</section>
+
+<!-- ============ 17. CALIBRATION FINDING ============ -->
+<section class="slide" aria-label="Calibration finding">
+  <div class="slide-content">
+    <p class="quote reveal">“can we run real model weights on this demo app? also preload photos from the data source”<small>Prompt · the project owner</small></p>
+    <div class="grid g3 reveal d1">
+      <div class="card"><div class="stat">0.25</div><p class="muted small">the highest score the model gives any of 253 validation photos</p></div>
+      <div class="card"><div class="stat">60/60</div><p class="muted small">epochs with validation count accuracy stuck at the do-nothing baseline (0.474)</p></div>
+      <div class="card"><div class="stat">0.835</div><p class="muted small">test species mAP50: it ranks insects well, it just isn't confident</p></div>
+    </div>
+    <p class="reveal d2 muted">Diagnosis at the time: a calibration problem, not a bad checkpoint (slide 19 has the root cause). That is why nothing ever passed the 0.5 threshold.</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>17</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The owner asked whether real weights could run in the demo app, with photos preloaded from the dataset. Checking first exposed the problem: the highest score the model gave any of 253 validation photos was 0.25. In 60 of 60 epochs, validation count accuracy stayed at the do-nothing baseline of 0.474, the score of a model that predicts nothing. Yet test species mAP50 was 0.835: the model ranks insects well, it just is not confident. The diagnosis was a calibration problem (scores that do not reflect how likely a detection is to be right), not a bad checkpoint. That is why nothing passed the 0.5 threshold.</p><p class="n-part">Presenting</p><p>Ask: how can a model rank well yet count nothing? Answer: ranking depends on the order of scores; counting needs scores above a cut-off. Pitfall: do not call the model good without this caveat.</p></aside>
+</section>
+
+<!-- ============ 18. EXPORT BUG ============ -->
+<section class="slide" aria-label="ONNX export bug">
+  <div class="slide-content">
+    <p class="tag reveal">Lesson · find the first stage that disagrees</p>
+    <h2 class="reveal d1">An export that only worked on one input</h2>
+    <div class="two-col">
+      <ul class="clean reveal d2">
+        <li>First export: <b>0 of 300</b> output rows matched PyTorch.</li>
+        <li>Comparing stage by stage showed the graph had frozen values from the input used to trace it.</li>
+        <li>Fix: export inside <code>eval()</code> + <code>no_grad()</code>. A regression test, checked by breaking it deliberately, guards this.</li>
+        <li>Parity also reports <b>how many detections it compared</b>, so it cannot pass on nothing.</li>
+      </ul>
+      <div class="card reveal d3">
+        <h3>Parity on real photos</h3>
+        <p class="muted small" style="margin:.4em 0">First export (run r18-1), 10 validation photos, threshold 0.04. The current model, r50-v5: 145 detections at 0.48, max difference 4.9e-6, 171.7 MB.</p>
+        <table>
+          <tbody>
+            <tr><td>Detections compared</td><td class="num">126</td></tr>
+            <tr><td>Max score difference</td><td class="num">3.5e-7</td></tr>
+            <tr><td>Min box overlap (IoU)</td><td class="num">0.99999</td></tr>
+            <tr><td>ONNX size</td><td class="num">80.75 MB</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>18</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The first ONNX export matched PyTorch on 0 of 300 output rows. Comparing stage by stage found the first stage that disagreed: the exported graph had frozen values from the input used to trace it. The fix was to export inside <code>eval()</code> and <code>no_grad()</code>, guarded by a regression test that was checked by breaking it deliberately. Parity also reports how many detections it compared, so it cannot pass on nothing. On 10 validation photos at threshold 0.04 it compared 126 detections, with a maximum score difference of 3.5e-7 and a minimum box overlap (IoU, intersection over union) of 0.99999. See <code>tools/export_onnx.py</code>.</p><p class="n-part">Presenting</p><p>Ask: why does “126 detections compared” matter? Answer: a parity check that compares zero detections passes trivially. Pitfall: do not skip the method; finding the first stage that disagrees is the skill that transfers.</p></aside>
+</section>
+
+<!-- ============ 19. THRESHOLD ============ -->
+<section class="slide" aria-label="Demo threshold">
+  <div class="slide-content">
+    <p class="tag reveal">Prompt choice: “Pick on validation split”</p>
+    <h2 class="reveal d1">A demo threshold, chosen on validation photos only</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Threshold</th><th class="num">Count accuracy</th><th class="num">Count error (both species)</th><th class="num">Detections kept</th></tr></thead>
+      <tbody>
+        <tr><td><b>0.04 (chosen)</b></td><td class="num"><b>0.632</b></td><td class="num"><b>3.83</b></td><td class="num">3,019</td></tr>
+        <tr><td>0.10</td><td class="num">0.482</td><td class="num">9.11</td><td class="num">625</td></tr>
+        <tr><td>0.50 (specified)</td><td class="num">0.474 = baseline</td><td class="num">11.51</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted">The threshold choice never touched the test split. Stemborers are overcounted and black bugs undercounted. This is a demo setting, not a fix. Calibration (16 Oct) did not reach the count gate either. A larger model (r50-1) reached 0.751, still below 0.80. The root cause was a bug in the training library; retrained with the fix (r50-v5, 17 Oct), the model scores normally, its threshold moves to 0.48, and validation count accuracy reaches 0.834. The app's demo now uses r50-v5; on its one test look (18 Oct, 252 photos) it counts 0.849 at 0.48. The training deck has the details.</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>19</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>To show anything, the demo needed a lower threshold, chosen on validation photos only, without touching the test split. At 0.04, count accuracy was 0.632, count error 3.83 and 3,019 detections were kept. At 0.10: 0.482, 9.11 and 625. At the specified 0.50: 0.474, the baseline, with error 11.51 and nothing kept. Stemborers are overcounted and black bugs undercounted. This is a demo setting, not a fix. Calibration on 16 Oct did not reach the count gate either. A larger r50 model (r50-1) lifted validation count accuracy to 0.751, still below 0.80. On 17 October the low scores were traced to a bug in the training library (transformers 4.57.6). Retrained on the fixed version, r50-v5 scores normally: its validation-chosen threshold is 0.48, its validation count accuracy 0.834, and the low-confidence review flag moves from 0.06 to 0.64. r50-v5 is now the demo model. On 18 October it had the single pre-registered look at the held-out test split, at 0.48 on 252 photos: count accuracy 0.849, against a do-nothing baseline of 0.456, so it meets the model quality gates on test.</p><p class="n-part">Presenting</p><p>Show <code>tools/choose_demo_threshold.py</code>. Ask: why choose on validation, never on test? Answer: tuning on test makes the test score optimistic. Point to the training deck for r50-1 and r50-v5. Pitfall: do not read 0.632 as field accuracy.</p></aside>
+</section>
+
+<!-- ============ 20. DEMO MODE ============ -->
+<section class="slide" aria-label="Demo mode">
+  <div class="slide-content">
+    <div class="two-col">
+      <div>
+        <p class="tag reveal">Demo mode</p>
+        <h2 class="reveal d1">Real weights on the emulator</h2>
+        <ul class="clean reveal d2" style="margin-top:var(--content-gap)">
+          <li>The weights were copied to the emulator and <b>checked against the recorded checkpoint hash</b>.</li>
+          <li>The demo model lives in app storage, and loads only if its SHA-256 and size match.</li>
+          <li>20 validation photos pushed to the gallery, with their true counts for comparison.</li>
+          <li>Its own notice: “counts have not been validated in the field”.</li>
+        </ul>
+      </div>
+      <img class="shot reveal d3" src="demo-app-process-assets/app-demo_processed.png" alt="App home screen in demo mode with a notice about real model weights and one entry in past counts">
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>20</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Demo mode runs real weights on the emulator. The weights were copied over and checked against the recorded checkpoint hash. The demo model lives in app storage and loads only if its SHA-256 hash and size match. Twenty validation photos were pushed to the emulator’s gallery, with their true counts for comparison. Demo mode has its own notice: “counts have not been validated in the field”. The screenshot shows the home screen in demo mode, with one entry in past counts. The “Run it” section of <code>README.md</code> explains how a developer places a demo model.</p><p class="n-part">Presenting</p><p>Ask: why does demo mode need its own notice? Answer: the weights are real, but no one has checked the counts in the field. Pitfall: demo mode is for developers; do not suggest it for real counts.</p></aside>
+</section>
+
+<!-- ============ 21. SECTION: SHIP ============ -->
+<!-- ============ THREE MODELS ============ -->
+<section class="slide" aria-label="Three models in one app">
+  <div class="slide-content">
+    <p class="tag reveal">17–18 Oct · prompt: “…an option to switch models on the app”</p>
+    <h2 class="reveal d1">Three models, one app</h2>
+    <div class="grid g3 reveal d2" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,24rem),1fr))">
+      <div class="card"><p><b>Download from Kaggle</b></p><p class="muted small">Settings lists the three published models from a catalogue bundled with the app. Each download is pinned by size and SHA-256. The home screen offers r50-v5, the default.</p></div>
+      <div class="card"><p><b>Checked before use</b></p><p class="muted small">An imported model file loads only if its size, SHA-256, input and output shapes and a self-test all pass.</p></div>
+      <div class="card"><p><b>Settings travel with the model</b></p><p class="muted small">Input size, threshold and review flag: r50-v5 640 px, 0.48, 0.64; RF-DETR-M 576 px, 0.48, 0.63; D-FINE-L 640 px, 0.50, 0.68.</p></div>
+      <div class="card"><p><b>Switch and compare</b></p><p class="muted small">Pick the active model, or run two on the same photo side by side. On one emulator photo: r50-v5 counted 9 black bugs and 1 stemborer in 1.3 s; RF-DETR-M counted 11 and 0, with a review flag, in 0.7 s.</p></div>
+      <div class="card"><p><b>Not validated, every model</b></p><p class="muted small">Every model, the default included, carries a “Not validated” tag: none has been checked in the field or by experts.</p></div>
+      <div class="card"><p><b>A demo app, in words too</b></p><p class="muted small">The app and its documents say “demo app”. A test fails if any English or Filipino string mentions farmers or technicians.</p></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>21</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>On 17–18 October the app grew from one model to three. After wave 2, three fine-tuned models existed, r50-v5, RF-DETR-M and D-FINE-L, and their weights were published on Kaggle. The owner asked for a way to switch models for demonstrations. Settings now lists the three published models from a catalogue bundled with the app, and each download is pinned by size and SHA-256. A model file imported by hand loads only if its size, SHA-256, input and output shapes and a self-test all pass. Each model carries its own input size, threshold and review flag, because the three were tuned separately on validation photos. A Compare screen runs two models on the same photo; on one emulator photo, r50-v5 counted 9 black bugs and 1 stemborer in 1.3 s, and RF-DETR-M counted 11 and 0, with a review flag, in 0.7 s. Every model keeps a “Not validated” tag, the default included, because none has been checked in the field or by experts. The same days reframed the project as a teaching demo, so the app’s strings say “demo app”, and a test rejects any string that mentions farmers or technicians.</p><p class="n-part">Presenting</p><p>Ask: why should the threshold travel with the model rather than live in the app? Answer: each model was tuned separately, and one shared threshold would miscount for two of them. Pitfall: one photo is an example, not a comparison; the evaluation record compares the models on validation and test photos.</p></aside>
+</section>
+
+<section class="slide section" aria-label="Section: Ship">
+  <div class="slide-content" style="align-items:flex-start;">
+    <p class="tag reveal">Section 04</p>
+    <h2 class="reveal d1">Document it honestly</h2>
+    <div class="line-accent reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>22</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 04 covers documentation: writing down what was built, what is not done and what the agent did, so the next reader does not have to guess.</p><p class="n-part">Presenting</p><p>Ask: who will read documentation for a project like this, and what do they need to see first?</p></aside>
+</section>
+
+<!-- ============ 22. DOCS ============ -->
+<section class="slide" aria-label="Documentation and cleanup">
+  <div class="slide-content">
+    <p class="tag reveal">Prompts: “write full documentation…”, “add AI Use Disclosure…”</p>
+    <h2 class="reveal d1">README, notice, disclosure, rename</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><h3>README</h3><p class="muted">Two Mermaid architecture diagrams, status first, the full pipeline, run instructions. Test counts were re-run before they were written down.</p></div>
+      <div class="card"><h3>Notice + disclosure</h3><p class="muted">A standard safety notice, extended to the app. An AI Use Disclosure says what the agent did and what people did.</p></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>23</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Two prompts produced the documentation. The README gained two Mermaid architecture diagrams, the status first, the full pipeline and run instructions. Mermaid is a text format that renders as diagrams. Test counts were re-run before they were written down. A standard safety notice was extended to cover the app, and an AI Use Disclosure section says what the agent did and what people did. The rename is the app’s package ID, changed to a neutral one (<code>io.github.kurtvalcorza.trapcounter</code>); Android treats a new ID as a new app, so slide 25 (prompt 14) pairs it with a reinstall.</p><p class="n-part">Presenting</p><p>Open <code>README.md</code> and show that the status comes first. Ask: why put status before features? Answer: readers should meet the limits before the claims.</p></aside>
+</section>
+
+<!-- ============ 23. PROMPTS 1 ============ -->
+<section class="slide" aria-label="Prompts used, part 1">
+  <div class="slide-content">
+    <p class="tag reveal">Behind the scenes · prompts used (1/3)</p>
+    <h2 class="reveal d1">Short prompts, multiple-choice answers</h2>
+    <table class="reveal d2">
+      <thead><tr><th>#</th><th>Owner's prompt or choice</th><th>What it triggered</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span class="mono">“if we were to build this rice pest detector app, what's your recommended tech stack”</span></td><td class="muted">Stack recommendation</td></tr>
+        <tr><td>2</td><td><span class="mono">“whats' this skill”</span> → <span class="mono">/plan</span></td><td class="muted">Explained plan mode</td></tr>
+        <tr><td>3</td><td>Plan the detector app · Farmers on phones · MVP while model is fixed</td><td class="muted">Plan scope</td></tr>
+        <tr><td>4</td><td>Counts + refer to expert · Flutter · Filipino, English, regional</td><td class="muted">Product rules</td></tr>
+        <tr><td>5</td><td>On-device only · Inside rice-pest-detector</td><td class="muted">Privacy, repo</td></tr>
+        <tr><td>6</td><td><span class="mono">“Install Flutter + Android SDK”</span> · <span class="mono">“Yes, accept and install”</span></td><td class="muted">Toolchain, licence consent</td></tr>
+        <tr><td>7</td><td>flutter_onnxruntime · <span class="mono">“Continue to working app”</span></td><td class="muted">Steps 4–9</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>24</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>This table lists the owner’s prompts and choices for the first half of the project, and what each triggered. Notice how short they are. After the opening question about a tech stack, and a question about a skill that led to plan mode (<code>/plan</code>), most entries are multiple-choice answers: farmers on phones (the first brief), MVP while the model is fixed, counts plus referral to an expert, Flutter, the languages, on-device only, inside the repository. Rows 6 and 7, including the licence consent, moved the work from planning into the toolchain and build steps 4–9.</p><p class="n-part">Presenting</p><p>Ask: what did the owner need to know to answer these well? Answer: the users, the risks and the context, not the code. Pitfall: do not reconstruct prompts beyond what the table shows.</p></aside>
+</section>
+
+<!-- ============ 24. PROMPTS 2 ============ -->
+<section class="slide" aria-label="Prompts used, part 2">
+  <div class="slide-content">
+    <p class="tag reveal">Behind the scenes · prompts used (2/3)</p>
+    <h2 class="reveal d1">From “we good?” to a real model</h2>
+    <table class="reveal d2">
+      <thead><tr><th>#</th><th>Owner's prompt or choice</th><th>What it triggered</th></tr></thead>
+      <tbody>
+        <tr><td>8</td><td><span class="mono">“Status check”</span> · <span class="mono">“Ok”</span> · <span class="mono">“we good?”</span></td><td class="muted">Hang diagnosis, retry</td></tr>
+        <tr><td>9</td><td><span class="mono">“how do i run it”</span> · <span class="mono">“let's do Option B”</span></td><td class="muted">Emulator with a window</td></tr>
+        <tr><td>10</td><td><span class="mono">“can we run real model weights on this demo app? also preload photos from the data source”</span></td><td class="muted">Export, demo mode</td></tr>
+        <tr><td>11</td><td>I'll copy it now · Pick on validation split · <span class="mono">“end emulator run”</span></td><td class="muted">Threshold sweep</td></tr>
+        <tr><td>12</td><td><span class="mono">“write full documentation includin architecture diagram in … README.md”</span></td><td class="muted">README</td></tr>
+        <tr><td>13</td><td><span class="mono">“… add AI Use Disclosure section and a safety notice”</span></td><td class="muted">Notice, disclosure</td></tr>
+        <tr><td>14</td><td><span class="mono">“expand the notice to cover the app … and reinstall…”</span></td><td class="muted">Rename, reinstall</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>25</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The second half follows the same pattern. Short check-ins (“Status check”, “Ok”, “we good?”) triggered the hang diagnosis and a retry. “how do i run it” and choosing Option B produced an emulator with a window. The request for real model weights and preloaded photos led to the export and demo mode. A copy, a choice to pick the threshold on the validation split and ending the emulator run produced the threshold sweep. The last three prompts asked for full documentation with an architecture diagram, an AI Use Disclosure with a safety notice, and an expanded notice with a reinstall.</p><p class="n-part">Presenting</p><p>Ask: which prompt here would carry the most risk if the agent misread it? Pitfall: do not present terse prompts as a technique on their own; point back to the plan and tests that framed them.</p></aside>
+</section>
+
+<!-- ============ PROMPTS 3 ============ -->
+<section class="slide" aria-label="Prompts used, part 3">
+  <div class="slide-content">
+    <p class="tag reveal">Behind the scenes · prompts used (3/3)</p>
+    <h2 class="reveal d1">From one model to three</h2>
+    <table class="reveal d2">
+      <thead><tr><th>#</th><th>Owner's prompt or choice</th><th>What it triggered</th></tr></thead>
+      <tbody>
+        <tr><td>15</td><td><span class="mono">“im thinking for demo purposes we could have an option to switch models on the app…”</span></td><td class="muted">Model registry, import checks, Compare</td></tr>
+        <tr><td>16</td><td><span class="mono">“…can we host these in kaggle?”</span></td><td class="muted">Weights published on Kaggle</td></tr>
+        <tr><td>17</td><td><span class="mono">“in settings can we add an option to download the other three…”</span></td><td class="muted">Download list in Settings</td></tr>
+        <tr><td>18</td><td><span class="mono">“none of these models are field validated or validated by experts, we keep the tag”</span></td><td class="muted">“Not validated” on every model</td></tr>
+        <tr><td>19</td><td><span class="mono">“Drop the farmers…”</span></td><td class="muted">Demo-app wording, renamed files</td></tr>
+        <tr><td>20</td><td><span class="mono">“is there a script to run the emulator”</span></td><td class="muted">tools/run_emulator.ps1 and .sh</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>26</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The third group of prompts, from 17–18 October, took the app from one model to three. A request for a model switch for demonstrations led to the model registry, the import checks and the Compare screen. Asking whether the weights could be hosted on Kaggle led to their publication there. A request for Settings to offer the other models led to the download list. The owner kept the “Not validated” tag on every model because none has been validated in the field or by experts. “Drop the farmers” started the reframing to a demo app, in the README, the app’s strings and the file names. The last prompt produced a script that starts an emulator and runs the app.</p><p class="n-part">Presenting</p><p>Ask: which of these prompts is a product decision rather than a coding task? Answer: keeping the tag (18) and dropping the farmers (19); the agent carried them out, but only the owner could make them.</p></aside>
+</section>
+
+
+<!-- ============ 25. SKILLS AND AGENT TOOLS ============ -->
+<section class="slide" aria-label="Skills and agent tools">
+  <div class="slide-content">
+    <p class="tag reveal">Behind the scenes · how the agent worked</p>
+    <h2 class="reveal d1">Skills, modes and agent tools</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><h3>Plan mode <span class="pill">/plan</span></h3><p class="muted small">Read-only research, a written plan, then approval before any code.</p></div>
+      <div class="card"><h3>Explore sub-agent</h3><p class="muted small">Mapped the reusable code, contract and licences, without cluttering the main session.</p></div>
+      <div class="card"><h3>Multiple-choice decisions</h3><p class="muted small">Every fork went to the owner as options with a recommendation.</p></div>
+      <div class="card"><h3>Test-driven development</h3><p class="muted small">Superpowers TDD: watch each test fail, then pass. Where code came first, a deliberate break proved the tests catch it.</p></div>
+      <div class="card"><h3>Agent tools</h3><p class="muted small">PowerShell, Bash, file read/write/edit, search, web fetch (pub.dev, Pillow source, Android downloads), background tasks.</p></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>27</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The agent combined several ways of working. Plan mode (<code>/plan</code>) meant read-only research, a written plan, then approval before any code. An Explore sub-agent mapped the reusable code, the contract and licences without cluttering the main session. Every fork went to the owner as options with a recommendation. Test-driven development followed Superpowers TDD: watch each test fail, then pass; where code came first, a deliberate break proved the tests catch it. Agent tools included PowerShell, Bash, file read, write and edit, search, web fetch (pub.dev, the Pillow source, Android downloads) and background tasks.</p><p class="n-part">Presenting</p><p>Ask: why send mapping work to a sub-agent? Answer: it keeps the main session focused on decisions. Likely question: does my agent have a plan mode? Answer: check its documentation; planning before code works with any agent.</p></aside>
+</section>
+
+<!-- ============ 26. TOOLS AND VERSIONS ============ -->
+<section class="slide" aria-label="Tools and versions">
+  <div class="slide-content">
+    <p class="tag reveal">Behind the scenes · exact versions</p>
+    <h2 class="reveal d1">Tools and versions used</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Layer</th><th>Tool</th><th>Version / note</th></tr></thead>
+      <tbody>
+        <tr><td>App</td><td>Flutter · Dart</td><td class="mono">3.47.7 · 3.13.5</td></tr>
+        <tr><td>On-device inference</td><td>flutter_onnxruntime → ONNX Runtime</td><td class="mono">1.9.0 → 1.28</td></tr>
+        <tr><td>Android</td><td>SDK platform · emulator · JDK</td><td class="mono">36 · WHPX · 21</td></tr>
+        <tr><td>App packages</td><td>image · image_picker · share_plus · path_provider · http · crypto</td><td class="mono">image 4.12 · share_plus 13</td></tr>
+        <tr><td>Training and export</td><td>PyTorch · transformers</td><td class="mono">2.14.1 (CPU) · 5.20.1 (4.57.6 for the first two runs)</td></tr>
+        <tr><td>Reference and ONNX</td><td>Pillow · onnx · onnxruntime</td><td class="mono">12.3.0 · 1.23.2 · 1.31.0</td></tr>
+        <tr><td>Everything else</td><td>git · adb · pytest · Colab · Kaggle CLI</td><td class="mono">weights published on Kaggle (18 Oct)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>28</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>This is the exact version list, for anyone reproducing the build. The app uses Flutter 3.47.7 and Dart 3.13.5; on-device inference uses flutter_onnxruntime 1.9.0 over ONNX Runtime 1.28. Android uses SDK platform 36, the WHPX emulator and JDK 21. App packages include image 4.12 and share_plus 13. Training and export used PyTorch 2.14.1 (CPU) and transformers 5.20.1 (the first two runs used 4.57.6, whose loss bug is covered in the model-training case study); the reference and ONNX tools are Pillow 12.3.0, onnx 1.23.2 and onnxruntime 1.31.0. git, adb, pytest, Colab and the Kaggle CLI were also used; the three models’ weights were published on Kaggle on 18 October.</p><p class="n-part">Presenting</p><p>Ask: why does the exact Pillow version matter? Answer: the Dart resize copies Pillow 12.3’s behaviour byte for byte (slide 12). Pitfall: do not round or update versions when reproducing.</p></aside>
+</section>
+
+<!-- ============ 27. TESTING ============ -->
+<section class="slide" aria-label="Testing discipline">
+  <div class="slide-content">
+    <p class="tag reveal">Behind the scenes · proof, not promises</p>
+    <h2 class="reveal d1">Every claim has a test behind it</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><div class="stat">128</div><p class="muted small">Python tests: data, metrics, training loop, notebook build, fixtures, export, parity, threshold, calibration</p></div>
+      <div class="card"><div class="stat">138</div><p class="muted small">Dart tests on the PC: contract, decoding, counting, history, model store and registry, import and download checks, strings, screens</p></div>
+      <div class="card"><div class="stat">1</div><p class="muted small">device test: the real app starting with no model installed</p></div>
+    </div>
+    <ul class="clean reveal d3">
+      <li>Generated files have <code>--check</code> modes, and line endings are pinned, so Windows checkouts stay reproducible.</li>
+      <li>Deliberate breaks proved three key tests can fail: model install verification, threshold tie-break, export inference mode.</li>
+    </ul>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>29</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Every claim in the deck has a test behind it: 128 Python tests (data, metrics, training loop, notebook build, fixtures, export, parity, threshold, calibration), 138 Dart tests on the PC (contract, decoding, counting, history, model store and registry, import and download checks, strings, and screens including settings and compare) and 1 device test, which checks the real app starting with no model installed. Generated files have <code>--check</code> modes and line endings are pinned, so Windows checkouts stay reproducible. Deliberate breaks proved that three key tests can fail: model install verification, the threshold tie-break and export inference mode. A test that cannot fail proves nothing. The “Testing” section of <code>README.md</code> gives the commands.</p><p class="n-part">Presenting</p><p>If time allows, run <code>flutter test</code> in <code>app/</code>. Ask: how do you know a test can fail? Answer: break the code on purpose and watch it fail.</p></aside>
+</section>
+
+<!-- ============ 28. STATUS AND GATES ============ -->
+<section class="slide" aria-label="Status and release gates">
+  <div class="slide-content">
+    <p class="tag reveal">Current version</p>
+    <h2 class="reveal d1">Works end to end. Not validated for real use.</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Release gate</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Model passes the quality gates with a validation-chosen threshold</td><td><span class="pill ok">met on test (18 Oct): r50-v5 count accuracy 0.849 at 0.48</span></td></tr>
+        <tr><td>Field validation on phone photos taken in the field</td><td><span class="pill wait">not started</span></td></tr>
+        <tr><td>Weights</td><td><span class="pill ok">published on Kaggle (18 Oct) as a teaching demo</span></td></tr>
+        <tr><td>Wording review: the English text and the Filipino draft, so nothing reads as agronomic advice</td><td><span class="pill wait">pending</span></td></tr>
+        <tr><td>Data protection: the privacy notice and consent for any photos collected</td><td><span class="pill wait">pending</span></td></tr>
+        <tr><td>Phone latency: a target per photo on a low-end phone</td><td><span class="pill wait">not set</span></td></tr>
+        <tr><td>ONNX export and app built and running; parity met on a 10-photo validation sample</td><td><span class="pill ok">done</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>30</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The current version works end to end but is not validated for real use; it is a teaching demo. Of the release gates shown, three are now met. The ONNX export and app are built and running, with parity met on a 10-photo validation sample. The model quality gate is met on test: the demo model r50-v5 had the single pre-registered test look on 18 October, at its validation-chosen threshold of 0.48, and counts 0.849 on 252 test photos (species mAP50 0.943, every sex class above 0.70). The test split has now had both its rule-based looks, plus a post-hoc comparison of the two challengers, so a later model needs a new held-out set, such as field photos. The weights are published on Kaggle as a teaching demo, and the app's pin points at r50-v5 there. Field validation on phone photos taken in the field has not started. A wording review of the English text and the Filipino draft, and a data-protection review of the privacy notice and of consent for any photos collected, are pending, and a phone latency target has not been set. The full gate list is in section 6 of <code>docs/specs/2026-10-15-demo-app-design.md</code>.</p><p class="n-part">Presenting</p><p>Ask: who should decide whether each gate is passed? Answer: the owner and the reviewers, not the agent. Pitfall: do not call this a pilot or a release; it is an exploratory build, and r50-v5 stays a demo model until field validation on phone photos and the data-protection review are done.</p></aside>
+</section>
+
+<!-- ============ 29. TAKEAWAYS ============ -->
+<section class="slide" aria-label="Takeaways">
+  <div class="slide-content">
+    <p class="tag reveal">For workshop participants</p>
+    <h2 class="reveal d1">What to take from this</h2>
+    <ul class="clean reveal d2">
+      <li><b>You make the calls.</b> The agent offered options with a recommendation; the owner decided users, scope, wording and risk.</li>
+      <li><b>Spec and plan first.</b> The model's limits were in the plan before any code was written.</li>
+      <li><b>Tests are the stop condition.</b> Golden fixtures turned “looks right” into “matches byte for byte”.</li>
+      <li><b>Bugs hide in libraries and tooling:</b> Pillow's pass order, EXIF handling, the Impeller hang, the export trace.</li>
+      <li><b>Say what isn't done.</b> Preview and demo notices, release gates, an AI Use Disclosure.</li>
+    </ul>
+    <p class="reveal d3 accent mono small">Repository: rice-pest-detector · README.md has the full write-up</p>
+  </div>
+  <div class="bottom-bar"><span>Demo app process</span><span>31</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Five lessons. You make the calls: the agent offered options with a recommendation, and the owner decided users, scope, wording and risk. Spec and plan first: the model’s limits were in the plan before any code was written. Tests are the stop condition: golden fixtures turned “looks right” into “matches byte for byte”. Bugs hide in libraries and tooling: Pillow’s pass order, EXIF handling, the Impeller hang, the export trace. Say what is not done, with preview and demo notices, release gates and an AI Use Disclosure. <code>README.md</code> in the rice-pest-detector repository has the full write-up.</p><p class="n-part">Presenting</p><p>Ask each person which lesson they would apply first in their own work. Try: take one decision from slide 4 and ask your agent to put it to you as a multiple-choice question.</p></aside>
+</section>
+
+</main>
+
+<script>
+/* ===== SlidePresentation: keyboard, touch, wheel nav; progress bar; nav dots; reveal-on-view ===== */
+class SlidePresentation {
+  constructor() {
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.progress = document.querySelector('.progress');
+    this.dots = document.querySelector('.dots');
+    this.wheelLock = false;
+    this.init();
+  }
+  init() {
+    this.buildDots();
+    this.setupIntersectionObserver();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.update(0);
+  }
+  buildDots() {
+    this.slides.forEach((s, i) => {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', `Go to slide ${i + 1}: ${s.getAttribute('aria-label') || ''}`);
+      b.addEventListener('click', () => this.goTo(i));
+      this.dots.appendChild(b);
+    });
+  }
+  setupIntersectionObserver() {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          this.update(this.slides.indexOf(e.target));
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach((s) => io.observe(s));
+  }
+  setupKeyboardNav() {
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+      if (e.key === 'Home') { e.preventDefault(); this.goTo(0); }
+      if (e.key === 'End') { e.preventDefault(); this.goTo(this.slides.length - 1); }
+    });
+  }
+  setupTouchNav() {
+    let y0 = null;
+    document.addEventListener('touchstart', (e) => { y0 = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      if (y0 === null) return;
+      const dy = y0 - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 50) (dy > 0 ? this.next() : this.prev());
+      y0 = null;
+    }, { passive: true });
+  }
+  setupWheelNav() {
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (this.wheelLock || Math.abs(e.deltaY) < 12) return;
+      this.wheelLock = true;
+      (e.deltaY > 0 ? this.next() : this.prev());
+      setTimeout(() => { this.wheelLock = false; }, 650);
+    }, { passive: false });
+  }
+  goTo(i) {
+    const idx = Math.max(0, Math.min(this.slides.length - 1, i));
+    this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+    this.update(idx);
+  }
+  next() { this.goTo(this.current + 1); }
+  prev() { this.goTo(this.current - 1); }
+  update(i) {
+    this.current = i;
+    this.progress.style.width = `${((i + 1) / this.slides.length) * 100}%`;
+    Array.from(this.dots.children).forEach((d, j) => d.classList.toggle('active', j === i));
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const deck = new SlidePresentation();
+  const params = new URLSearchParams(location.search);
+  /* Deep link: ?slide=12 opens slide 12 (1-based). */
+  if (params.has('slide')) {
+    const i = parseInt(params.get('slide'), 10) - 1;
+    deck.slides.forEach((s) => s.classList.add('visible'));
+    document.documentElement.style.scrollBehavior = 'auto';  /* jump, don't animate */
+    deck.slides[Math.max(0, i)].scrollIntoView({ behavior: 'instant', block: 'start' });
+    document.documentElement.style.scrollBehavior = '';
+    deck.update(Math.max(0, i));
+  }
+  /* QA hook: ?slide=N&solo renders only slide N (clean headless screenshots, no scrolling). */
+  if (params.has('solo') && params.has('slide')) {
+    const keep = parseInt(params.get('slide'), 10) - 1;
+    deck.slides.forEach((s, j) => { if (j !== keep) s.style.display = 'none'; });
+  }
+  /* QA hook: ?check lists slides whose content overflows the viewport (used by headless checks). */
+  if (params.has('check')) {
+    const bad = deck.slides.map((s, i) => {
+      const c = s.querySelector('.slide-content');
+      return c.scrollHeight > c.clientHeight + 1 || c.scrollWidth > c.clientWidth + 1 ? i + 1 : null;
+    }).filter((x) => x !== null);
+    const pre = document.createElement('pre');
+    pre.id = 'overflow-report';
+    pre.textContent = `OVERFLOW:${innerWidth}x${innerHeight}:${bad.join(',') || 'none'}`;
+    document.body.appendChild(pre);
+  }
+});
+</script>
+<div id="notes-panel" role="region" aria-label="Speaker notes"></div>
+<script>
+/* Speaker notes: press N to show or hide the notes for the slide in view. */
+(() => {
+  const panel = document.getElementById('notes-panel');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const current = () => slides.reduce((best, s) => Math.abs(s.getBoundingClientRect().top) < Math.abs(best.getBoundingClientRect().top) ? s : best, slides[0]);
+  const render = () => {
+    const s = current(); const n = s.querySelector('aside.notes');
+    panel.innerHTML = '<b>Notes · slide ' + (slides.indexOf(s) + 1) + '</b>' + (n ? n.innerHTML : 'No notes for this slide.');
+  };
+  document.addEventListener('keydown', (e) => { if ((e.key === 'n' || e.key === 'N') && !e.shiftKey) { panel.classList.toggle('open'); render(); } });
+  document.addEventListener('scroll', () => { if (panel.classList.contains('open')) render(); }, { passive: true });
+  /* ?notes opens the panel on load (reading the deck alone, or headless checks). */
+  if (new URLSearchParams(location.search).has('notes')) window.addEventListener('load', () => { panel.classList.add('open'); render(); });
+})();
+</script>
+<div id="notes-sheet" aria-label="All speaker notes"></div>
+<script>
+/* Shift+N: every slide's notes on one printable page (press Shift+N again to return). */
+(() => {
+  const sheet = document.getElementById('notes-sheet');
+  const build = () => {
+    const items = Array.from(document.querySelectorAll('.slide')).map((s, i) => {
+      const h = s.querySelector('h1, h2'); const n = s.querySelector('aside.notes');
+      return '<div class="ns-item"><h2>' + (i + 1) + '. ' + (h ? h.textContent : '') + '</h2>' + (n ? n.innerHTML : '') + '</div>';
+    });
+    sheet.innerHTML = '<h1>' + document.title + ': notes</h1>' + items.join('');
+  };
+  document.addEventListener('keydown', (e) => { if (e.key === 'N' && e.shiftKey) { build(); document.body.classList.toggle('notes-sheet'); window.scrollTo(0, 0); } });
+})();
+</script>
+</body>
+</html>

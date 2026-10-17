@@ -1,0 +1,23 @@
+{
+ "id": "r50-v5",
+ "label": "r50-v5",
+ "architecture": "RT-DETR (ResNet-50)",
+ "base_model": "PekingU/rtdetr_r50vd",
+ "licence": "Apache-2.0",
+ "input_size": 640,
+ "threshold": 0.48,
+ "review_below": 0.64,
+ "sha256": "dc3927ae0967f6553721e18eec826305cca66c7fb5c8cd1789a8187d74f069c1",
+ "bytes": 171744970,
+ "outputs": [
+  "logits",
+  "pred_boxes"
+ ],
+ "num_classes": 4,
+ "validation": {
+  "count_accuracy": 0.834,
+  "species_map50": 0.937,
+  "wsb30_mae": 8.67
+ },
+ "validated": false
+}

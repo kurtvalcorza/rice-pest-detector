@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harnesses and Context Engineering</title>
+<!--
+  Harnesses and Context Engineering — companion teaching deck for "Coding with AI Agents"
+  Content as of 15 Oct 2026.
+  Navigate: ← → / Space / PageUp-PageDown, mouse wheel, swipe, or the dots on the right.
+  Customize: colors and fonts live in the :root block.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== warm-notebook preset ===== */
+:root {
+  --color-bg: #FAF7F2;
+  --color-bg-warm: #F5F0E8;
+  --color-bg-code: #1E1E2E;
+  --color-surface-card: #FFFFFF;
+  --color-surface-card-alt: #FDF9F3;
+  --color-border: #E5DFD6;
+  --color-border-light: #EEEBE5;
+  --color-title: #2C2A28;
+  --color-text-body: #2C2A28;
+  --color-text-muted: #9E9790;
+  --color-text-subtle: #6B6560;
+  --color-accent: #D94F30;
+  --color-accent-hover: #C4432A;
+  --color-accent-light: #FDEEE9;
+  --color-accent-muted: #E8836C;
+  --color-success: #2D8B55;
+  --color-error: #C93B3B;
+  --color-warning: #D4A843;
+  --color-actor-1: #D94F30;
+  --color-actor-2: #2A7B9B;
+  --color-actor-3: #7B6DAA;
+  --color-actor-4: #D4A843;
+  --color-actor-5: #2D8B55;
+  --code-keyword: #CBA6F7;
+  --code-string: #A6E3A1;
+  --code-function: #89B4FA;
+  --code-comment: #6C7086;
+  --code-number: #FAB387;
+  --code-property: #F9E2AF;
+  --code-operator: #94E2D5;
+  --code-tag: #F38BA8;
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', Fira Code, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(44,42,40,0.05);
+  --shadow-md: 0 4px 12px rgba(44,42,40,0.08);
+  --shadow-lg: 0 8px 24px rgba(44,42,40,0.1);
+  --shadow-xl: 0 16px 48px rgba(44,42,40,0.12);
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --ease-in-out: cubic-bezier(0.65,0,0.35,1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+/* ===== DECK-LEVEL TOKENS: responsive type scale + per-framework colors ===== */
+:root {
+  --title-size: clamp(1.75rem, 4.6vw, 3.75rem);
+  --h2-size: clamp(1.2rem, 2.6vw, 2.25rem);
+  --h3-size: clamp(0.95rem, 1.6vw, 1.3rem);
+  --body-size: clamp(0.78rem, 1.25vw, 1.08rem);
+  --small-size: clamp(0.66rem, 0.95vw, 0.85rem);
+  --slide-padding: clamp(1rem, 3.6vw, 3.5rem);
+  --content-gap: clamp(0.5rem, 1.8vw, 1.6rem);
+  --element-gap: clamp(0.25rem, 0.9vw, 0.8rem);
+  /* one color per core framework, drawn from the preset's actor palette */
+  --fw-speckit: var(--color-actor-2);
+  --fw-openspec: var(--color-actor-5);
+  --fw-bmad: var(--color-actor-3);
+  --fw-superpowers: var(--color-actor-1);
+  --fw-gsd: var(--color-actor-4);
+  --fw-extra: var(--color-text-subtle);
+}
+
+/* ===== VIEWPORT FITTING: MANDATORY BASE STYLES ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+/* body is the single scroll container: html is locked so snapping applies to body */
+html, body { height: 100%; overflow-x: hidden; }
+html { overflow: hidden; }
+body { overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; scrollbar-width: none; }
+body::-webkit-scrollbar { display: none; } /* dots + progress bar replace the scrollbar */
+body {
+  background: var(--color-bg);
+  color: var(--color-text-body);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* faint notebook grid gives the warm-notebook texture */
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(var(--color-border-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-light) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--content-gap);
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--slide-padding);
+  padding-bottom: calc(var(--slide-padding) * 0.6);
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ===== TYPOGRAPHY ===== */
+h1, h2, h3 { font-family: var(--font-display); color: var(--color-title); line-height: 1.08; letter-spacing: -0.015em; }
+h1 { font-size: var(--title-size); font-weight: 800; }
+h2 { font-size: var(--h2-size); font-weight: 700; }
+h3 { font-size: var(--h3-size); font-weight: 700; }
+p { max-width: 70ch; }
+.lede { font-size: calc(var(--body-size) * 1.15); color: var(--color-text-subtle); }
+.small { font-size: var(--small-size); color: var(--color-text-subtle); }
+.mono, code { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--color-bg-warm); border: 1px solid var(--color-border); border-radius: 4px; padding: 0 0.3em; }
+.tag {
+  font-family: var(--font-mono); font-size: var(--small-size); letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--color-accent); font-weight: 600;
+}
+.accent { color: var(--color-accent); }
+ul.clean { list-style: none; display: flex; flex-direction: column; gap: var(--element-gap); }
+ul.clean li { padding-left: 1.1em; position: relative; }
+ul.clean li::before { content: ""; position: absolute; left: 0; top: 0.6em; width: 0.45em; height: 0.45em; border-radius: 2px; background: var(--color-accent); }
+
+/* ===== LAYOUT PRIMITIVES ===== */
+.head { display: flex; flex-direction: column; gap: var(--element-gap); }
+.row { display: flex; gap: var(--content-gap); align-items: stretch; min-height: 0; }
+.col { display: flex; flex-direction: column; gap: var(--element-gap); min-width: 0; }
+.grow { flex: 1; }
+.w60 { flex: 0 0 60%; } .w40 { flex: 1; }
+.grid { display: grid; gap: var(--element-gap); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.grid-3 { display: grid; gap: var(--content-gap); grid-template-columns: repeat(3, 1fr); }
+.card {
+  background: var(--color-surface-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: clamp(0.5rem, 1.2vw, 1rem);
+  box-shadow: var(--shadow-sm);
+}
+.card h3 { margin-bottom: 0.25em; }
+.card .k { font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
+.card p, .card li { font-size: var(--small-size); color: var(--color-text-body); }
+.card.edge { border-left: 4px solid var(--edge, var(--color-accent)); }
+.pill {
+  display: inline-block; font-family: var(--font-mono); font-size: var(--small-size);
+  padding: 0.12em 0.6em; border-radius: var(--radius-full); border: 1px solid var(--color-border);
+  background: var(--color-surface-card-alt); white-space: nowrap;
+}
+.pill.warn { border-color: var(--color-warning); background: #FBF4E1; }
+.pill.ok { border-color: var(--color-success); background: #E8F4ED; }
+.pill.bad { border-color: var(--color-error); background: #FBEAEA; }
+.callout {
+  border-left: 4px solid var(--color-accent); background: var(--color-accent-light);
+  padding: 0.5em 0.9em; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: var(--small-size);
+}
+
+/* ===== FRAMEWORK SLIDES: diagram + facts ===== */
+.fw-title { display: flex; align-items: baseline; gap: 0.6em; flex-wrap: wrap; }
+.fw-title .ver { font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-subtle); }
+.diagram { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: clamp(0.4rem, 1vw, 0.9rem); box-shadow: var(--shadow-md); display: flex; align-items: center; justify-content: center; min-height: 0; }
+.diagram svg { width: 100%; height: auto; max-height: min(56vh, 520px); display: block; }
+.facts { display: flex; flex-direction: column; gap: var(--element-gap); }
+.facts .card { padding: clamp(0.4rem, 0.9vw, 0.75rem); }
+
+/* ===== SVG DIAGRAM VOCABULARY (shared by every diagram) ===== */
+svg text { font-family: var(--font-body); fill: var(--color-text-body); }
+svg .t { font-size: 15px; font-weight: 600; }
+svg .ts { font-size: 12px; fill: var(--color-text-subtle); }
+svg .tm { font-family: var(--font-mono); font-size: 11px; fill: var(--color-text-subtle); }
+svg .th { font-family: var(--font-display); font-size: 17px; font-weight: 700; }
+svg .node { fill: var(--color-surface-card); stroke: var(--c, var(--color-text-subtle)); stroke-width: 2; }
+svg .node.fill { fill: var(--c, var(--color-text-subtle)); }
+svg .node.fill + text, svg text.on { fill: #fff; }
+svg .opt { fill: var(--color-surface-card-alt); stroke: var(--color-text-muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
+svg .box { fill: var(--color-bg-warm); stroke: var(--color-border); stroke-width: 1.5; }
+svg .gate { fill: var(--color-accent-light); stroke: var(--color-accent); stroke-width: 2; }
+svg .ar { fill: none; stroke: var(--color-text-subtle); stroke-width: 2; marker-end: url(#arrow); }
+svg .ar.acc { stroke: var(--c, var(--color-accent)); marker-end: url(#arrow-acc); }
+svg .ar.dot { stroke-dasharray: 4 4; stroke-width: 1.5; }
+svg .ar.noend { marker-end: none; }
+
+/* ===== TABLES ===== */
+table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: var(--small-size); background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+th, td { text-align: left; padding: 0.45em 0.7em; border-bottom: 1px solid var(--color-border-light); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 0.92em; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-subtle); background: var(--color-bg-warm); }
+tr:last-child td { border-bottom: none; }
+td:first-child { font-weight: 600; white-space: nowrap; }
+
+/* ===== SECTION HEADER + TITLE SLIDES ===== */
+.slide.section { background: var(--color-bg-warm); }
+.slide.section .slide-content { justify-content: center; align-items: flex-start; }
+.slide.section h2 { font-size: var(--title-size); }
+.rule { width: clamp(3rem, 8vw, 7rem); height: 4px; background: var(--color-accent); border-radius: 2px; }
+.title-strip { display: flex; gap: 0.4em; flex-wrap: wrap; }
+.title-strip .pill { border-width: 2px; }
+
+/* ===== BOTTOM BAR ===== */
+.bottom-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 var(--slide-padding) clamp(0.4rem, 1.2vh, 0.9rem);
+  font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-subtle);
+}
+
+/* ===== NAVIGATION CHROME ===== */
+.progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--color-accent); width: 0; z-index: 20; transition: width var(--duration-normal) var(--ease-out); }
+.dots { position: fixed; right: clamp(0.4rem, 1vw, 1rem); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; z-index: 20; }
+.dots button { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--color-text-muted); background: transparent; cursor: pointer; padding: 0; }
+.dots button.active { background: var(--color-accent); border-color: var(--color-accent); transform: scale(1.3); }
+.dots button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* ===== REVEAL ANIMATIONS (triggered by IntersectionObserver) ===== */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out); }
+.slide.visible .reveal { opacity: 1; transform: none; }
+.slide.visible .d1 { transition-delay: 90ms; } .slide.visible .d2 { transition-delay: 180ms; }
+.slide.visible .d3 { transition-delay: 270ms; } .slide.visible .d4 { transition-delay: 360ms; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: opacity 0.3s ease; transform: none; }
+  body { scroll-behavior: auto; }
+}
+
+/* ===== HEIGHT BREAKPOINTS: shrink chrome before content clips ===== */
+@media (max-height: 700px) {
+  :root { --slide-padding: clamp(0.75rem, 2.6vw, 2rem); --content-gap: clamp(0.4rem, 1.2vw, 1rem); }
+  .diagram svg { max-height: 50vh; }
+}
+@media (max-height: 600px) {
+  :root { --body-size: clamp(0.7rem, 1.1vw, 0.92rem); --small-size: clamp(0.6rem, 0.85vw, 0.75rem); }
+  .diagram svg { max-height: 46vh; }
+  .hide-short { display: none; }
+}
+@media (max-height: 500px) {
+  .diagram svg { max-height: 40vh; }
+  .bottom-bar { display: none; }
+}
+@media (max-width: 900px) {
+  .row { flex-direction: column; }
+  .w60 { flex: none; }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ===== PRESENTER NOTES: N = panel, Shift+N = printable notes sheet ===== */
+aside.notes { display: none; }
+#notes-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: none;
+  max-height: 34vh; overflow-y: auto; padding: 0.9rem 1.4rem 1rem;
+  background: var(--color-bg-code); color: #E6E1D8; font-family: var(--font-body);
+  font-size: clamp(0.85rem, 1.15vw, 1.05rem); line-height: 1.5; border-top: 3px solid var(--color-accent); }
+#notes-panel .np-head { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--color-accent-muted); margin-bottom: 0.35rem; }
+body.show-notes #notes-panel { display: block; }
+#notes-sheet { display: none; padding: 2rem clamp(1rem, 5vw, 4rem); max-width: 900px; margin: 0 auto; }
+#notes-sheet h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+#notes-sheet .ns-item { padding: 0.8rem 0; border-bottom: 1px solid var(--color-border); break-inside: avoid; }
+#notes-sheet .ns-item h2 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+#notes-sheet .ns-item p { font-size: 0.95rem; max-width: none; }
+body.notes-sheet main, body.notes-sheet .dots, body.notes-sheet .progress, body.notes-sheet #notes-panel { display: none !important; }
+body.notes-sheet { overflow: auto; scroll-snap-type: none; }
+body.notes-sheet #notes-sheet { display: block; }
+.kbd-hint { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0.4rem; z-index: 20; font-family: var(--font-mono);
+  font-size: 0.68rem; color: var(--color-text-subtle); opacity: 0.7; }
+@media print { body.notes-sheet #notes-sheet { padding: 0; } .kbd-hint { display: none; } }
+
+/* Citation links: on-palette, visibly clickable (also inside SVG diagrams). */
+.slide-content a, .notes a { color: inherit; text-decoration: underline; text-decoration-color: var(--color-accent); text-underline-offset: 2px; }
+.slide-content a:hover, .notes a:hover { color: var(--color-accent); }
+svg a text { text-decoration: underline; fill: var(--color-accent); }
+.n-part { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-accent-muted); margin: 0.7em 0 0.15em; }
+#notes-panel p, #notes-sheet p { margin: 0 0 0.4em; }
+</style>
+</head>
+<body>
+
+<!-- Shared SVG arrowhead markers, referenced by every diagram via url(#arrow) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6B6560"/>
+    </marker>
+    <marker id="arrow-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+</svg>
+
+<div class="progress" aria-hidden="true"></div>
+<nav class="dots" aria-label="Slide navigation"></nav>
+
+<main>
+
+<!-- ===================================================================== 1. TITLE -->
+<section class="slide" aria-label="Title">
+  <div class="slide-content">
+    <p class="tag reveal">Coding with AI Agents · Companion to Module 3 (Specify)</p>
+    <h1 class="reveal d1">Harnesses decide what<br><span class="accent">SDD frameworks can enforce</span></h1>
+    <p class="lede reveal d2">Agent harnesses, context engineering and why a framework's files travel between agents while its behaviour does not.</p>
+    <div class="title-strip reveal d3">
+      <span class="pill" style="border-color:var(--color-actor-3)">model</span>
+      <span class="pill" style="border-color:var(--color-actor-2)">harness</span>
+      <span class="pill" style="border-color:var(--color-actor-5)">context</span>
+      <span class="pill" style="border-color:var(--color-actor-1)">gates</span>
+      <span class="pill" style="border-color:var(--color-actor-4)">evidence</span>
+    </div>
+    <p class="small reveal d4"><strong>Optional deep dive</strong> for the <em>Coding with AI Agents</em> session. Status as of 15 October 2026. Sources are linked on each slide.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>Oct 2026</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>An optional deep dive that follows on from the SDD framework comparison in Module 3 of the 2-hour session deck (<code>coding-with-ai-agents-2h.html</code>). SDD means spec-driven development: writing a specification before an agent writes code. It explains why a framework’s files work with any agent while its behaviour does not. Status as of 15 October 2026; slides link their sources.</p><p class="n-part">Presenting</p><p>Point to Module 3 of the 2-hour deck first if the audience has not seen it. Ask: “Which agent do you use, and what does it do besides calling the model?” Use the five words on the strip (model, harness, context, gates, evidence) as the map.</p></aside>
+</section>
+
+<!-- ===================================================================== 2. PUZZLE -->
+<section class="slide" aria-label="The puzzle: files travel, behaviour does not">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">The puzzle from the SDD comparison</p>
+      <h2 class="reveal d1">Move a framework to another agent: the files work, the gates may not</h2>
+    </div>
+    <div class="diagram reveal d2">
+      <svg viewBox="0 0 900 270" role="img" aria-label="Grid: a framework's Markdown artefacts work on all three harnesses; its behaviour runs fully on harness A, partially on B, and degrades to prose on C">
+        <!-- column headers -->
+        <g style="--c:var(--color-actor-2)">
+          <rect class="node" x="350" y="10" width="170" height="56" rx="10"/><text class="t" x="435" y="34" text-anchor="middle">Harness A</text><text class="ts" x="435" y="54" text-anchor="middle">hooks + sub-agents + skills</text>
+          <rect class="node" x="535" y="10" width="170" height="56" rx="10"/><text class="t" x="620" y="34" text-anchor="middle">Harness B</text><text class="ts" x="620" y="54" text-anchor="middle">hooks, different events</text>
+          <rect class="node" x="720" y="10" width="170" height="56" rx="10"/><text class="t" x="805" y="34" text-anchor="middle">Harness C</text><text class="ts" x="805" y="54" text-anchor="middle">no custom sub-agents</text>
+        </g>
+        <!-- row 1: artifacts -->
+        <rect class="node" style="--c:var(--color-actor-5)" x="10" y="82" width="320" height="78" rx="10"/>
+        <text class="t" x="26" y="108">Markdown artefacts</text>
+        <text class="tm" x="26" y="130">spec.md · plan.md · tasks.md</text>
+        <text class="tm" x="26" y="148">skills · AGENTS.md</text>
+        <rect x="350" y="82" width="540" height="78" rx="10" style="fill:#E8F4ED"/>
+        <text class="t" x="435" y="118" text-anchor="middle" style="fill:var(--color-success);font-size:22px">✓</text><text class="ts" x="435" y="142" text-anchor="middle">read by the model</text>
+        <text class="t" x="620" y="118" text-anchor="middle" style="fill:var(--color-success);font-size:22px">✓</text><text class="ts" x="620" y="142" text-anchor="middle">read by the model</text>
+        <text class="t" x="805" y="118" text-anchor="middle" style="fill:var(--color-success);font-size:22px">✓</text><text class="ts" x="805" y="142" text-anchor="middle">read by the model</text>
+        <!-- row 2: behaviour -->
+        <rect class="node" style="--c:var(--color-actor-1)" x="10" y="176" width="320" height="84" rx="10"/>
+        <text class="t" x="26" y="202">Behaviour</text>
+        <text class="ts" x="26" y="224">gates · hooks · sub-agent waves</text>
+        <text class="ts" x="26" y="242">skill auto-activation · bootstrap</text>
+        <rect x="350" y="176" width="170" height="84" rx="10" style="fill:#E8F4ED"/>
+        <rect x="535" y="176" width="170" height="84" rx="10" style="fill:#FBF4E1"/>
+        <rect x="720" y="176" width="170" height="84" rx="10" style="fill:#FBEAEA"/>
+        <text class="t" x="435" y="212" text-anchor="middle" style="fill:var(--color-success);font-size:22px">✓</text><text class="ts" x="435" y="236" text-anchor="middle">runs as designed</text>
+        <text class="t" x="620" y="212" text-anchor="middle" style="fill:#A8811F;font-size:22px">◐</text><text class="ts" x="620" y="236" text-anchor="middle">renamed / partial</text>
+        <text class="t" x="805" y="212" text-anchor="middle" style="fill:var(--color-error);font-size:22px">✕</text><text class="ts" x="805" y="236" text-anchor="middle">gate becomes a</text><text class="ts" x="805" y="252" text-anchor="middle">sentence in a prompt</text>
+      </svg>
+    </div>
+    <p class="callout reveal d3">Artefacts are <strong>inputs to the model</strong>, and every harness can read a file. Gates, waves and auto-activation are <strong>calls into the harness</strong>, and no standard covers them.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>02</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>When you move an SDD framework to a different coding agent, two kinds of thing move with it. Markdown artefacts (spec.md, plan.md, tasks.md, skills, AGENTS.md) are inputs to the model, and every harness (the software around the model, defined on the next slide) can hand a file to the model, so they always work. Behaviour (gates that stop work, hooks, sub-agent waves, skill auto-activation, the bootstrap) is a call into the harness. Depending on the harness it runs as designed, runs partly under other names or becomes a sentence in a prompt that the model may ignore. No standard covers these calls.</p><p class="n-part">Presenting</p><p>Read the grid row by row: the artefact row is all ticks, the behaviour row is not. Ask: “What is the difference between a file and a gate?” Pitfall: harnesses A, B and C are schematic; do not map them to named products here.</p></aside>
+</section>
+
+<!-- ===================================================================== 3. AGENT = MODEL + HARNESS -->
+<section class="slide" aria-label="Agent equals model plus harness">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Definitions</p>
+      <h2 class="reveal d1">Agent = Model + Harness</h2>
+    </div>
+    <div class="row">
+      <div class="diagram w60 reveal d2">
+        <svg viewBox="0 0 640 300" role="img" aria-label="Operating-system analogy: model is the CPU, context window is RAM, harness is the operating system, agent is the application">
+          <text class="ts" x="10" y="20"><a href="https://www.philschmid.de/agent-harness-2026" target="_blank" rel="noopener">Philipp Schmid's analogy (Jan 2026)</a></text>
+          <rect class="node fill" style="--c:var(--color-actor-1)" x="10" y="36" width="620" height="54" rx="10"/>
+          <text class="t on" x="28" y="69">Agent</text><text class="ts" x="250" y="69" style="fill:#fff">= the application you run</text>
+          <rect class="node fill" style="--c:var(--color-actor-2)" x="10" y="100" width="620" height="54" rx="10"/>
+          <text class="t on" x="28" y="133">Harness</text><text class="ts" x="250" y="133" style="fill:#fff">= the operating system: loop, tools, permissions, hooks</text>
+          <rect class="node" style="--c:var(--color-actor-5)" x="10" y="164" width="300" height="54" rx="10"/>
+          <text class="t" x="28" y="190">Context window</text><text class="ts" x="28" y="208">= RAM: limited, volatile</text>
+          <rect class="node" style="--c:var(--color-actor-3)" x="330" y="164" width="300" height="54" rx="10"/>
+          <text class="t" x="348" y="190">Model</text><text class="ts" x="348" y="208">= the CPU: reasons, picks actions</text>
+          <text class="ts" x="10" y="250"><a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness" target="_blank" rel="noopener">LangChain</a>: "A harness is every piece of code, configuration,</text>
+          <text class="ts" x="10" y="268">and execution logic that isn't the model itself."</text>
+          <text class="ts" x="10" y="292">Google ships the same functions as Managed Agents / ADK, without the word.</text>
+        </svg>
+      </div>
+      <div class="facts w40">
+        <div class="card edge reveal d2"><p>"Claude Code … is the layer around the model that provides the tools and manages the context the model sees. This surrounding layer is what the term <strong>agentic harness</strong> refers to."</p><p class="small">— <a href="https://code.claude.com/docs/en/how-claude-code-works" target="_blank" rel="noopener">Claude Code docs</a></p></div>
+        <div class="card edge reveal d3" style="--edge:var(--color-actor-2)"><p>OpenAI: "the Codex harness" is "the core agent loop and execution logic that underlies all Codex experiences."</p><p class="small">— <a href="https://openai.com/index/unrolling-the-codex-agent-loop/" target="_blank" rel="noopener">OpenAI, Jan 2026</a> (read via summary)</p></div>
+        <div class="card reveal d4"><p class="small">The term has no formal definition yet; a June 2026 preprint (<a href="https://arxiv.org/abs/2606.10106" target="_blank" rel="noopener">arXiv 2606.10106</a>) notes it is applied inconsistently.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>03</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The working definition is Agent = Model + Harness. In LangChain’s words, the harness is every piece of code, configuration and execution logic that is not the model itself: the loop, tools, permissions and hooks. Philipp Schmid’s analogy helps: the model is the CPU that reasons and picks actions, the context window is RAM (limited and volatile), the harness is the operating system and the agent is the application you run. Anthropic and OpenAI use the word for their own products; Google ships the same functions without it. The term has no formal definition yet, and a June 2026 preprint (arXiv 2606.10106) notes it is applied inconsistently.</p><p class="n-part">Presenting</p><p>Sketch the CPU, RAM and operating system analogy for beginners. Likely question: “Is the harness just the app?” Answer: the harness is the layer around the model; the agent is the whole thing you run. Mention that the OpenAI quote was read via a summary.</p></aside>
+</section>
+
+<!-- ===================================================================== 4. FOUR LAYERS -->
+<section class="slide" aria-label="Four layers between the model and the spec">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">The mental model for this module</p>
+      <h2 class="reveal d1">Four layers sit between the model and the spec</h2>
+    </div>
+    <div class="row">
+      <div class="diagram w60 reveal d2">
+        <svg viewBox="0 0 640 320" role="img" aria-label="Layer stack: workflow framework on top of project-level harness on top of vendor runtime harness on top of model">
+          <g>
+            <rect class="node fill" style="--c:var(--color-actor-1)" x="10" y="10" width="480" height="62" rx="10"/>
+            <text class="t on" x="26" y="36">Workflow framework</text><text class="ts" x="26" y="58" style="fill:#fff">Spec Kit · OpenSpec · BMAD · Superpowers · GSD Core</text>
+            <rect class="node fill" style="--c:var(--color-actor-5)" x="10" y="84" width="480" height="62" rx="10"/>
+            <text class="t on" x="26" y="110">Project-level harness</text><text class="ts" x="26" y="132" style="fill:#fff">your AGENTS.md, skills, hook scripts, linters, tests</text>
+            <rect class="node fill" style="--c:var(--color-actor-2)" x="10" y="158" width="480" height="62" rx="10"/>
+            <text class="t on" x="26" y="184">Vendor runtime harness</text><text class="ts" x="26" y="206" style="fill:#fff">Claude Code · Codex · Copilot · Cursor · Antigravity · Kiro</text>
+            <rect class="node fill" style="--c:var(--color-actor-3)" x="10" y="232" width="480" height="62" rx="10"/>
+            <text class="t on" x="26" y="258">Model</text><text class="ts" x="26" y="280" style="fill:#fff">Claude · GPT · Gemini</text>
+          </g>
+          <!-- owner column -->
+          <text class="tm" x="505" y="46">maintainers</text>
+          <text class="tm" x="505" y="120">your team</text>
+          <text class="tm" x="505" y="194">harness vendor</text>
+          <text class="tm" x="505" y="268">model vendor</text>
+          <text class="ts" x="505" y="20" style="font-weight:700">owned by</text>
+          <!-- extension point bracket -->
+          <text class="ts" x="10" y="314" style="fill:var(--color-accent)">The top layer reaches the model only through the runtime's hooks, sub-agents and skills.</text>
+        </svg>
+      </div>
+      <div class="facts w40">
+        <div class="card reveal d2"><p class="k">Frameworks don't own the loop</p><p>SDD frameworks are <strong>packaged project-level harnesses</strong>: prompts, templates, skills and, where the host allows, hooks. They depend on the runtime's extension points like an app depends on system calls.</p></div>
+        <div class="card reveal d3"><p class="k">Two senses of "harness"</p><p>The <strong>vendor runtime</strong> (product code) and the <strong>project-level harness</strong> a team builds: <a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank" rel="noopener">Böckeler's</a> "guides" before the agent acts and "sensors" after.</p></div>
+        <div class="card reveal d4"><p class="k">A hidden coupling</p><p>"Claude Code and Codex are post-trained with models and harnesses in the loop" (<a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness" target="_blank" rel="noopener">LangChain</a>). The same prompt can behave differently on another harness.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>04</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Four layers sit between the model and your spec. The model (Claude, GPT, Gemini) and the vendor runtime harness (Claude Code, Codex, Copilot, Cursor, Antigravity, Kiro) belong to vendors. The project-level harness is what your team adds: AGENTS.md, skills, hook scripts, linters and tests, which Böckeler calls “guides” before the agent acts and “sensors” after. SDD frameworks are packaged project-level harnesses. They never own the loop; they call the runtime’s extension points as an app calls an operating system. One hidden coupling: some models are post-trained with their own harness in the loop, so the same prompt can behave differently on another harness.</p><p class="n-part">Presenting</p><p>Open this repository’s <code>AGENTS.md</code> and <code>.claude/</code> folder as a small, real project-level harness. Ask: “Which of these four layers can your team change?” Pitfall: do not call an SDD framework a harness in the vendor sense; it calls into one.</p></aside>
+</section>
+
+<!-- ===================================================================== 5. SECTION -->
+<section class="slide section" aria-label="Section: inside a harness">
+  <div class="slide-content">
+    <p class="tag reveal">Part 1</p>
+    <h2 class="reveal d1">Inside a harness</h2>
+    <div class="rule reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>Part 1</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Part 1 opens the box: what a harness is made of, using Claude Code’s documentation as the most complete reference, and which of its parts SDD frameworks rely on.</p><p class="n-part">Presenting</p><p>Use as a transition. Ask the room to name one thing their agent does that the model alone could not do.</p></aside>
+</section>
+
+<!-- ===================================================================== 6. COMPONENTS -->
+<section class="slide" aria-label="Eleven harness components">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Claude Code as the reference implementation</p>
+      <h2 class="reveal d1">Eleven components, all owned by the harness vendor</h2>
+    </div>
+    <div class="diagram reveal d2">
+      <svg viewBox="0 0 900 320" role="img" aria-label="Eleven harness components arranged around the model; hooks, sub-agents, skills and compaction highlighted as the ones SDD frameworks depend on">
+        <!-- centre -->
+        <circle cx="450" cy="150" r="62" style="fill:var(--color-actor-3)"/>
+        <text class="t on" x="450" y="146" text-anchor="middle">Model</text>
+        <text class="ts" x="450" y="166" text-anchor="middle" style="fill:#fff">reasons, acts</text>
+        <!-- left column: core -->
+        <g style="--c:var(--color-text-subtle)">
+          <rect class="node" x="10" y="20" width="230" height="50" rx="8"/><text class="t" x="24" y="42">Agent loop</text><text class="ts" x="24" y="60">gather → act → verify, repeated</text>
+          <rect class="node" x="10" y="80" width="230" height="50" rx="8"/><text class="t" x="24" y="102">Tools</text><text class="ts" x="24" y="120">built-ins + MCP, loaded on demand</text>
+          <rect class="node" x="10" y="140" width="230" height="50" rx="8"/><text class="t" x="24" y="162">Permissions / sandbox</text><text class="ts" x="24" y="180">modes, allow-rules</text>
+          <rect class="node" x="10" y="200" width="230" height="50" rx="8"/><text class="t" x="24" y="222">Instruction files</text><text class="ts" x="24" y="240">AGENTS.md, CLAUDE.md at start</text>
+        </g>
+        <!-- right column: SDD-critical -->
+        <g style="--c:var(--color-accent)">
+          <rect class="node" x="660" y="20" width="230" height="50" rx="8" style="fill:var(--color-accent-light)"/><text class="t" x="674" y="42">Hooks</text><text class="ts" x="674" y="60">33 events → deterministic gates</text>
+          <rect class="node" x="660" y="80" width="230" height="50" rx="8" style="fill:var(--color-accent-light)"/><text class="t" x="674" y="102">Sub-agents</text><text class="ts" x="674" y="120">own context window → waves, review</text>
+          <rect class="node" x="660" y="140" width="230" height="50" rx="8" style="fill:var(--color-accent-light)"/><text class="t" x="674" y="162">Skills</text><text class="ts" x="674" y="180">load on demand → auto-activation</text>
+          <rect class="node" x="660" y="200" width="230" height="50" rx="8" style="fill:var(--color-accent-light)"/><text class="t" x="674" y="222">Compaction</text><text class="ts" x="674" y="240">early instructions "may be lost"</text>
+        </g>
+        <!-- bottom row -->
+        <g style="--c:var(--color-text-subtle)">
+          <rect class="node" x="250" y="262" width="125" height="46" rx="8"/><text class="t" x="312" y="290" text-anchor="middle">Memory</text>
+          <rect class="node" x="388" y="262" width="125" height="46" rx="8"/><text class="t" x="450" y="290" text-anchor="middle">Sessions</text>
+          <rect class="node" x="526" y="262" width="125" height="46" rx="8"/><text class="t" x="588" y="290" text-anchor="middle">Interfaces</text>
+        </g>
+        <!-- spokes -->
+        <path class="ar noend dot" d="M240 45 L392 128"/><path class="ar noend dot" d="M240 105 L388 140"/><path class="ar noend dot" d="M240 165 L388 158"/><path class="ar noend dot" d="M240 225 L395 178"/>
+        <path class="ar noend" style="stroke:var(--color-accent)" d="M660 45 L508 128"/><path class="ar noend" style="stroke:var(--color-accent)" d="M660 105 L512 140"/><path class="ar noend" style="stroke:var(--color-accent)" d="M660 165 L512 158"/><path class="ar noend" style="stroke:var(--color-accent)" d="M660 225 L505 178"/>
+        <path class="ar noend dot" d="M312 262 L420 205"/><path class="ar noend dot" d="M450 262 V212"/><path class="ar noend dot" d="M588 262 L480 205"/>
+        <text class="ts" x="660" y="300" style="fill:var(--color-accent)">highlighted = what SDD</text>
+        <text class="ts" x="660" y="316" style="fill:var(--color-accent)">frameworks depend on</text>
+      </svg>
+    </div>
+    <p class="small reveal d3">Every component is an extension point the vendor defines: event names, payload schemas, skill fields, sub-agent semantics, permission syntax. A framework that uses one is coupled to that vendor.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>06</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Around the model sit eleven components, all owned by the harness vendor: the agent loop (gather, act, verify, repeated), tools (built-ins plus MCP, the protocol for connecting external tools, loaded on demand), permissions and sandbox, instruction files read at start, hooks (33 events in Claude Code, usable as deterministic gates), sub-agents with their own context window, skills loaded on demand, compaction (summarising older history, where early instructions “may be lost”), memory, sessions and interfaces. Four are highlighted because SDD frameworks depend on them: hooks, sub-agents, skills and compaction. The vendor defines each one’s event names, payloads and fields, so a framework that uses one is coupled to that vendor.</p><p class="n-part">Presenting</p><p>Show <code>.claude/hooks/</code>, <code>.claude/agents/</code> and <code>.claude/skills/</code> in this repository as live examples of three highlighted boxes. Likely question: “Do all agents have 33 hook events?” No; slide 17 compares the counts.</p></aside>
+</section>
+
+<!-- ===================================================================== 7. SECTION -->
+<section class="slide section" aria-label="Section: enforcement">
+  <div class="slide-content">
+    <p class="tag reveal">Part 2</p>
+    <h2 class="reveal d1">Where a gate runs decides whether it holds</h2>
+    <div class="rule reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>Part 2</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Part 2 is about enforcement. A gate is a check that stops work until a condition holds. Where that check runs (in a prompt, in the harness or in your tests) decides whether it actually holds.</p><p class="n-part">Presenting</p><p>Use as a transition. Ask: “If your instruction file says ‘never do X’, what actually stops the agent doing X?”</p></aside>
+</section>
+
+<!-- ===================================================================== 8. CONTEXT VS CONFIG -->
+<section class="slide" aria-label="Instructions are context, not enforced configuration">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">The vendor draws the line itself</p>
+      <h2 class="reveal d1">Instruction files are context, not enforcement</h2>
+    </div>
+    <blockquote class="card edge reveal d1" style="font-size:calc(var(--body-size)*1.2)">
+      <p>Instruction files are "context, not enforced configuration. To block an action regardless of what Claude decides, use a <code>PreToolUse</code> hook instead."</p>
+      <p class="small">— <a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">Claude Code memory docs</a></p>
+    </blockquote>
+    <div class="grid-3">
+      <div class="card reveal d2" style="border-top:4px solid var(--color-text-muted)"><h3>Prompt rule</h3><p>"Don't plan until the spec is approved." The <strong>model decides</strong> whether to follow it. Travels to any harness as text.</p></div>
+      <div class="card reveal d3" style="border-top:4px solid var(--color-actor-2)"><h3>Hook</h3><p>A <code>PreToolUse</code> deny blocks the tool even in bypass-permissions mode; a <code>Stop</code> hook can require passing tests. <strong>Works only where that event exists.</strong></p></div>
+      <div class="card reveal d4" style="border-top:4px solid var(--color-warning)"><h3>Compaction erases prose</h3><p>Early instructions "can get lost". Fix: re-inject with a <code>SessionStart</code> hook after compaction. Superpowers on Hermes (no such hook) "loses the bootstrap".</p></div>
+    </div>
+    <p class="small reveal d4"><a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank" rel="noopener">Böckeler's terms</a>: <strong>computational</strong> controls are deterministic, cheap, run on every change; <strong>inferential</strong> controls are slower and "more non-deterministic".</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>08</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Claude Code’s own documentation draws the line: instruction files are “context, not enforced configuration”, and to block an action regardless of what the model decides you use a PreToolUse hook. A prompt rule such as “do not plan until the spec is approved” travels to any harness as text, but the model decides whether to follow it. A hook is code the harness runs: a PreToolUse deny blocks a tool even in bypass-permissions mode, and a Stop hook can require passing tests, but only where that event exists. Compaction can also drop early instructions; the fix is to re-inject them with a SessionStart hook. Superpowers on Hermes, which has no such hook, “loses the bootstrap”.</p><p class="n-part">Presenting</p><p>Open <code>.claude/settings.json</code> and <code>.claude/hooks/require_green_tests.py</code>: a Stop hook that blocks finishing while <code>flutter test</code> fails. Contrast it with the test instruction in <code>AGENTS.md</code>. Explain Böckeler’s terms from the slide: computational controls are deterministic and cheap; inferential ones are slower and less predictable.</p></aside>
+</section>
+
+<!-- ===================================================================== 9. SIX-TIER LADDER -->
+<section class="slide" aria-label="Six-tier gate strength scale">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">A scale for classifying any framework's gates</p>
+      <h2 class="reveal d1">Six tiers of gate strength</h2>
+    </div>
+    <div class="diagram reveal d2">
+      <svg viewBox="0 0 900 330" role="img" aria-label="Six tiers: instruction text, format choices, harness-triggered LLM judge, harness hook running code, external tests and CI, human approval">
+        <text class="ts" x="96" y="16" style="font-weight:700">Tier · mechanism</text>
+        <text class="ts" x="530" y="16" style="font-weight:700">verdict</text>
+        <text class="ts" x="650" y="16" style="font-weight:700">travels between harnesses?</text>
+        <g>
+          <!-- 1 -->
+          <circle cx="40" cy="45" r="18" style="fill:var(--color-text-muted)"/><text class="t on" x="40" y="50" text-anchor="middle">1</text>
+          <text class="t" x="96" y="42">Instruction text</text><text class="ts" x="96" y="60">AGENTS.md, skill, command prompt</text>
+          <text class="ts" x="530" y="50">model decides</text><text class="ts" x="650" y="50" style="fill:var(--color-success)">yes, as text</text>
+          <!-- 2 -->
+          <circle cx="40" cy="95" r="18" style="fill:var(--color-text-muted)"/><text class="t on" x="40" y="100" text-anchor="middle">2</text>
+          <text class="t" x="96" y="92">Format &amp; structure</text><text class="ts" x="96" y="110">JSON task list, checklists, delta-spec headings</text>
+          <text class="ts" x="530" y="100">model, less drift</text><text class="ts" x="650" y="100" style="fill:var(--color-success)">yes</text>
+          <!-- 3 -->
+          <circle cx="40" cy="145" r="18" style="fill:var(--color-warning)"/><text class="t on" x="40" y="150" text-anchor="middle">3</text>
+          <text class="t" x="96" y="142">Harness-triggered LLM judge</text><text class="ts" x="96" y="160">Claude Code prompt / agent hooks</text>
+          <text class="ts" x="530" y="150">probabilistic</text><text class="ts" x="650" y="150" style="fill:var(--color-error)">rarely (Codex skips them)</text>
+          <!-- 4 -->
+          <circle cx="40" cy="195" r="18" style="fill:var(--color-actor-2)"/><text class="t on" x="40" y="200" text-anchor="middle">4</text>
+          <text class="t" x="96" y="192">Harness hook / product feature</text><text class="ts" x="96" y="210">PreToolUse deny, Stop-needs-tests, Kiro waves</text>
+          <text class="ts" x="530" y="200">deterministic</text><text class="ts" x="650" y="200" style="fill:var(--color-error)">no: per harness, renamed</text>
+          <!-- 5 -->
+          <circle cx="40" cy="245" r="18" style="fill:var(--color-success)"/><text class="t on" x="40" y="250" text-anchor="middle">5</text>
+          <text class="t" x="96" y="242">External tests, linters, CI</text><text class="ts" x="96" y="260">openspec validate in CI, hidden acceptance tests</text>
+          <text class="ts" x="530" y="250">deterministic</text><text class="ts" x="650" y="250" style="fill:var(--color-success);font-weight:700">yes, fully independent</text>
+          <!-- H -->
+          <circle cx="40" cy="295" r="18" class="gate"/><text class="t" x="40" y="300" text-anchor="middle" style="fill:var(--color-accent)">H</text>
+          <text class="t" x="96" y="292">Human approval</text><text class="ts" x="96" y="310">plan review, phase sign-off</text>
+          <text class="ts" x="530" y="300">human judgement</text><text class="ts" x="650" y="300" style="fill:var(--color-success)">yes, if someone reads it</text>
+        </g>
+        <path class="ar noend" style="stroke:var(--color-border)" d="M80 120 H880"/>
+        <path class="ar noend" style="stroke:var(--color-border)" d="M80 220 H880"/>
+      </svg>
+    </div>
+    <p class="callout reveal d3"><strong>Design rule:</strong> back the gates that matter with tier 5. Treat tier-4 hooks as harness-specific accelerators that catch problems earlier, not as the guarantee.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>09</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>A six-tier scale for any framework’s gates. Tier 1 is instruction text: the model decides, and it travels as text. Tier 2 is format and structure (a JSON task list, checklists): still the model’s choice, with less drift. Tier 3 is an LLM judge that the harness triggers: probabilistic and rarely portable, since Codex skips such hooks. Tier 4 is a harness hook or product feature: deterministic, but per harness and often renamed. Tier 5 is external tests, linters and CI (continuous integration, checks that run on every change): deterministic and fully harness-independent. H is human approval, which travels if someone reads the artefact. Design rule: back the gates that matter with tier 5.</p><p class="n-part">Presenting</p><p>Walk the tiers from weakest to strongest. Ask the room to place one rule they rely on today on the scale. Pitfall: do not present tier-4 hooks as the guarantee; the slide treats them as accelerators that catch problems earlier.</p></aside>
+</section>
+
+<!-- ===================================================================== 10. SAME FRAMEWORK DIFFERENT TIERS -->
+<section class="slide" aria-label="Same framework, different tiers">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Applying the scale</p>
+      <h2 class="reveal d1">The same framework runs at different tiers on different harnesses</h2>
+    </div>
+    <div class="row">
+      <div class="diagram w60 reveal d2">
+        <svg viewBox="0 0 640 310" role="img" aria-label="GSD Core hooks installed per harness: seven on Claude Code, one on Codex, one advisory on Copilot, none usable on Windsurf and Cline">
+          <text class="th" x="10" y="24">GSD Core: hooks it installs, per harness</text>
+          <!-- Claude Code -->
+          <text class="t" x="10" y="64">Claude Code</text>
+          <g style="--c:var(--color-actor-2)">
+            <rect class="node fill" x="150" y="46" width="100" height="26" rx="13"/><text class="tm" x="200" y="64" text-anchor="middle" style="fill:#fff">SessionStart</text>
+            <rect class="node fill" x="256" y="46" width="90" height="26" rx="13"/><text class="tm" x="301" y="64" text-anchor="middle" style="fill:#fff">PreToolUse</text>
+            <rect class="node fill" x="352" y="46" width="96" height="26" rx="13"/><text class="tm" x="400" y="64" text-anchor="middle" style="fill:#fff">PostToolUse</text>
+            <rect class="node fill" x="454" y="46" width="100" height="26" rx="13"/><text class="tm" x="504" y="64" text-anchor="middle" style="fill:#fff">SubagentStop</text>
+            <rect class="node fill" x="150" y="78" width="60" height="26" rx="13"/><text class="tm" x="180" y="96" text-anchor="middle" style="fill:#fff">Stop</text>
+            <rect class="node fill" x="216" y="78" width="96" height="26" rx="13"/><text class="tm" x="264" y="96" text-anchor="middle" style="fill:#fff">PreCompact</text>
+            <rect class="node fill" x="318" y="78" width="100" height="26" rx="13"/><text class="tm" x="368" y="96" text-anchor="middle" style="fill:#fff">FileChanged</text>
+          </g>
+          <text class="ts" x="430" y="96" style="fill:var(--color-actor-2);font-weight:700">tier 4 + sub-agent waves</text>
+          <!-- Codex -->
+          <text class="t" x="10" y="146">Codex</text>
+          <g style="--c:var(--color-actor-2)"><rect class="node fill" x="150" y="128" width="100" height="26" rx="13"/><text class="tm" x="200" y="146" text-anchor="middle" style="fill:#fff">SessionStart</text></g>
+          <text class="ts" x="262" y="146">only; the rest falls back to prose</text>
+          <!-- Copilot -->
+          <text class="t" x="10" y="196">Copilot</text>
+          <rect class="opt" x="150" y="178" width="100" height="26" rx="13"/><text class="tm" x="200" y="196" text-anchor="middle">sessionStart</text>
+          <text class="ts" x="262" y="196">one advisory hook</text>
+          <!-- Windsurf / Cline -->
+          <text class="t" x="10" y="246">Windsurf, Cline</text>
+          <text class="t" x="150" y="246" style="fill:var(--color-error)">✕</text><text class="ts" x="172" y="246">no sub-agent surface GSD can use → waves cannot run as designed</text>
+          <rect class="box" x="10" y="266" width="620" height="38" rx="8"/>
+          <text class="ts" x="22" y="290">Source: GSD Core install guide. Same .planning/ files on every harness; very different enforcement.</text>
+        </svg>
+      </div>
+      <div class="facts w40">
+        <div class="card reveal d2"><p class="k">Spec Kit</p><p>Constitution checks, <code>analyze</code>, <code>converge</code>: tier 1 everywhere. "The AI interprets them, so compliance isn't guaranteed."</p></div>
+        <div class="card reveal d3"><p class="k">Superpowers</p><p>A tier-4 trigger (hook injects the bootstrap) carrying tier-1 obligations ("you must use" a skill). Its brainstorm gate never fired in one test.</p></div>
+        <div class="card reveal d3"><p class="k">Kiro</p><p>The one place wave execution is a product feature: "Waves execute sequentially; tasks within a wave execute concurrently."</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>10</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The same framework runs at different tiers on different harnesses. GSD Core installs seven hooks on Claude Code and runs sub-agent waves (groups of tasks run in parallel). On Codex it registers only SessionStart and the rest falls back to prose; on Copilot it has one advisory hook; on Windsurf and Cline it finds no sub-agent surface, so waves cannot run as designed. The .planning/ files are identical everywhere. Spec Kit’s constitution checks, <code>analyze</code> and <code>converge</code> are tier 1 on every harness, so compliance is not guaranteed. Superpowers uses a tier-4 hook to carry tier-1 obligations, and its brainstorm gate never fired in one test. Kiro is the one product with built-in wave execution.</p><p class="n-part">Presenting</p><p>Ask: “Which of these would you trust for a gate that must hold?” Pitfall: “never fired in one test” is a single run, not a failure rate; say so. Cite the GSD Core install guide as the source of the per-harness hook list.</p></aside>
+</section>
+
+<!-- ===================================================================== 11. SECTION -->
+<section class="slide section" aria-label="Section: context engineering">
+  <div class="slide-content">
+    <p class="tag reveal">Part 3</p>
+    <h2 class="reveal d1">Context engineering</h2>
+    <div class="rule reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>Part 3</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Part 3 turns to context engineering: deciding what the model sees at each step, what loads, when and what gets dropped. It is the other half of why files travel and behaviour does not.</p><p class="n-part">Presenting</p><p>Use as a transition. Recall the analogy from slide 3: the context window is limited, volatile RAM.</p></aside>
+</section>
+
+<!-- ===================================================================== 12. DEFINITION -->
+<section class="slide" aria-label="Context engineering definition">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Definition</p>
+      <h2 class="reveal d1">"Find the smallest set of high-signal tokens that maximize the likelihood of your desired outcome."</h2>
+      <p class="small reveal d1">— <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Anthropic, "Effective context engineering for AI agents", 29 Sep 2025</a></p>
+    </div>
+    <div class="diagram reveal d2">
+      <svg viewBox="0 0 900 130" role="img" aria-label="Timeline: June 2025 term endorsed, 27 June Willison post, 29 September Anthropic definition, April 2026 Thoughtworks Adopt">
+        <path class="ar noend" style="stroke:var(--color-border);stroke-width:3" d="M30 50 H870"/>
+        <g style="--c:var(--color-actor-5)">
+          <circle cx="80" cy="50" r="9" class="node fill"/><text class="t" x="80" y="26" text-anchor="middle">Jun 2025</text><text class="ts" x="80" y="80" text-anchor="middle">Lütke, Karpathy</text><text class="ts" x="80" y="96" text-anchor="middle">endorse the term</text>
+          <circle cx="300" cy="50" r="9" class="node fill"/><text class="t" x="300" y="26" text-anchor="middle">27 Jun 2025</text><text class="ts" x="300" y="80" text-anchor="middle"><a href="https://simonwillison.net/2025/Jun/27/context-engineering/" target="_blank" rel="noopener">Simon Willison's post</a></text><text class="ts" x="300" y="96" text-anchor="middle">(the dated anchor)</text>
+          <circle cx="560" cy="50" r="9" class="node fill"/><text class="t" x="560" y="26" text-anchor="middle">29 Sep 2025</text><text class="ts" x="560" y="80" text-anchor="middle"><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Anthropic's definition</a>:</text><text class="ts" x="560" y="96" text-anchor="middle">manage "the full context state"</text>
+          <circle cx="800" cy="50" r="9" class="node fill"/><text class="t" x="800" y="26" text-anchor="middle">Apr 2026</text><text class="ts" x="800" y="80" text-anchor="middle">Thoughtworks: Adopt</text><text class="ts" x="800" y="96" text-anchor="middle">(secondary source only)</text>
+        </g>
+      </svg>
+    </div>
+    <div class="grid-3">
+      <div class="card reveal d2"><h3>Attention budget</h3><p>n tokens create n² relationships, so quality degrades "as a gradient rather than a hard cliff". A design argument, not a measurement.</p></div>
+      <div class="card reveal d3"><h3>Beyond prompts</h3><p>Covers system instructions, tools, MCP, retrieved data and message history, not just the wording of one prompt.</p></div>
+      <div class="card reveal d4"><h3>Harness engineering is a form of it</h3><p>The harness is where context engineering gets implemented: what loads, when and what gets dropped.</p></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>12</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Anthropic defines context engineering as finding “the smallest set of high-signal tokens that maximize the likelihood of your desired outcome” (29 September 2025). The term spread in June 2025, with Simon Willison’s 27 June post as the dated anchor. It covers everything the model sees (system instructions, tools, MCP, retrieved data and message history), not just one prompt’s wording. The attention-budget argument (n tokens create n² relationships, so quality degrades gradually) is a design argument, not a measurement. Thoughtworks’ move to Adopt in April 2026 is confirmed only through a secondary source. Harness engineering is a form of context engineering: the harness is where loading and dropping happen.</p><p class="n-part">Presenting</p><p>Ask: “What is in your agent’s context right now that it does not need?” Likely question: “Is this prompt engineering renamed?” Answer: it manages the full context state, not the wording of one prompt. Pitfall: do not present the n² argument as a measured result.</p></aside>
+</section>
+
+<!-- ===================================================================== 13. WSCI -->
+<section class="slide" aria-label="Write, select, compress, isolate">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal"><a href="https://www.langchain.com/blog/context-engineering-for-agents" target="_blank" rel="noopener">LangChain's taxonomy</a></p>
+      <h2 class="reveal d1">Four moves cover the technique space</h2>
+    </div>
+    <div class="diagram reveal d2">
+      <svg viewBox="0 0 900 320" role="img" aria-label="Context window at centre with four techniques: write, select, compress, isolate">
+        <rect x="350" y="105" width="200" height="110" rx="14" style="fill:var(--color-bg-code)"/>
+        <text class="t" x="450" y="150" text-anchor="middle" style="fill:#fff">context window</text>
+        <text class="ts" x="450" y="172" text-anchor="middle" style="fill:#CDD6F4">what the model sees</text>
+        <text class="ts" x="450" y="190" text-anchor="middle" style="fill:#CDD6F4">this step</text>
+        <g style="--c:var(--color-actor-5)">
+          <rect class="node" x="10" y="10" width="320" height="130" rx="12"/>
+          <text class="th" x="26" y="38" style="fill:var(--color-actor-5)">Write</text><text class="ts" x="100" y="38">keep state outside the window</text>
+          <text class="ts" x="26" y="64">• scratchpads, memories, files on disk</text>
+          <text class="ts" x="26" y="84">• Manus rewrites todo.md to push goals</text>
+          <text class="ts" x="26" y="100">   to the end of context (~50 tool calls/task)</text>
+          <text class="ts" x="26" y="122">• SDD: spec.md, STATE.md, plans</text>
+        </g>
+        <g style="--c:var(--color-actor-2)">
+          <rect class="node" x="570" y="10" width="320" height="130" rx="12"/>
+          <text class="th" x="586" y="38" style="fill:var(--color-actor-2)">Select</text><text class="ts" x="664" y="38">load only what this step needs</text>
+          <text class="ts" x="586" y="64">• skills: ~100 tokens of metadata at start,</text>
+          <text class="ts" x="586" y="80">   full SKILL.md (&lt;5k) only when used</text>
+          <text class="ts" x="586" y="102">• just-in-time: keep paths, read on demand</text>
+          <text class="ts" x="586" y="122">• tool retrieval: 3× accuracy (reported)</text>
+        </g>
+        <g style="--c:var(--color-actor-4)">
+          <rect class="node" x="10" y="180" width="320" height="130" rx="12"/>
+          <text class="th" x="26" y="208" style="fill:#A8811F">Compress</text><text class="ts" x="124" y="208">shrink the history</text>
+          <text class="ts" x="26" y="234">• trimming, summarising, auto-compaction</text>
+          <text class="ts" x="26" y="254">• context editing clears stale tool results</text>
+          <text class="ts" x="26" y="274">• 84% fewer tokens (vendor eval, weak)</text>
+          <text class="ts" x="26" y="294">• SDD: delta specs, SUMMARY files</text>
+        </g>
+        <g style="--c:var(--color-actor-3)">
+          <rect class="node" x="570" y="180" width="320" height="130" rx="12"/>
+          <text class="th" x="586" y="208" style="fill:var(--color-actor-3)">Isolate</text><text class="ts" x="664" y="208">split across separate windows</text>
+          <text class="ts" x="586" y="234">• sub-agents return 1,000–2,000-token</text>
+          <text class="ts" x="586" y="250">   condensed summaries</text>
+          <text class="ts" x="586" y="272">• cost: multi-agent up to 15× chat tokens</text>
+          <text class="ts" x="586" y="294">• SDD: GSD waves, per-task reviewers</text>
+        </g>
+        <path class="ar" d="M330 90 L355 112"/><path class="ar" d="M570 90 L545 112"/><path class="ar" d="M330 230 L355 208"/><path class="ar" d="M570 230 L545 208"/>
+      </svg>
+    </div>
+    <p class="small reveal d3"><strong>Harness functions</strong> (frameworks can't change them): caching, compaction, tool-result clearing, skill loading, sub-agent spawning. <strong>Workflow choices</strong> (frameworks package them): instruction files, which skills exist, state files, when to start fresh.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>13</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>LangChain sorts the techniques into four moves. Write keeps state outside the window in scratchpads, memories and files (in SDD: spec.md, STATE.md, plans). Select loads only what this step needs: a skill costs about 100 tokens of metadata at start, and its full SKILL.md (under 5k tokens) loads only when used. Compress shrinks history by trimming, summarising and compaction. Isolate splits work across separate windows: sub-agents return condensed 1,000–2,000-token summaries, but multi-agent work can use up to 15× the tokens of chat. Some of these are harness functions a framework cannot change (caching, compaction, skill loading, sub-agent spawning); others are workflow choices frameworks package (instruction files, state files, when to start fresh).</p><p class="n-part">Presenting</p><p>Open <code>.claude/skills/refactor-safely/</code> as a Select example and <code>.claude/agents/find-callers.md</code> as an Isolate example. Ask which moves the room already makes by hand. Pitfall: the 3× and 84% figures are vendor-reported; do not quote them as settled.</p></aside>
+</section>
+
+<!-- ===================================================================== 14. FRAMEWORKS MAPPED -->
+<section class="slide" aria-label="How the five frameworks map to the four moves">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">SDD frameworks are context-engineering kits</p>
+      <h2 class="reveal d1">All five use files as memory and a fresh session as compaction</h2>
+    </div>
+    <table class="reveal d2">
+      <thead><tr><th>Framework</th><th>Write</th><th>Select</th><th>Compress</th><th>Isolate</th><th>Needs from harness</th></tr></thead>
+      <tbody>
+        <tr><td>GSD Core</td><td><code>.planning/</code> STATE, CONTEXT, PLAN</td><td>Phase-scoped files</td><td>Byte ceilings on workflows (90k / 54k / 38k)</td><td>Fresh 200k executors in parallel waves</td><td><span class="pill bad">High</span> custom sub-agents</td></tr>
+        <tr><td>Superpowers</td><td>Design docs, plans</td><td>Bootstrap + auto-triggered skills</td><td>Plans record decisions, not code</td><td>Fresh sub-agent per task + review</td><td><span class="pill warn">Medium</span> bootstrap path</td></tr>
+        <tr><td>OpenSpec</td><td>Change folders, archived deltas</td><td>Profiles limit installed skills</td><td>Deltas, not full rewrites</td><td>Manual: "clear your context" first</td><td><span class="pill ok">Low</span> commands/skills</td></tr>
+        <tr><td>Spec Kit</td><td>Constitution + per-feature docs</td><td><code>/speckit-*</code> skills</td><td>Template compression proposed (~23%)</td><td>Phase separation only</td><td><span class="pill ok">Low</span> commands/skills</td></tr>
+        <tr><td>BMAD</td><td>PRD, architecture, stories</td><td>Role skills (core cut 14 → 8)</td><td>Sharding (removed v6.11)</td><td>Stories in a fresh chat</td><td><span class="pill ok">Low–med</span> skills, agents</td></tr>
+      </tbody>
+    </table>
+    <p class="callout reveal d3">The catch: frameworks also <em>add</em> always-loaded text (bootstraps, skill metadata, context updates). One OpenSpec user asked <a href="https://github.com/Fission-AI/OpenSpec/issues/611" target="_blank" rel="noopener">"why bloat context with 10 openspec skills?"</a>, and all three projects trimmed in 2026.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>14</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>All five SDD frameworks make the same core move: files on disk act as memory, and a fresh session or sub-agent acts as compaction. They differ in what they need from the harness. GSD Core keeps .planning/ state files, sets byte ceilings on its workflows (90k / 54k / 38k) and runs fresh 200k executors in parallel waves, so it needs real custom sub-agents. Superpowers needs a bootstrap path. OpenSpec and Spec Kit need only commands or skills; BMAD needs skills and agents. The catch: frameworks also add always-loaded text such as bootstraps and skill metadata. One OpenSpec user asked “why bloat context with 10 openspec skills?”, and all three projects trimmed in 2026.</p><p class="n-part">Presenting</p><p>Read one column at a time rather than the whole grid. Ask: “Which column best predicts how well a framework moves to another agent?” The answer is the last one. Pitfall: the always-loaded text in the callout sets up the next slide; land it before moving on.</p></aside>
+</section>
+
+<!-- ===================================================================== 15. FAILURE MODES -->
+<section class="slide" aria-label="Context failure modes">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">The failure modes rest on stronger evidence than the fixes</p>
+      <h2 class="reveal d1">More context and more rules make models less reliable</h2>
+    </div>
+    <div class="row">
+      <div class="diagram grow reveal d2">
+        <svg viewBox="0 0 420 250" role="img" aria-label="Lost in the middle: accuracy is highest when relevant information is at the start or end of the context">
+          <text class="th" x="10" y="24">Lost in the middle</text>
+          <text class="ts" x="10" y="42"><a href="https://aclanthology.org/2024.tacl-1.9/" target="_blank" rel="noopener">TACL 2024</a> · U-shaped accuracy</text>
+          <path class="ar noend" style="stroke:var(--color-border)" d="M40 200 H400 M40 200 V60"/>
+          <path d="M50 80 C 120 175, 330 175, 390 84" style="fill:none;stroke:var(--color-accent);stroke-width:3"/>
+          <text class="ts" x="40" y="220">start</text><text class="ts" x="200" y="220" text-anchor="middle">middle</text><text class="ts" x="400" y="220" text-anchor="end">end</text>
+          <text class="ts" x="220" y="240" text-anchor="middle">position of the relevant fact</text>
+          <text class="ts" x="30" y="70" text-anchor="end" transform="rotate(-90 30 70)">accuracy</text>
+          <text class="ts" x="220" y="182" text-anchor="middle" style="fill:var(--color-accent)">↑ rules buried here get missed</text>
+        </svg>
+      </div>
+      <div class="col grow">
+        <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+          <div class="card reveal d2"><p class="k"><a href="https://arxiv.org/abs/2507.11538" target="_blank" rel="noopener">IFScale · NeurIPS 2025</a></p><h3 class="accent">~68%</h3><p>best models' accuracy at 500 instructions; earlier instructions favoured</p></div>
+          <div class="card reveal d2"><p class="k"><a href="https://proceedings.mlr.press/v267/modarressi25a.html" target="_blank" rel="noopener">NoLiMa · ICML 2025</a></p><h3 class="accent">99 → 70%</h3><p>GPT-4o at 32k tokens; 11 of 13 models fell below half their baseline</p></div>
+          <div class="card reveal d3"><p class="k"><a href="https://www.trychroma.com/research/context-rot" target="_blank" rel="noopener">Chroma · Context rot</a></p><h3 class="accent">18 / 18</h3><p>models got less reliable as input grew, even on simple tasks</p></div>
+          <div class="card reveal d3"><p class="k"><a href="https://www.thoughtworks.com/radar/techniques/agent-instruction-bloat" target="_blank" rel="noopener">Thoughtworks · Apr 2026</a></p><h3 class="accent">Caution</h3><p>"agent instruction bloat": rules accrete and conflict</p></div>
+        </div>
+        <p class="small reveal d4"><a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html" target="_blank" rel="noopener">Breunig's</a> names for what goes wrong: <strong>poisoning</strong>, <strong>distraction</strong>, <strong>confusion</strong> (46 tools failed, 19 worked), <strong>clash</strong> (−39% on sharded prompts).</p>
+      </div>
+    </div>
+    <p class="callout reveal d4"><strong>For SDD:</strong> a gate written as one rule among dozens competes for attention and can be compacted away. Put the few non-negotiable rules first; keep current goals last.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>15</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The evidence that more context and more rules hurt is stronger than the evidence for any fix. Lost in the middle (TACL 2024): accuracy is U-shaped, so facts in the middle of the context get missed. IFScale (NeurIPS 2025): the best models reach about 68% accuracy at 500 instructions and favour earlier ones. NoLiMa (ICML 2025): GPT-4o fell from 99 to 70% at 32k tokens, and 11 of 13 models fell below half their baseline. Chroma: all 18 models got less reliable as input grew. Thoughtworks flags “agent instruction bloat”. For SDD, a gate written as one rule among dozens competes for attention: put the few non-negotiable rules first and keep current goals last.</p><p class="n-part">Presenting</p><p>Sketch the U-shaped curve and ask where the most important rule sits in the room’s instruction files. Open this repository’s short <code>AGENTS.md</code> as an example. Pitfall: Chroma’s result is on simple tasks; do not present it as a test of coding-agent rules.</p></aside>
+</section>
+
+<!-- ===================================================================== 16. SECTION -->
+<section class="slide section" aria-label="Section: portability">
+  <div class="slide-content">
+    <p class="tag reveal">Part 4</p>
+    <h2 class="reveal d1">Portability</h2>
+    <div class="rule reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>Part 4</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Part 4 is about portability: what each harness offers frameworks (hooks, sub-agents, skills, commands, plugins) and which parts of the stack have an agreed standard.</p><p class="n-part">Presenting</p><p>Use as a transition. Ask how many people have used more than one coding agent on the same repository.</p></aside>
+</section>
+
+<!-- ===================================================================== 17. CAPABILITY MATRIX -->
+<section class="slide" aria-label="Harness capability matrix">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Hooks converged in 2026; sub-agents did not</p>
+      <h2 class="reveal d1">What each harness offers frameworks</h2>
+    </div>
+    <div class="row">
+      <div class="diagram w60 reveal d2">
+        <svg viewBox="0 0 640 348" role="img" aria-label="Capability matrix of ten harnesses across hooks, custom sub-agents, skills, commands and plugins">
+          <text class="ts" x="215" y="20" text-anchor="middle" style="font-weight:700">Hooks</text>
+          <text class="ts" x="315" y="20" text-anchor="middle" style="font-weight:700">Sub-agents</text>
+          <text class="ts" x="410" y="20" text-anchor="middle" style="font-weight:700">Skills</text>
+          <text class="ts" x="500" y="20" text-anchor="middle" style="font-weight:700">Commands</text>
+          <text class="ts" x="590" y="20" text-anchor="middle" style="font-weight:700">Plugins</text>
+          <g id="cm">
+            <!-- rows: y = 46 + 29*i -->
+            <text class="t" x="10" y="51">Claude Code</text><circle cx="185" cy="46" r="8" style="fill:var(--color-success)"/><text x="185" y="50" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="tm" x="200" y="50">33</text><circle cx="315" cy="46" r="8" style="fill:var(--color-success)"/><text x="315" y="50" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="410" cy="46" r="8" style="fill:var(--color-success)"/><text x="410" y="50" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="500" cy="46" r="8" style="fill:var(--color-success)"/><text x="500" y="50" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="590" cy="46" r="8" style="fill:var(--color-success)"/><text x="590" y="50" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text>
+            <text class="t" x="10" y="80">Cursor</text><circle cx="185" cy="75" r="8" style="fill:var(--color-success)"/><text x="185" y="79" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="tm" x="200" y="79">21</text><circle cx="315" cy="75" r="8" style="fill:var(--color-success)"/><text x="315" y="79" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="410" cy="75" r="8" style="fill:var(--color-success)"/><text x="410" y="79" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="500" cy="75" r="8" style="fill:var(--color-success)"/><text x="500" y="79" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="590" cy="75" r="8" style="fill:var(--color-success)"/><text x="590" y="79" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text>
+            <text class="t" x="10" y="109">Copilot CLI</text><circle cx="185" cy="104" r="8" style="fill:var(--color-success)"/><text x="185" y="108" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="tm" x="200" y="108">14</text><circle cx="315" cy="104" r="8" style="fill:var(--color-success)"/><text x="315" y="108" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="410" cy="104" r="8" style="fill:var(--color-success)"/><text x="410" y="108" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="500" cy="104" r="8" style="fill:var(--color-success)"/><text x="500" y="108" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="590" cy="104" r="8" style="fill:var(--color-success)"/><text x="590" y="108" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text>
+            <text class="t" x="10" y="138">Codex CLI</text><circle cx="185" cy="133" r="8" style="fill:var(--color-success)"/><text x="185" y="137" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="tm" x="200" y="137">12</text><circle cx="315" cy="133" r="8" style="fill:var(--color-success)"/><text x="315" y="137" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="410" cy="133" r="8" style="fill:var(--color-success)"/><text x="410" y="137" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="500" cy="133" r="8" style="fill:var(--color-warning)"/><text x="500" y="137" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="590" cy="133" r="8" style="fill:var(--color-success)"/><text x="590" y="137" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text>
+            <text class="t" x="10" y="167">Gemini CLI</text><circle cx="185" cy="162" r="8" style="fill:var(--color-success)"/><text x="185" y="166" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="tm" x="200" y="166">11</text><circle cx="315" cy="162" r="8" style="fill:var(--color-success)"/><text x="315" y="166" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="410" cy="162" r="8" style="fill:var(--color-success)"/><text x="410" y="166" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="500" cy="162" r="8" style="fill:var(--color-warning)"/><text x="500" y="166" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="590" cy="162" r="8" style="fill:var(--color-success)"/><text x="590" y="166" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text>
+            <text class="t" x="10" y="196">Antigravity</text><circle cx="185" cy="191" r="8" style="fill:var(--color-success)"/><text x="185" y="195" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="tm" x="200" y="195">6</text><circle cx="315" cy="191" r="8" style="fill:var(--color-warning)"/><text x="315" y="195" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="410" cy="191" r="8" style="fill:var(--color-warning)"/><text x="410" y="195" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="500" cy="191" r="8" style="fill:var(--color-warning)"/><text x="500" y="195" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="590" cy="191" r="8" style="fill:var(--color-warning)"/><text x="590" y="195" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text>
+            <text class="t" x="10" y="225">Kiro</text><circle cx="185" cy="220" r="8" style="fill:var(--color-success)"/><text x="185" y="224" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="tm" x="200" y="224">4+</text><circle cx="315" cy="220" r="8" style="fill:var(--color-warning)"/><text x="315" y="224" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="410" cy="220" r="8" style="fill:var(--color-success)"/><text x="410" y="224" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="500" cy="220" r="8" style="fill:var(--color-warning)"/><text x="500" y="224" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><text class="t" x="590" y="226" text-anchor="middle" style="fill:var(--color-text-muted)">?</text>
+            <text class="t" x="10" y="254">OpenCode</text><circle cx="185" cy="249" r="8" style="fill:var(--color-warning)"/><text x="185" y="253" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="315" cy="249" r="8" style="fill:var(--color-success)"/><text x="315" y="253" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="410" cy="249" r="8" style="fill:var(--color-success)"/><text x="410" y="253" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="500" cy="249" r="8" style="fill:var(--color-success)"/><text x="500" y="253" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><circle cx="590" cy="249" r="8" style="fill:var(--color-success)"/><text x="590" y="253" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text>
+            <text class="t" x="10" y="283">Windsurf</text><circle cx="185" cy="278" r="8" style="fill:var(--color-warning)"/><text x="185" y="282" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="315" cy="278" r="7" style="fill:none;stroke:var(--color-error);stroke-width:2"/><text class="t" x="410" y="284" text-anchor="middle" style="fill:var(--color-text-muted)">?</text><circle cx="500" cy="278" r="8" style="fill:var(--color-warning)"/><text x="500" y="282" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><text class="t" x="590" y="284" text-anchor="middle" style="fill:var(--color-text-muted)">?</text>
+            <text class="t" x="10" y="312">Cline</text><circle cx="185" cy="307" r="8" style="fill:var(--color-warning)"/><text x="185" y="311" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text><circle cx="315" cy="307" r="7" style="fill:none;stroke:var(--color-error);stroke-width:2"/><circle cx="410" cy="307" r="8" style="fill:var(--color-success)"/><text x="410" y="311" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">Y</text><text class="t" x="500" y="313" text-anchor="middle" style="fill:var(--color-text-muted)">?</text><circle cx="590" cy="307" r="8" style="fill:var(--color-warning)"/><text x="590" y="311" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;font-weight:700;fill:#fff">P</text>
+          </g>
+          <circle cx="16" cy="332" r="6" style="fill:var(--color-success)"/><text x="16" y="335" text-anchor="middle" style="font-family:var(--font-mono);font-size:9px;font-weight:700;fill:#fff">Y</text><text class="ts" x="28" y="336">yes (docs)</text>
+          <circle cx="120" cy="332" r="6" style="fill:var(--color-warning)"/><text x="120" y="335" text-anchor="middle" style="font-family:var(--font-mono);font-size:9px;font-weight:700;fill:#fff">P</text><text class="ts" x="132" y="336">partial / 3rd-party</text>
+          <circle cx="285" cy="332" r="5" style="fill:none;stroke:var(--color-error);stroke-width:2"/><text class="ts" x="297" y="336">none</text>
+          <text class="t" x="350" y="337" style="fill:var(--color-text-muted)">?</text><text class="ts" x="364" y="336">unverified · n = hook events</text>
+        </svg>
+      </div>
+      <div class="facts w40">
+        <div class="card reveal d2"><p class="k">Hooks converged on Claude Code's shape</p><p>Codex passes <code>CLAUDE_PLUGIN_ROOT</code>; Copilot CLI reads <code>.claude/settings.json</code>; Cursor honours exit code 2. A shell <code>PreToolUse</code> guard now ports with renames.</p></div>
+        <div class="card reveal d3"><p class="k">Sub-agents still differ</p><p>Markdown in Claude Code, TOML in Codex; Gemini CLI has them on by default but can't nest; Windsurf has no custom-agent surface.</p></div>
+        <div class="card reveal d4"><p class="k">Google's harness moved</p><p>Antigravity CLI replaced Gemini CLI for unpaid and Google One users on 18 Jun 2026.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>17</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The matrix shows what ten harnesses offer frameworks, with the number of hook events: Claude Code 33, Cursor 21, Copilot CLI 14, Codex CLI 12, Gemini CLI 11, Antigravity 6. Hooks converged on Claude Code’s shape in 2026: Codex passes CLAUDE_PLUGIN_ROOT, Copilot CLI reads .claude/settings.json and Cursor honours exit code 2, so a shell PreToolUse guard now ports with renames. Sub-agents still differ: Markdown in Claude Code, TOML in Codex; Gemini CLI cannot nest them; Windsurf has no custom-agent surface. Google’s Antigravity CLI replaced Gemini CLI for unpaid and Google One users on 18 June 2026. A question mark means unverified.</p><p class="n-part">Presenting</p><p>Note that this repository’s hook is declared in <code>.claude/settings.json</code>, the file Copilot CLI also reads. Pitfall: treat “?” and “P” cells as open questions, not as “no”. Add the caveats: Copilot’s cloud agent has fewer hooks, OpenCode bridges hooks through plugins and GSD’s own documents disagree on some cells.</p></aside>
+</section>
+
+<!-- ===================================================================== 18. TRADE-OFF -->
+<section class="slide" aria-label="Portability versus enforcement">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">The pattern</p>
+      <h2 class="reveal d1">Portability and enforcement trade against each other, except in CI</h2>
+    </div>
+    <div class="row">
+      <div class="diagram w60 reveal d2">
+        <svg viewBox="0 0 640 330" role="img" aria-label="Chart: frameworks that ask more of the harness enforce more but port less; tests and CI enforce strongly while asking nothing of the harness">
+          <path class="ar" style="stroke:var(--color-text-subtle)" d="M60 290 H620"/>
+          <path class="ar" style="stroke:var(--color-text-subtle)" d="M60 290 V20"/>
+          <text class="ts" x="340" y="322" text-anchor="middle">what it needs from the harness →</text>
+          <text class="ts" x="30" y="160" text-anchor="middle" transform="rotate(-90 30 160)">what it can enforce →</text>
+          <path d="M90 270 L590 50" style="stroke:var(--color-border);stroke-width:2;stroke-dasharray:6 6"/>
+          <g>
+            <circle cx="120" cy="255" r="10" style="fill:var(--color-actor-2)"/><text class="t" x="138" y="260">Spec Kit</text>
+            <circle cx="150" cy="225" r="10" style="fill:var(--color-actor-5)"/><text class="t" x="168" y="230">OpenSpec</text>
+            <circle cx="230" cy="245" r="10" style="fill:var(--color-actor-3)"/><text class="t" x="248" y="250">BMAD</text>
+            <circle cx="340" cy="170" r="10" style="fill:var(--color-actor-1)"/><text class="t" x="358" y="175">Superpowers</text>
+            <circle cx="500" cy="95" r="10" style="fill:var(--color-actor-4)"/><text class="t" x="518" y="100">GSD Core</text>
+            <rect x="540" y="30" width="18" height="18" rx="3" style="fill:var(--color-text-subtle)"/><text class="t" x="566" y="45">Kiro</text>
+            <text class="ts" x="532" y="45" text-anchor="end">product-only</text>
+          </g>
+          <!-- CI breaks the trade-off -->
+          <circle cx="110" cy="60" r="14" style="fill:var(--color-success)"/><text class="t" x="132" y="56" style="fill:var(--color-success)">Your tests + CI</text>
+          <text class="ts" x="132" y="74">tier 5: strong on any harness</text>
+          <path class="ar noend dot" style="stroke:var(--color-success)" d="M160 215 L118 78"/>
+          <text class="ts" x="178" y="150" style="fill:var(--color-success)">openspec validate</text><text class="ts" x="178" y="166" style="fill:var(--color-success)">in CI moves it here</text>
+        </svg>
+      </div>
+      <div class="facts w40">
+        <div class="card reveal d2"><p class="k">Ask little, enforce little</p><p>Spec Kit and OpenSpec need only commands or skills, which nearly every harness has, so they port best and enforce least.</p></div>
+        <div class="card reveal d3"><p class="k">Ask a lot, lose a lot</p><p>GSD Core needs real sub-agents and hooks. On Windsurf or Cline, prefer Spec Kit or OpenSpec. Superpowers sits between: its bootstrap can be injected three ways.</p></div>
+        <div class="card edge reveal d4" style="--edge:var(--color-success)"><p class="k">The way out</p><p>Gates in the repository's tests and CI are both deterministic and portable.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>18</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Portability and enforcement trade against each other. The chart places frameworks by what they need from the harness against what they can enforce. Spec Kit and OpenSpec need only commands or skills, which nearly every harness has, so they port best and enforce least. GSD Core needs real sub-agents and hooks, so it loses most when moved; on Windsurf or Cline, prefer Spec Kit or OpenSpec. Superpowers sits between, because its bootstrap can be injected three ways. Kiro enforces only inside its own product. The way out is your own tests and CI: tier-5 gates that are deterministic on any harness. Running openspec validate in CI moves OpenSpec there.</p><p class="n-part">Presenting</p><p>Ask: “Where would your own test suite sit on this chart?” Likely question: “Why is Kiro product-only?” Its waves are a product feature, and its subscription forbids routing through third-party harnesses. Pitfall: the positions are qualitative, not measured.</p></aside>
+</section>
+
+<!-- ===================================================================== 19. STANDARDS -->
+<section class="slide" aria-label="What is standardised and what is not">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Standards</p>
+      <h2 class="reveal d1">Files and protocols are standardised; hooks and orchestration are not</h2>
+    </div>
+    <div class="diagram reveal d2">
+      <svg viewBox="0 0 900 330" role="img" aria-label="Eight layers of the agent stack: six with a standard or vendor format, lifecycle hooks and sub-agent orchestration with none">
+        <text class="ts" x="20" y="18" style="font-weight:700">Layer · standard</text><text class="ts" x="330" y="18" style="font-weight:700">fixes</text><text class="ts" x="620" y="18" style="font-weight:700">leaves to each harness</text>
+        <g style="--c:var(--color-actor-5)">
+          <rect class="node" x="10" y="28" width="880" height="32" rx="6"/><text class="t" x="22" y="49">AGENTS.md</text><text class="tm" x="140" y="49">AAIF / LF</text><text class="ts" x="330" y="49">file name + location</text><text class="ts" x="620" y="49">when loaded, weight, size limits</text>
+          <rect class="node" x="10" y="66" width="880" height="32" rx="6"/><text class="t" x="22" y="87">Agent Skills</text><text class="tm" x="140" y="87">Anthropic-led</text><text class="ts" x="330" y="87">folder, frontmatter, disclosure stages</text><text class="ts" x="620" y="87" style="fill:var(--color-accent);font-weight:700">activation, invocation, install path</text>
+          <rect class="node" x="10" y="104" width="880" height="32" rx="6"/><text class="t" x="22" y="125">MCP</text><text class="tm" x="140" y="125">AAIF / LF</text><text class="ts" x="330" y="125">agent ↔ tool wire protocol, Tasks</text><text class="ts" x="620" y="125">the agent loop itself</text>
+          <rect class="node" x="10" y="142" width="880" height="32" rx="6"/><text class="t" x="22" y="163">ACP</text><text class="tm" x="140" y="163">community</text><text class="ts" x="330" y="163">editor ↔ agent connection</text><text class="ts" x="620" y="163">everything inside the agent</text>
+          <rect class="node" x="10" y="180" width="880" height="32" rx="6"/><text class="t" x="22" y="201">A2A</text><text class="tm" x="140" y="201">AAIF / LF</text><text class="ts" x="330" y="201">agent ↔ remote agent messaging</text><text class="ts" x="620" y="201">local sub-agents</text>
+        </g>
+        <g style="--c:var(--color-warning)">
+          <rect class="node" x="10" y="218" width="880" height="32" rx="6"/><text class="t" x="22" y="239">Plugin marketplaces</text><text class="tm" x="190" y="239">per vendor</text><text class="ts" x="330" y="239">install + catalogue format</text><text class="ts" x="620" y="239">hooks and agents inside stay harness-specific</text>
+        </g>
+        <rect x="10" y="256" width="880" height="32" rx="6" style="fill:#FBEAEA;stroke:var(--color-error);stroke-width:2;stroke-dasharray:6 4"/><text class="t" x="22" y="277" style="fill:var(--color-error)">Lifecycle hooks: NONE</text><text class="ts" x="330" y="277">de facto: JSON stdin/stdout, exit 2 blocks</text><text class="ts" x="620" y="277">event names, payloads, semantics</text>
+        <rect x="10" y="294" width="880" height="32" rx="6" style="fill:#FBEAEA;stroke:var(--color-error);stroke-width:2;stroke-dasharray:6 4"/><text class="t" x="22" y="315" style="fill:var(--color-error)">Sub-agent orchestration: NONE</text><text class="ts" x="330" y="315">nothing</text><text class="ts" x="620" y="315">format, parallelism, nesting, handoff</text>
+      </svg>
+    </div>
+    <p class="small reveal d3">Result: every framework ships a per-harness installer. Spec Kit maps 35+ agents to different directories and keeps a public list of per-agent workarounds. The only hook-standard proposal found is one person's three-commit draft.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>19</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Standards exist for files and protocols, but each stops short of where SDD behaviour lives. AGENTS.md fixes a file name and location, not when it loads or how much weight it gets. Agent Skills fixes the folder, frontmatter and disclosure stages, but leaves activation to each client, which is why auto-activation does not travel. MCP (agent to tool), ACP (editor to agent) and A2A (agent to remote agent) are wire protocols. Plugin marketplaces are per vendor. Lifecycle hooks and sub-agent orchestration have no standard; hooks share only a de facto shape (JSON in and out, exit 2 blocks). So every framework ships a per-harness installer; Spec Kit maps 35+ agents to different directories.</p><p class="n-part">Presenting</p><p>Ask: “Which row would SDD frameworks most need standardised?” Most people answer hooks or sub-agents. Pitfall: do not suggest a hook standard is close; the only proposal found is one person’s three-commit draft.</p></aside>
+</section>
+
+<!-- ===================================================================== 20. SECTION -->
+<section class="slide section" aria-label="Section: evidence">
+  <div class="slide-content">
+    <p class="tag reveal">Part 5</p>
+    <h2 class="reveal d1">What the evidence supports</h2>
+    <div class="rule reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>Part 5</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Part 5 grades the evidence. Each claim carries a grade, from strong to none, so you can separate what is established from what is a vendor report or an untested prediction.</p><p class="n-part">Presenting</p><p>Use as a transition. Ask: “Which claim so far did you find most convincing, and why?”</p></aside>
+</section>
+
+<!-- ===================================================================== 21. EVIDENCE TABLE -->
+<section class="slide" aria-label="Graded evidence">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Teach the claim with its grade attached</p>
+      <h2 class="reveal d1">Strong on context limits; untested on SDD across harnesses</h2>
+    </div>
+    <table class="reveal d2">
+      <thead><tr><th>Claim</th><th>Best evidence</th><th>Grade</th></tr></thead>
+      <tbody>
+        <tr><td>Longer input degrades performance</td><td><a href="https://www.trychroma.com/research/context-rot" target="_blank" rel="noopener">Chroma (18 models)</a>, <a href="https://proceedings.mlr.press/v267/modarressi25a.html" target="_blank" rel="noopener">NoLiMa (ICML 2025)</a>, <a href="https://aclanthology.org/2024.tacl-1.9/" target="_blank" rel="noopener">lost-in-the-middle (TACL 2024)</a></td><td><span class="pill ok">Strong</span></td></tr>
+        <tr><td>More instructions, lower adherence</td><td><a href="https://arxiv.org/abs/2507.11538" target="_blank" rel="noopener">IFScale (NeurIPS 2025)</a>: ~68% at 500 instructions</td><td><span class="pill ok">Strong</span></td></tr>
+        <tr><td>Same model, different harness, different score</td><td><a href="https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering" target="_blank" rel="noopener">LangChain</a>: GPT-5.2-Codex held constant, Terminal-Bench 2.0 52.8% → 66.5%</td><td><span class="pill">Moderate</span></td></tr>
+        <tr><td>Context editing + memory help long runs</td><td><a href="https://claude.com/resources/articles/context-management" target="_blank" rel="noopener">Anthropic internal evals</a>: +39%, −84% tokens</td><td><span class="pill warn">Weak</span></td></tr>
+        <tr><td>Hooks enforce what prose misses</td><td>Self-reported ~25–60% rule compliance vs ~95% with hooks</td><td><span class="pill warn">Weak</span></td></tr>
+        <tr><td>AGENTS.md files help or hurt</td><td>Two studies, different measures (next slide)</td><td><span class="pill warn">Conflicting</span></td></tr>
+        <tr><td>SDD framework effects differ by harness</td><td>No study exists</td><td><span class="pill bad">None</span></td></tr>
+      </tbody>
+    </table>
+    <p class="small reveal d3">Harness comparisons on leaderboards "are not a randomized ablation": prompts, budgets and run counts differ. The mechanism is well-founded by inference; the SDD-specific prediction is untested.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>21</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Each claim is shown with its best evidence and a grade. Strong: longer input degrades performance (Chroma, NoLiMa, lost in the middle), and more instructions lower adherence (IFScale, about 68% at 500). Moderate: the same model scores differently in another harness (LangChain kept GPT-5.2-Codex fixed; Terminal-Bench 2.0 went from 52.8% to 66.5%). Weak: context editing plus memory (Anthropic internal evals, +39%, −84% tokens), and hooks beating prose (self-reported ~25–60% rule compliance against ~95%). Conflicting: whether AGENTS.md files help. None: no study measures SDD frameworks across harnesses. Leaderboard comparisons “are not a randomized ablation”. The mechanism is well-founded by inference; the SDD prediction is untested.</p><p class="n-part">Presenting</p><p>Ask the room to grade a claim they have heard about AI coding tools. Pitfall: do not quote the Weak rows as findings. If asked about multi-agent gains: +90.2% on an internal research eval at ~15× chat tokens, but Anthropic says coding has “fewer truly parallelizable tasks”.</p></aside>
+</section>
+
+<!-- ===================================================================== 22. AGENTS.MD STUDIES -->
+<section class="slide" aria-label="The two AGENTS.md studies">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">A conflict worth teaching</p>
+      <h2 class="reveal d1">Do AGENTS.md files help? Two studies, two answers</h2>
+    </div>
+    <div class="row">
+      <div class="card edge grow reveal d1" style="--edge:var(--color-actor-3)">
+        <p class="k"><a href="https://arxiv.org/abs/2602.11988" target="_blank" rel="noopener">ETH Zurich + LogicStar · arXiv 2602.11988</a></p>
+        <h3>Success on hard, niche tasks</h3>
+        <ul class="clean">
+          <li>4 agent–model pairs; SWE-bench Lite + 138 new tasks</li>
+          <li>LLM-generated files: success <strong>−0.5 to −2 pts</strong>, cost <strong>+20–23%</strong></li>
+          <li>Minimal human-written files: <strong>+4 pts</strong> (not for Claude Code)</li>
+          <li>Agents followed the files; extra rules meant more exploring and testing</li>
+        </ul>
+      </div>
+      <div class="card edge grow reveal d2" style="--edge:var(--color-actor-2)">
+        <p class="k"><a href="https://arxiv.org/abs/2601.20404" target="_blank" rel="noopener">Lulla et al. · arXiv 2601.20404</a></p>
+        <h3>Efficiency on ordinary PRs</h3>
+        <ul class="clean">
+          <li>124 pull requests across 10 repositories, with vs without</li>
+          <li>Median runtime <strong>−28.6%</strong></li>
+          <li>Output tokens <strong>−16.6%</strong></li>
+          <li>"Comparable task completion behavior"</li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout reveal d3"><strong>Defensible reading:</strong> short, hand-written files that state what the agent can't discover itself help modestly; large generated files cost money without improving success. Both studies are small, Python-heavy and lack significance tests.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>22</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Two studies of AGENTS.md files point different ways because they measure different things. arXiv 2602.11988 measured success on hard, niche tasks with 4 agent–model pairs: LLM-generated files lowered success by 0.5–2 points and raised cost by 20–23%, while minimal human-written files raised it by 4 points (not for Claude Code). Agents followed the files; extra rules meant more exploring and testing. Lulla et al. (arXiv 2601.20404) measured efficiency on 124 pull requests across 10 repositories: median runtime fell 28.6% and output tokens 16.6%, with comparable completion. The defensible reading: short, hand-written files stating what the agent cannot discover help modestly; large generated files cost money without improving success.</p><p class="n-part">Presenting</p><p>Open this repository’s <code>AGENTS.md</code> and ask: “Which lines tell the agent something it could not discover itself?” Pitfall: both studies are small, Python-heavy and lack significance tests, and Thoughtworks’ Radar cites the wrong paper for “hand-written beats generated”.</p></aside>
+</section>
+
+<!-- ===================================================================== 23. SECTION -->
+<section class="slide section" aria-label="Section: practice">
+  <div class="slide-content">
+    <p class="tag reveal">Part 6</p>
+    <h2 class="reveal d1">Putting it into practice</h2>
+    <div class="rule reveal d2"></div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>Part 6</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Part 6 puts the material into practice: six rules for adopting or moving a framework, and four labs that let a class observe the finding rather than take it on trust.</p><p class="n-part">Presenting</p><p>Use as a transition. Ask whether anyone is about to adopt an SDD framework, and use their case on the next slide.</p></aside>
+</section>
+
+<!-- ===================================================================== 24. PORTING RULES -->
+<section class="slide" aria-label="Six rules for choosing and porting a framework">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Before you adopt or move a framework</p>
+      <h2 class="reveal d1">Six porting rules</h2>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card edge reveal d1"><p class="k">1 · Classify</p><h3>Tier every gate</h3><p>Ask what happens on the target harness if the extension point is missing. A gate that drops to tier 1 is advisory: say so.</p></div>
+      <div class="card edge reveal d1" style="--edge:var(--color-success)"><p class="k">2 · Back it</p><h3>Gates that matter → tier 5</h3><p>Hidden acceptance tests; CI fails on unchecked tasks or spec/plan/task mismatch; <code>openspec validate</code> in the pipeline.</p></div>
+      <div class="card edge reveal d2" style="--edge:var(--color-actor-2)"><p class="k">3 · Package</p><h3>Skills as the portable unit</h3><p>The file format works in ~45 clients, but test activation on each harness; invoke explicitly where it's unreliable.</p></div>
+      <div class="card edge reveal d2" style="--edge:var(--color-actor-5)"><p class="k">4 · Budget</p><h3>Small, hand-written context</h3><p>Non-negotiable rules first, everything else in on-demand skills. GSD's byte ceilings are a model.</p></div>
+      <div class="card edge reveal d3" style="--edge:var(--color-actor-4)"><p class="k">5 · Order</p><h3>Pick the harness first</h3><p>…when parallel sub-agents matter. GSD Core needs Claude Code or equivalent; on Windsurf or Cline use Spec Kit or OpenSpec.</p></div>
+      <div class="card edge reveal d3" style="--edge:var(--color-actor-3)"><p class="k">6 · Pin</p><h3>Pin framework and harness</h3><p>Hook schemas changed in 2026 (GSD needs Codex CLI ≥ 0.137.0); some frameworks ship breaking changes often.</p></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>24</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Six porting rules. Classify: give every gate a tier and ask what happens on the target harness if the extension point is missing; a gate that drops to tier 1 is advisory, so say so. Back it: gates that matter go to tier 5, such as hidden acceptance tests, CI that fails on unchecked tasks or on spec/plan/task mismatch or openspec validate in the pipeline. Package: skills are the portable unit (the format works in about 45 clients), but test activation on each harness. Budget: keep context small and hand-written, rules first. Order: pick the harness first when parallel sub-agents matter. Pin: fix both versions, since hook schemas changed in 2026.</p><p class="n-part">Presenting</p><p>Apply rule 1 live to one gate from a framework the room uses. Likely question: “If CI is the guarantee, why keep hooks?” They catch problems earlier, as accelerators. Mention the pinning example: GSD needs Codex CLI ≥ 0.137.0.</p></aside>
+</section>
+
+<!-- ===================================================================== 25. LABS -->
+<section class="slide" aria-label="Four course labs">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">For the course</p>
+      <h2 class="reveal d1">Four labs that turn the finding into something you observe</h2>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="card edge reveal d1"><p class="k">Lab 1 · Gate strength</p><h3>One rule, three ways</h3><p>"Run tests before declaring done" as an AGENTS.md sentence, as a <code>Stop</code>/<code>PreToolUse</code> hook and as a CI check. Count how often each fires over several runs.</p></div>
+      <div class="card edge reveal d2" style="--edge:var(--color-actor-5)"><p class="k">Lab 2 · Context budget</p><h3>Minimal vs generated vs none</h3><p>Same task with a hand-written AGENTS.md, a generated one and none. Compare tokens and outcome with the ETH and Lulla results.</p></div>
+      <div class="card edge reveal d3" style="--edge:var(--color-actor-2)"><p class="k">Lab 3 · Portability</p><h3>One framework, two harnesses</h3><p>Install on Claude Code and Codex (or Copilot). Record which gates still fire and which degrade to prose. Add a forced mid-task resume.</p></div>
+      <div class="card edge reveal d4" style="--edge:var(--color-actor-4)"><p class="k">Lab 4 · Evidence literacy</p><h3>Grade every claim</h3><p>Context rot: established. Harness effects: moderate, confounded. SDD across harnesses: unmeasured. Star counts are not evidence.</p></div>
+    </div>
+    <p class="small reveal d4">Run Labs 1 and 3 as repeated, test-graded measurements and the class produces evidence that does not yet exist anywhere.</p>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>25</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Four labs turn the finding into something you can observe. Lab 1, gate strength: write one rule (“run tests before declaring done”) as an AGENTS.md sentence, as a Stop or PreToolUse hook and as a CI check, then count how often each fires over several runs. Lab 2, context budget: run the same task with a hand-written AGENTS.md, a generated one and none, and compare tokens and outcome with the two studies on slide 22. Lab 3, portability: install one framework on Claude Code and Codex (or Copilot), record which gates still fire and force a mid-task resume. Lab 4, evidence literacy: grade every claim. Star counts are not evidence.</p><p class="n-part">Presenting</p><p>For Lab 1, show that this repository already has all three forms: the test instruction in <code>AGENTS.md</code>, the Stop hook in <code>.claude/hooks/require_green_tests.py</code> and the CI check in <code>.github/workflows/tests.yml</code>. Pitfall: one run proves nothing; Labs 1 and 3 only produce new evidence as repeated, test-graded measurements.</p></aside>
+</section>
+
+<!-- ===================================================================== 26. TAKEAWAY -->
+<section class="slide" aria-label="Takeaway and sources">
+  <div class="slide-content">
+    <div class="head">
+      <p class="tag reveal">Takeaway</p>
+      <h2 class="reveal d1">A spec is a context-engineering artefact.<br><span class="accent">A gate is a harness-engineering artefact.</span></h2>
+    </div>
+    <div class="grid-3">
+      <div class="card edge reveal d1"><h3>Specs travel</h3><p>A curated, durable, high-signal set of tokens that lets a fresh context pick up the work. Any harness can read it.</p></div>
+      <div class="card edge reveal d2"><h3>Gates live somewhere</h3><p>Ask where a framework's enforcement runs, and whether that place exists on the harness your team will actually use.</p></div>
+      <div class="card edge reveal d3" style="--edge:var(--color-success)"><h3>Tests are the portable gate</h3><p>Teach SDD as practices (small context, phase-sized work, state on disk, gates as tests) with any framework as one implementation.</p></div>
+    </div>
+    <div class="small reveal d4">
+      <strong>Key sources:</strong> code.claude.com docs (<a href="https://code.claude.com/docs/en/how-claude-code-works" target="_blank" rel="noopener">how Claude Code works</a>, <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">hooks</a>, <a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">memory</a>) · langchain.com (<a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness" target="_blank" rel="noopener">anatomy of an agent harness</a>; <a href="https://www.langchain.com/blog/context-engineering-for-agents" target="_blank" rel="noopener">context engineering</a>) · <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">anthropic.com/engineering (effective context engineering)</a> · <a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank" rel="noopener">martinfowler.com (Böckeler, harness engineering)</a> · <a href="https://agentskills.io/" target="_blank" rel="noopener">agentskills.io</a> · <a href="https://agents.md/" target="_blank" rel="noopener">agents.md</a> · <a href="https://arxiv.org/abs/2507.11538" target="_blank" rel="noopener">arXiv 2507.11538 (IFScale)</a>, <a href="https://arxiv.org/abs/2602.11988" target="_blank" rel="noopener">2602.11988</a>, <a href="https://arxiv.org/abs/2601.20404" target="_blank" rel="noopener">2601.20404</a> · <a href="https://www.trychroma.com/research/context-rot" target="_blank" rel="noopener">trychroma.com (context rot)</a> · <a href="https://www.thoughtworks.com/radar" target="_blank" rel="noopener">thoughtworks.com/radar</a>. The SDD frameworks themselves are compared in Module 3 of <em>Coding with AI Agents: 2-hour session</em> (coding-with-ai-agents-2h.html, in this folder).
+    </div>
+  </div>
+  <div class="bottom-bar"><span>Harnesses &amp; context engineering</span><span>26</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The closing reframe. A spec is a context-engineering artefact: a curated, durable, high-signal set of tokens that lets a fresh context pick up the work, and any harness can read it. A gate is a harness-engineering artefact: it runs somewhere, so ask where a framework’s enforcement runs and whether that place exists on the harness your team will actually use. Tests and CI are the only gates that are both deterministic and portable. Teach SDD as practices (small context, phase-sized work, state on disk, gates as tests), with any framework as one implementation. The frameworks themselves are compared in Module 3 of <code>coding-with-ai-agents-2h.html</code>, in the same folder.</p><p class="n-part">Presenting</p><p>Ask each person to name one gate in their own workflow and say where it runs. Close by pointing to the key sources listed on this slide and to the companion deck.</p></aside>
+</section>
+
+</main>
+
+<!-- Presenter notes panel (N) and printable notes sheet (Shift+N); filled by NotesView below -->
+<div id="notes-panel" role="complementary" aria-label="Presenter notes" aria-live="polite"></div>
+<div id="notes-sheet" aria-label="Presenter notes sheet"></div>
+<div class="kbd-hint" aria-hidden="true">N notes · Shift+N notes sheet</div>
+
+
+<script>
+/* =====================================================================
+   SlidePresentation — navigation controller
+   - IntersectionObserver adds .visible to the slide in view (drives .reveal animations)
+   - Keyboard: ← → ↑ ↓, Space, PageUp/PageDown, Home/End
+   - Wheel: one slide per gesture (debounced); Touch: vertical/horizontal swipe
+   - Progress bar + navigation dots stay in sync with the current slide
+   ===================================================================== */
+class SlidePresentation {
+  constructor() {
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.currentSlide = 0;
+    this.progress = document.querySelector('.progress');
+    this.dotsNav = document.querySelector('.dots');
+    this.wheelLock = false;
+    this.init();
+  }
+
+  init() {
+    this.buildDots();
+    this.setupIntersectionObserver();
+    this.setupKeyboardNav();
+    this.setupWheelNav();
+    this.setupTouchNav();
+    this.update();
+  }
+
+  // One dot per slide; aria-label uses the slide's own aria-label
+  buildDots() {
+    this.dots = this.slides.map((slide, i) => {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', `Go to slide ${i + 1}: ${slide.getAttribute('aria-label') || ''}`);
+      b.addEventListener('click', () => this.goTo(i));
+      this.dotsNav.appendChild(b);
+      return b;
+    });
+  }
+
+  setupIntersectionObserver() {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          this.currentSlide = this.slides.indexOf(e.target);
+          this.update();
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach((s) => io.observe(s));
+  }
+
+  setupKeyboardNav() {
+    document.addEventListener('keydown', (e) => {
+      const next = ['ArrowRight', 'ArrowDown', 'PageDown', ' '];
+      const prev = ['ArrowLeft', 'ArrowUp', 'PageUp'];
+      if (next.includes(e.key)) { e.preventDefault(); this.nextSlide(); }
+      else if (prev.includes(e.key)) { e.preventDefault(); this.prevSlide(); }
+      else if (e.key === 'Home') { e.preventDefault(); this.goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); this.goTo(this.slides.length - 1); }
+    });
+  }
+
+  // Debounced so a trackpad flick moves exactly one slide
+  setupWheelNav() {
+    window.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (this.wheelLock || Math.abs(e.deltaY) < 8) return;
+      this.wheelLock = true;
+      e.deltaY > 0 ? this.nextSlide() : this.prevSlide();
+      setTimeout(() => { this.wheelLock = false; }, 650);
+    }, { passive: false });
+  }
+
+  setupTouchNav() {
+    let sx = 0, sy = 0;
+    window.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+      const d = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(d) > 50) d < 0 ? this.nextSlide() : this.prevSlide();
+    }, { passive: true });
+  }
+
+  goTo(i) {
+    this.currentSlide = Math.max(0, Math.min(i, this.slides.length - 1));
+    this.slides[this.currentSlide].scrollIntoView({ behavior: 'smooth' });
+    this.update();
+  }
+  nextSlide() { this.goTo(this.currentSlide + 1); }
+  prevSlide() { this.goTo(this.currentSlide - 1); }
+
+  update() {
+    const pct = ((this.currentSlide + 1) / this.slides.length) * 100;
+    this.progress.style.width = pct + '%';
+    this.dots.forEach((d, i) => d.classList.toggle('active', i === this.currentSlide));
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => new SlidePresentation());
+
+/* =====================================================================
+   NotesView — presenter notes. Each slide's notes live in <aside class="notes">.
+   N toggles a panel with the current slide's notes; Shift+N toggles a
+   printable sheet of every slide's notes (print it with Ctrl+P); Esc closes both.
+   ===================================================================== */
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const panel = document.getElementById('notes-panel');
+  const sheet = document.getElementById('notes-sheet');
+  const noteOf = (s) => { const a = s.querySelector('aside.notes'); return a ? a.innerHTML.trim() : ''; };
+  let current = 0;
+  function render() {
+    const s = slides[current];
+    const n = noteOf(s);
+    panel.innerHTML = '<div class="np-head">Slide ' + (current + 1) + ' / ' + slides.length + ' · ' +
+      (s.getAttribute('aria-label') || '') + '</div>' + (n ? '<p>' + n + '</p>' : '<p><em>No notes for this slide.</em></p>');
+  }
+  function buildSheet() {
+    const title = document.title;
+    sheet.innerHTML = '<h1>' + title + ' — presenter notes</h1><p class="small">' + slides.length +
+      ' slides. Press Shift+N or Esc to return to the deck; Ctrl+P to print.</p>' +
+      slides.map((s, i) => '<div class="ns-item"><h2>' + (i + 1) + '. ' + (s.getAttribute('aria-label') || '') +
+        '</h2><p>' + (noteOf(s) || '<em>No notes.</em>') + '</p></div>').join('');
+  }
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { current = slides.indexOf(e.target); render(); }
+  }), { threshold: 0.5 });
+  slides.forEach((s) => io.observe(s));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'n' || e.key === 'N') {
+      e.preventDefault();
+      if (e.shiftKey) { buildSheet(); document.body.classList.toggle('notes-sheet'); window.scrollTo(0, 0); }
+      else { document.body.classList.toggle('show-notes'); render(); }
+    } else if (e.key === 'Escape') {
+      document.body.classList.remove('show-notes', 'notes-sheet');
+      slides[current].scrollIntoView();
+    }
+  }, true);
+  render();
+})();
+
+</script>
+</body>
+</html>

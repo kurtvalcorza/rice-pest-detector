@@ -1,0 +1,107 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it using the metadata below."
+title: "Rice-Pest Detector: a worked example of building software with AI agents"
+type: software
+authors:
+  - given-names: Kurt
+    family-names: Valcorza
+license: Apache-2.0
+repository-code: "https://github.com/kurtvalcorza/rice-pest-detector"
+url: "https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector"
+version: 1.0.0
+date-released: 2026-10-18
+keywords:
+  - object-detection
+  - onnx
+  - rt-detr
+  - flutter
+  - agriculture
+  - ai-agents
+  - teaching
+abstract: >-
+  A teaching demonstration of building software with AI coding agents: an object detector
+  that counts rice black bug and white stemborer in light-trap photos, exported to ONNX and
+  run in a demonstration Android app. It is not a tool for farmers, it is not validated in the
+  field and it is not an official product.
+references:
+  - type: data
+    title: "Annotated light-trap rice pest image dataset with detector-derived region-of-interest crops for species–sex recognition of rice black bug and white stemborer"
+    authors:
+      - given-names: Reymark
+        family-names: Deleña
+      - given-names: Gina
+        family-names: Balleras
+      - given-names: Brent Jason
+        family-names: Dequiña
+      - given-names: Rexter
+        family-names: Jumawan
+      - given-names: Christine
+        family-names: Flores
+    publisher:
+      name: Zenodo
+    version: "1"
+    year: 2026
+    doi: 10.5281/zenodo.20066074
+    license: CC-BY-4.0
+  - type: article
+    title: "DETRs Beat YOLOs on Real-time Object Detection"
+    authors:
+      - given-names: Yian
+        family-names: Zhao
+      - given-names: Wenyu
+        family-names: Lv
+      - given-names: Shangliang
+        family-names: Xu
+      - given-names: Jinman
+        family-names: Wei
+      - given-names: Guanzhong
+        family-names: Wang
+      - given-names: Qingqing
+        family-names: Dang
+      - given-names: Yi
+        family-names: Liu
+      - given-names: Jie
+        family-names: Chen
+    year: 2023
+    url: "https://arxiv.org/abs/2304.08069"
+    identifiers:
+      - type: other
+        value: "arXiv:2304.08069"
+  - type: article
+    title: "RF-DETR: Neural Architecture Search for Real-Time Detection Transformers"
+    authors:
+      - given-names: Isaac
+        family-names: Robinson
+      - given-names: Peter
+        family-names: Robicheaux
+      - given-names: Matvei
+        family-names: Popov
+      - given-names: Deva
+        family-names: Ramanan
+      - given-names: Neehar
+        family-names: Peri
+    year: 2025
+    url: "https://arxiv.org/abs/2511.09554"
+    identifiers:
+      - type: other
+        value: "arXiv:2511.09554"
+  - type: article
+    title: "D-FINE: Redefine Regression Task in DETRs as Fine-grained Distribution Refinement"
+    authors:
+      - given-names: Yansong
+        family-names: Peng
+      - given-names: Hebei
+        family-names: Li
+      - given-names: Peixi
+        family-names: Wu
+      - given-names: Yueyi
+        family-names: Zhang
+      - given-names: Xiaoyan
+        family-names: Sun
+      - given-names: Feng
+        family-names: Wu
+    year: 2024
+    url: "https://arxiv.org/abs/2410.13842"
+    identifiers:
+      - type: other
+        value: "arXiv:2410.13842"

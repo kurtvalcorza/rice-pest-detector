@@ -1,0 +1,4 @@
+*.ipynb -text
+data/*.json text eol=lf
+app/test/fixtures/*.json text eol=lf
+*.sh text eol=lf

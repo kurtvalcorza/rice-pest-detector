@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": ["Bash(flutter test:*)"]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/require_green_tests.py\"" }
+        ]
+      }
+    ]
+  }
+}

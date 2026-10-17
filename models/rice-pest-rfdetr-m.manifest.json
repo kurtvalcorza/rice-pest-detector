@@ -1,0 +1,23 @@
+{
+ "id": "rfdetr-m",
+ "label": "RF-DETR-M",
+ "architecture": "RF-DETR (medium)",
+ "base_model": "Roboflow/rf-detr-medium",
+ "licence": "Apache-2.0",
+ "input_size": 576,
+ "threshold": 0.48,
+ "review_below": 0.63,
+ "sha256": "07161f11d2bfc390510627ddff72a8436045b1f79cccd00682f19359fe5c660f",
+ "bytes": 121956743,
+ "outputs": [
+  "logits",
+  "pred_boxes"
+ ],
+ "num_classes": 4,
+ "validation": {
+  "count_accuracy": 0.846,
+  "species_map50": 0.933,
+  "wsb30_mae": 9.56
+ },
+ "validated": false
+}

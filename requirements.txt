@@ -1,0 +1,36 @@
+# Python packages for working with this repository on your own computer (Python 3.12).
+# Same constraints as pyproject.toml, which stays the source of truth: every package of the
+# base install and the dev, export and train extras. tests/test_requirements.py checks the two match.
+#
+#   python -m venv .venv
+#   .venv\Scripts\python -m pip install -r requirements.txt     (Windows)
+#   .venv/bin/python -m pip install -r requirements.txt         (macOS, Linux)
+#
+# torch is large. On a computer without an NVIDIA GPU, install the CPU build first, which is much smaller:
+#   python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+#
+# Tested on 2026-10-17 with Python 3.12.14 and: numpy 2.5.4, pillow 13.0.0, torch 2.14.1 (CPU),
+# transformers 5.20.1, pycocotools 2.0.11, scipy 1.18.1, onnx 1.23.2, onnxruntime 1.31.0,
+# pytest 9.1.1, ruff 0.17.1, nbformat 5.11.1.
+
+# The package itself (src/rice_pest_detector), installed in editable mode
+-e .
+
+# Base
+numpy>=1.26
+pillow>=10.3
+
+# Training and export: load and run RT-DETR / D-FINE / RF-DETR checkpoints
+torch
+transformers==5.20.1
+scipy>=1.11
+pycocotools>=2.0.8
+
+# ONNX export, parity and calibration
+onnx>=1.16
+onnxruntime>=1.18
+
+# Tests and tools
+pytest>=8
+ruff>=0.5
+nbformat>=5.10

@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in the notebooks, tools, app or docs does not work as described.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a teaching repository, maintained on a best-effort basis. For workshop questions, use Discussions (Q&A) instead. Do not report security problems here: see the security policy.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Describe the problem. Paste any error message as text.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands or actions, in order.
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. See the error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: dropdown
+    id: part
+    attributes:
+      label: Which part
+      options:
+        - notebooks
+        - tools
+        - app
+        - docs
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. Windows 11, macOS 15, Ubuntu 24.04, Android 15
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Python or Flutter version
+      description: Output of `python --version` or `flutter --version`, as relevant.
+    validations:
+      required: false

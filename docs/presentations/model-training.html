@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training the Rice-Pest Model</title>
+<!-- Fonts: warm-notebook preset (Bricolage Grotesque / DM Sans / JetBrains Mono) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== warm-notebook :root ===== */
+:root {
+  --color-bg: #FAF7F2;
+  --color-bg-warm: #F5F0E8;
+  --color-bg-code: #1E1E2E;
+  --color-surface-card: #FFFFFF;
+  --color-surface-card-alt: #FDF9F3;
+  --color-border: #E5DFD6;
+  --color-border-light: #EEEBE5;
+  --color-title: #2C2A28;
+  --color-text-body: #2C2A28;
+  --color-text-muted: #9E9790;
+  --color-text-subtle: #6B6560;
+  --color-accent: #D94F30;
+  --color-accent-hover: #C4432A;
+  --color-accent-light: #FDEEE9;
+  --color-accent-muted: #E8836C;
+  --color-success: #2D8B55;
+  --color-error: #C93B3B;
+  --color-warning: #D4A843;
+  --color-actor-1: #D94F30;
+  --color-actor-2: #2A7B9B;
+  --color-actor-3: #7B6DAA;
+  --color-actor-4: #D4A843;
+  --color-actor-5: #2D8B55;
+  --code-keyword: #CBA6F7;
+  --code-string: #A6E3A1;
+  --code-function: #89B4FA;
+  --code-comment: #6C7086;
+  --code-number: #FAB387;
+  --code-property: #F9E2AF;
+  --code-operator: #94E2D5;
+  --code-tag: #F38BA8;
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', Fira Code, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(44,42,40,0.05);
+  --shadow-md: 0 4px 12px rgba(44,42,40,0.08);
+  --shadow-lg: 0 8px 24px rgba(44,42,40,0.1);
+  --shadow-xl: 0 16px 48px rgba(44,42,40,0.12);
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --ease-in-out: cubic-bezier(0.65,0,0.35,1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+/* ===== Responsive scale (viewport-fitting contract: every size uses clamp) ===== */
+:root {
+  --title-size: clamp(1.6rem, 5vw, 4rem);
+  --h2-size: clamp(1.2rem, 3.2vw, 2.4rem);
+  --h3-size: clamp(0.95rem, 1.8vw, 1.35rem);
+  --body-size: clamp(0.75rem, 1.45vw, 1.1rem);
+  --small-size: clamp(0.62rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1rem, 4vw, 4rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.75rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.9rem);
+}
+
+/* ===== Viewport fitting: mandatory base styles ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+body { background: var(--color-bg); color: var(--color-text-body); font-family: var(--font-body); font-size: var(--body-size); line-height: 1.5; }
+.slide {
+  width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+  scroll-snap-align: start; display: flex; flex-direction: column; position: relative;
+  background:
+    radial-gradient(circle at 1px 1px, var(--color-border-light) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--color-bg);
+}
+.slide-content {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  max-height: 100%; overflow: hidden; padding: var(--slide-padding); gap: var(--content-gap);
+}
+.bottom-bar {
+  display: flex; justify-content: space-between; padding: 0 var(--slide-padding) clamp(0.5rem, 1.5vh, 1rem);
+  font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-muted);
+}
+
+/* ===== Typography ===== */
+h1, h2, h3 { font-family: var(--font-display); color: var(--color-title); line-height: 1.08; letter-spacing: -0.02em; }
+h1 { font-size: var(--title-size); font-weight: 800; }
+h2 { font-size: var(--h2-size); font-weight: 700; }
+h3 { font-size: var(--h3-size); font-weight: 700; }
+p, li, td, th { font-size: var(--body-size); }
+.tag { font-family: var(--font-mono); font-size: var(--small-size); text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-accent); font-weight: 600; }
+.muted { color: var(--color-text-subtle); }
+.small { font-size: var(--small-size); }
+.accent { color: var(--color-accent); }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+code { background: var(--color-accent-light); color: var(--color-accent-hover); padding: 0.05em 0.35em; border-radius: 4px; }
+ul.clean { list-style: none; display: flex; flex-direction: column; gap: var(--element-gap); }
+ul.clean li { padding-left: 1.3em; position: relative; }
+ul.clean li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.55em; height: 0.55em; border-radius: 2px; background: var(--color-accent); }
+
+/* ===== Components ===== */
+.card { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: clamp(0.6rem, 1.6vw, 1.2rem); box-shadow: var(--shadow-sm); }
+.grid { display: grid; gap: var(--element-gap); }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+.g4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
+.stat { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.6rem, 4.5vw, 3.4rem); color: var(--color-accent); line-height: 1; }
+.quote { font-family: var(--font-display); font-size: clamp(1.1rem, 2.8vw, 2.1rem); font-weight: 600; line-height: 1.25; border-left: 6px solid var(--color-accent); padding-left: clamp(0.75rem, 2vw, 1.5rem); color: var(--color-title); }
+.quote small { display: block; margin-top: 0.6em; font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-muted); font-weight: 400; }
+table { width: 100%; border-collapse: collapse; background: var(--color-surface-card); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+th { text-align: left; font-family: var(--font-mono); font-size: var(--small-size); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-subtle); background: var(--color-bg-warm); padding: 0.55em 0.9em; }
+td { padding: 0.5em 0.9em; border-top: 1px solid var(--color-border-light); vertical-align: top; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); }
+.code-block { background: var(--color-bg-code); color: #CDD6F4; border-radius: var(--radius-md); padding: clamp(0.7rem, 1.6vw, 1.2rem); font-family: var(--font-mono); font-size: clamp(0.62rem, 1.15vw, 0.92rem); line-height: 1.55; white-space: pre; overflow: hidden; }
+.code-block .k { color: var(--code-keyword); } .code-block .s { color: var(--code-string); } .code-block .c { color: var(--code-comment); } .code-block .n { color: var(--code-number); } .code-block .f { color: var(--code-function); }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: var(--small-size); padding: 0.2em 0.65em; border-radius: var(--radius-full); background: var(--color-accent-light); color: var(--color-accent-hover); }
+.pill.ok { background: #E3F2E8; color: var(--color-success); }
+.pill.no { background: #F8E4E4; color: var(--color-error); }
+.pill.wait { background: #FBF3DE; color: #9A7A22; }
+.two-col { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--content-gap); align-items: center; }
+.shot { max-height: min(62vh, 560px); width: auto; max-width: 100%; border-radius: 22px; border: 6px solid #2C2A28; box-shadow: var(--shadow-xl); justify-self: center; }
+
+/* Stepper (plan) */
+.stepper { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); gap: var(--element-gap); counter-reset: step; }
+.step { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 0.6em 0.75em; font-size: var(--small-size); position: relative; }
+.step b { display: block; font-family: var(--font-display); font-size: var(--h3-size); color: var(--color-accent); }
+
+/* Stack diagram (layered bands) */
+.stack { display: flex; flex-direction: column; gap: clamp(3px, 0.6vh, 7px); }
+.band { display: grid; grid-template-columns: clamp(6rem, 14vw, 11rem) 1fr; align-items: stretch; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--color-border); background: var(--color-surface-card); }
+.band .lbl { font-family: var(--font-mono); font-size: var(--small-size); font-weight: 600; color: #fff; padding: 0.45em 0.7em; display: flex; align-items: center; }
+.band .items { display: flex; flex-wrap: wrap; gap: 0.35em; padding: 0.4em 0.6em; align-items: center; }
+.chip { font-family: var(--font-mono); font-size: var(--small-size); background: var(--color-bg-warm); border: 1px solid var(--color-border); border-radius: 6px; padding: 0.12em 0.5em; white-space: nowrap; }
+
+/* Architecture diagram */
+.arch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--element-gap); align-items: start; }
+.lane { background: var(--color-surface-card-alt); border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 0.6em; display: flex; flex-direction: column; gap: 0.45em; }
+.lane h3 { font-size: var(--small-size); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-subtle); }
+.node { background: var(--color-surface-card); border: 1px solid var(--color-border); border-left: 4px solid var(--c, var(--color-accent)); border-radius: 6px; padding: 0.35em 0.55em; font-size: var(--small-size); line-height: 1.3; }
+.node b { font-family: var(--font-mono); font-weight: 600; }
+.arrow { text-align: center; color: var(--color-text-muted); font-size: var(--small-size); line-height: 1; }
+
+/* Section header slides */
+.slide.section { background: var(--color-title); }
+.slide.section h2 { color: #FAF7F2; font-size: var(--title-size); }
+.slide.section .tag { color: var(--color-accent-muted); }
+.slide.section .bottom-bar { color: rgba(250,247,242,0.45); }
+.line-accent { width: clamp(3rem, 10vw, 7rem); height: 6px; background: var(--color-accent); border-radius: 3px; }
+
+/* ===== Reveal animations ===== */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out); }
+.slide.visible .reveal { opacity: 1; transform: none; }
+.slide.visible .d1 { transition-delay: 90ms; } .slide.visible .d2 { transition-delay: 180ms; } .slide.visible .d3 { transition-delay: 270ms; } .slide.visible .d4 { transition-delay: 360ms; }
+@media (prefers-reduced-motion: reduce) { .reveal { transition: opacity 0.3s ease; transform: none; } html { scroll-behavior: auto; } }
+
+/* ===== Progress bar + nav dots ===== */
+.progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--color-accent); width: 0; z-index: 20; transition: width var(--duration-normal) var(--ease-out); }
+.dots { position: fixed; right: clamp(6px, 1.2vw, 18px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 5px; z-index: 20; }
+.dots button { width: 7px; height: 7px; border-radius: 50%; border: none; background: var(--color-border); cursor: pointer; padding: 0; }
+.dots button.active { background: var(--color-accent); transform: scale(1.4); }
+
+/* ===== Height breakpoints ===== */
+@media (max-height: 700px) { :root { --slide-padding: clamp(0.75rem, 3vw, 2.5rem); --content-gap: clamp(0.4rem, 1.5vw, 1rem); } .shot { max-height: 52vh; } }
+@media (max-height: 600px) { :root { --body-size: clamp(0.68rem, 1.3vw, 0.95rem); } .code-block { font-size: 0.62rem; } .card { padding: 0.45rem 0.6rem; } .card h3 { font-size: 0.85rem; } .card p { line-height: 1.3; } }
+@media (max-height: 500px) { :root { --h2-size: clamp(1rem, 2.6vw, 1.8rem); --title-size: clamp(1.3rem, 4vw, 2.8rem); } .dots { display: none; } }
+@media (max-width: 760px) { .two-col, .arch { grid-template-columns: 1fr; } .shot { max-height: 38vh; } }
+/* Contrast (WCAG AA >= 4.5:1), review 2026-10-16 */
+.tag { color: #B23A22; }
+.pill { color: #A8361F; } .pill.ok { color: #1F6E40; } .pill.no { color: #A82E2E; } .pill.wait { color: #7A5F14; }
+.bottom-bar, .arrow { color: var(--color-text-subtle); }
+.slide.section .tag { color: var(--color-accent-muted); }
+.slide a { color: #B23A22; text-decoration: underline; text-underline-offset: 2px; } .slide a:hover { color: var(--color-accent); }
+
+/* ===== Training deck additions ===== */
+.chart { width: 100%; height: auto; max-height: 52vh; background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.chart text { font-family: var(--font-mono); font-size: 13px; fill: var(--color-text-subtle); }
+.bars { display: flex; align-items: flex-end; gap: clamp(4px, 1vw, 12px); height: clamp(9rem, 34vh, 20rem); padding: 0.6em 0.6em 0; background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 0.25em; }
+.bar .fill { width: 100%; background: var(--color-actor-2); border-radius: 6px 6px 0 0; }
+.bar .fill.hot { background: var(--color-accent); }
+.bar .v { font-family: var(--font-mono); font-size: var(--small-size); font-weight: 600; }
+.bar .x { font-family: var(--font-mono); font-size: clamp(0.7rem, 0.9vw, 0.8rem); color: var(--color-text-subtle); padding-bottom: 0.4em; white-space: nowrap; }
+.split-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--element-gap); }
+.fam { display: flex; flex-wrap: wrap; gap: 4px; }
+.slide a { color: #B23A22; text-decoration: underline; text-underline-offset: 2px; } .slide a:hover { color: var(--color-accent); }
+aside.notes { display: none; }
+@media (max-height: 620px) { .chart { max-height: 40vh; } td, th { padding-top: 0.28em; padding-bottom: 0.28em; } }
+#notes-panel { display: none; position: fixed; left: 0; right: 0; bottom: 0; max-height: 38vh; overflow: auto; z-index: 30; background: var(--color-title); color: #FAF7F2; font-size: var(--body-size); line-height: 1.5; padding: 0.9rem clamp(1rem, 4vw, 4rem); box-shadow: var(--shadow-xl); }
+#notes-panel.open { display: block; }
+#notes-panel b { font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-accent-muted); display: block; margin-bottom: 0.3em; }
+.legend { display: flex; gap: 0.5em; flex-wrap: wrap; font-family: var(--font-mono); font-size: var(--small-size); color: var(--color-text-subtle); }
+.fam span { width: clamp(14px, 2vw, 22px); height: clamp(14px, 2vw, 22px); border-radius: 4px; background: var(--c); opacity: var(--o, 1); }
+#notes-sheet { display: none; padding: 2rem clamp(1rem, 5vw, 4rem); max-width: 920px; margin: 0 auto; color: var(--color-text); }
+#notes-sheet .ns-item { padding: 0.8rem 0; border-bottom: 1px solid var(--color-border); break-inside: avoid; }
+#notes-sheet h1 { font-size: 1.6rem; margin-bottom: 0.3rem; } #notes-sheet .ns-item h2 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+body.notes-sheet main, body.notes-sheet #notes-panel, body.notes-sheet .progress, body.notes-sheet .dots { display: none !important; }
+body.notes-sheet { overflow: auto; scroll-snap-type: none; } body.notes-sheet #notes-sheet { display: block; }
+.n-part { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-accent-muted); margin: 0.7em 0 0.15em; }
+#notes-panel p, #notes-sheet p { margin: 0 0 0.4em; }
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+<nav class="dots" aria-label="Slide navigation"></nav>
+<main>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide" aria-label="Title">
+  <div class="slide-content">
+    <p class="tag reveal">Coding with AI Agents · after-session case study</p>
+    <h1 class="reveal d1">Training the <span class="accent">rice-pest model</span></h1>
+    <p class="reveal d2 muted" style="max-width: 56ch;">How the detector behind the workshop's teaching tool was trained, tested and diagnosed, and why it is not finished yet. Every number here is recorded in the project's evaluation record or design spec. Press <b>N</b> for speaker notes.</p>
+    <div class="reveal d3" style="display:flex; gap:.5em; flex-wrap:wrap;">
+      <span class="pill">RT-DETR r18 → r50 → wave 2</span><span class="pill">5,453 images</span><span class="pill">Five Colab GPU runs</span><span class="pill">13–18 Oct 2026</span>
+    </div>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>This case study follows the object detector behind the workshop’s teaching tool: how it was specified, trained with an AI agent’s help, tested and diagnosed, and why it is not finished. It covers runs r18-1 and r50-1 and the three wave-2 runs (r50-v5, RF-DETR-M and D-FINE-L) on 5,453 images, plus r50-v5’s test look on 18 October. Every number comes from <code>docs/evaluation-record.md</code> or the design spec.</p><p class="n-part">Presenting</p><p>Open <code>docs/evaluation-record.md</code> beside the deck so every number can be traced. Ask what “not finished yet” might mean for a model. Pitfall: do not present this as a finished success story; r50-v5 now meets the three model quality gates on the held-out test split, but it is still a demo model, because field validation on phone photos and a data-protection review are still open. Its weights are published on Kaggle as a teaching demo only.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>01</span></div>
+</section>
+
+<!-- ============ 2. THE JOB ============ -->
+<section class="slide" aria-label="The job">
+  <div class="slide-content">
+    <p class="tag reveal">The job</p>
+    <h2 class="reveal d1">Count two rice pests in light-trap photos</h2>
+    <div class="grid g2 reveal d2">
+      <div class="card"><h3>Rice black bug (RBB)</h3><p class="muted"><i>Scotinophara coarctata</i>. Labelled female or male.</p></div>
+      <div class="card"><h3>White stemborer (WSB)</h3><p class="muted"><i>Scirpophaga innotata</i>. Labelled female or male.</p></div>
+    </div>
+    <div class="grid g3 reveal d3">
+      <div class="card"><div class="stat">4</div><p class="muted small">classes trained: species × sex</p></div>
+      <div class="card"><div class="stat">2</div><p class="muted small">species reported by the apps (sex classes must each reach 0.70 mAP50 first)</p></div>
+      <div class="card"><div class="stat">106</div><p class="muted small">insects on the most crowded tray seen, so the model needs room for many boxes</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The model has one job: count two rice pests in photos of light-trap trays. Rice black bug (RBB) and white stemborer (WSB) are each labelled female or male, so four classes are trained. The apps report only the two species, because each sex class must first reach 0.70 mAP50 (a ranking score, see the glossary), and two of them missed that bar in the first run (r18-1). The current model, r50-v5, clears it for all four on validation and on the held-out test split (lowest on test: RBB male, 0.798). The most crowded tray seen held 106 insects, so the model needs room for many boxes per photo. The requirements are in <code>docs/specs/2026-10-13-rice-pest-detector-design.md</code>.</p><p class="n-part">Presenting</p><p>Ask why a model might train on four classes but report only two. Pitfall: do not say the model cannot tell the sexes apart; r18-1’s two weak classes missed the 0.70 bar but did not score zero, and r50-v5’s lowest class is 0.826 on validation and 0.798 on test.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>02</span></div>
+</section>
+
+<!-- ============ 3. WORDS USED IN THIS DECK ============ -->
+<section class="slide" aria-label="Words used in this deck">
+  <div class="slide-content">
+    <p class="tag reveal">Glossary</p>
+    <h2 class="reveal d1">Ten terms, one line each</h2>
+    <div class="grid g2 reveal d2 small">
+      <div class="card"><p><b>Family:</b> one source photo plus all its augmented copies.</p><p><b>dHash:</b> a short fingerprint of an image; similar images get similar fingerprints.</p><p><b>Backbone / head:</b> the part that turns pixels into features / the small last layer that names the classes.</p><p><b>Query:</b> one box slot; the model fills up to 300 per photo.</p><p><b>Mixed precision:</b> doing most maths in 16-bit numbers to train faster.</p></div>
+      <div class="card"><p><b>IoU:</b> overlap of two boxes divided by their combined area; 0.5 counts as a hit.</p><p><b>mAP50:</b> how well confident boxes rank above wrong ones, averaged over classes, with IoU ≥ 0.5.</p><p><b>Threshold:</b> the minimum score a box needs to be counted.</p><p><b>Calibration:</b> making scores honest, so a 0.7 score is right about 70% of the time.</p><p><b>Baseline:</b> the score of a model that does nothing, here “always say zero”.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Ten terms recur through the deck. The two that matter most are mAP50, which measures whether confident boxes rank above wrong ones, and calibration, which asks whether a score of 0.7 is right about 70% of the time. A “family” is one source photo plus all its augmented copies, and the baseline is the score of a model that always says zero. Come back to this slide whenever a term is unclear.</p><p class="n-part">Presenting</p><p>Point back to this slide whenever a term comes up later. Ask someone to explain the difference between mAP50 and a threshold in their own words. Pitfall: do not read all ten definitions aloud.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>03</span></div>
+</section>
+
+<!-- ============ 4. SECTION: DATA BEFORE MODEL ============ -->
+<section class="slide section" aria-label="Section: Data before model">
+    <div class="slide-content" style="align-items:flex-start;">
+      <p class="tag reveal">Section 01</p>
+      <h2 class="reveal d1">Data before model</h2>
+      <div class="line-accent reveal d2"></div>
+    </div>
+  <div class="bottom-bar"><span>Training the model</span><span>04</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 1 covers the data before any model: what the open dataset contains, the trap hidden in its augmented copies, and how the images were re-split so that test photos are genuinely new to the model.</p><p class="n-part">Presenting</p><p>Ask who has read a dataset’s documentation closely before training on it. Set up the idea that data decisions come before model decisions.</p></aside>
+</section>
+
+<!-- ============ 5. THE DATASET ============ -->
+<section class="slide" aria-label="The dataset">
+  <div class="slide-content">
+    <p class="tag reveal">Open data · <a href="https://doi.org/10.5281/zenodo.20066074" target="_blank" rel="noopener">Deleña et al. · Zenodo</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></p>
+    <h2 class="reveal d1">A good dataset with fine print</h2>
+    <div class="grid g4 reveal d2">
+      <div class="card"><div class="stat">6,760</div><p class="muted small">training images in the published split</p></div>
+      <div class="card"><div class="stat">1,353</div><p class="muted small">distinct source photos behind them: about 5 augmented copies each</p></div>
+      <div class="card"><div class="stat">0</div><p class="muted small">pest-free images in any split</p></div>
+      <div class="card"><div class="stat">0/7,098</div><p class="muted small">metadata rows with capture date, place or trap filled in</p></div>
+    </div>
+    <p class="reveal d3 muted">Also noted: images were pre-stretched to 640×640, the labels are not documented as expert-checked, and one photo family appears in both the published train and test splits. None of this blocks training, but all of it goes on the model card.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The images come from an open dataset by Deleña et al., published on Zenodo under a CC BY 4.0 licence, which allows reuse with credit. It is a good dataset with fine print. The 6,760 published training images come from only 1,353 source photos, about five augmented (altered) copies each. No image is pest-free, and none of the 7,098 metadata rows records capture date, place or trap. Images were pre-stretched to 640×640, labels are not documented as expert-checked, and one photo family appears in both the published train and test splits. None of this blocks training, but all of it goes on the model card, <code>docs/model-card.md</code>.</p><p class="n-part">Presenting</p><p>Open <code>docs/model-card.md</code> and show where these caveats landed. Ask what a model trained only on photos with pests might do with an empty tray. Pitfall: do not present the dataset as flawed; it is good and open, with limits that must be recorded.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>05</span></div>
+</section>
+
+<!-- ============ 6. AUGMENTATION LEAKAGE ============ -->
+<section class="slide" aria-label="Augmentation leakage">
+  <div class="slide-content">
+    <p class="tag reveal">The trap</p>
+    <h2 class="reveal d1">Count families, not files</h2>
+    <div class="two-col reveal d2">
+      <div class="card">
+        <p class="small muted" style="margin-bottom:.5em">One source photo → about five augmented copies (some are greyscale). Each square is one file.</p>
+        <div class="fam" style="margin-bottom:.3em" role="img" aria-label="Five files from one source photo"><span style="--c:#2A7B9B"></span><span style="--c:#2A7B9B;--o:.8"></span><span style="--c:#2A7B9B;--o:.65"></span><span style="--c:#2A7B9B;--o:.5"></span><span style="--c:#6B6560"></span></div>
+        <div class="legend" style="margin-bottom:.8em"><span>copy 1</span><span>copy 2</span><span>copy 3</span><span>copy 4</span><span>greyscale copy</span></div>
+        <p class="small"><b>Split by file:</b> copies land in both train and test. The model has already seen the test photo, slightly altered. Scores go up; real skill doesn't.</p>
+        <p class="small" style="margin-top:.5em"><b>Split by family:</b> every copy of a photo stays on one side, so test photos come from source photos the model never trained on.</p>
+      </div>
+      <ul class="clean">
+        <li>Group files by the name before <code>_jpg.rf.</code></li>
+        <li>Then catch near-duplicates across families with a perceptual hash (dHash).</li>
+        <li>Keep <b>one copy per family</b> in validation and test.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Augmented copies are the trap. If files are split at random, copies of one photo land in both training and test, so the model is tested on a photo it has already seen, slightly altered. Scores go up; real skill does not. The fix is to split by family, so every copy of a source photo stays on one side. Files are grouped by the part of the name before <code>_jpg.rf</code>, near-duplicates across families are caught with a perceptual hash (dHash, a short image fingerprint), and validation and test keep one copy per family.</p><p class="n-part">Presenting</p><p>Ask: if a flipped copy of a test photo is in training, is the test still a test? Point out that the split must be checked, not assumed. Pitfall: do not treat the greyscale copies as different photos.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>06</span></div>
+</section>
+
+<!-- ============ 7. OUR SPLIT ============ -->
+<section class="slide" aria-label="Our split">
+  <div class="slide-content">
+    <p class="tag reveal">Re-split · 70 / 15 / 15 by family group · fixed seed</p>
+    <h2 class="reveal d1">5,453 images, zero leaked families</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Split</th><th class="num">Families</th><th class="num">Images</th><th>Rule</th></tr></thead>
+      <tbody>
+        <tr><td>Train</td><td class="num">1,179</td><td class="num">4,948</td><td class="muted">all augmented copies kept</td></tr>
+        <tr><td>Validation</td><td class="num">253</td><td class="num">253</td><td class="muted">one copy per family (197 of 253 are augmented copies); used to pick checkpoints and thresholds</td></tr>
+        <tr><td>Test</td><td class="num">252</td><td class="num">252</td><td class="muted">one copy per family (214 of 252 are augmented copies); one look per model, used by r18-1 (13 Oct) and r50-v5 (18 Oct), none left; the two challengers were scored on it post-hoc, for comparison only</td></tr>
+      </tbody>
+    </table>
+    <div class="grid g3 reveal d3">
+      <div class="card"><h3>Near-duplicate rule</h3><p class="muted small">dHash distance ≤ 1, the largest setting where no merged group holds more than 2% of families. Hashing every copy at distance 4 merged 46% of families into one group.</p></div>
+      <div class="card"><h3>Label fixes</h3><p class="muted small">516 images had polygon outlines instead of boxes; converted to boxes. 1 family dropped for a missing label.</p></div>
+      <div class="card"><h3>Checked by tests</h3><p class="muted small">No family or duplicate group in two splits; each image is checked against its recorded SHA-256 when extracted.</p></div>
+    </div>
+    <p class="reveal d3 muted small">Not perfect: 51 validation and 42 test families are still near neighbours (dHash distance ≤ 2) of a training family, and 3 close test pairs await a check by eye. The 2% rule protects the split; it does not define a duplicate.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The images were re-split 70/15/15 by family group with a fixed seed: 1,179 families (4,948 images) for training, 253 for validation and 252 for test, with one image per family in the last two. Validation picks checkpoints and thresholds; test is looked at once per model, and it has now been used twice under the rules (r18-1 on 13 October, r50-v5 on 18 October), so no looks remain. RF-DETR-M and D-FINE-L were also scored on it afterwards, by owner exception: post-hoc, for comparison only. Near-duplicates are families within dHash distance 1, the largest setting where no merged group holds more than 2% of families; hashing every copy at distance 4 had merged 46% of families into one group. Tests confirm no family crosses splits. The limits are stated: 51 validation and 42 test families are still near neighbours of a training family, and 3 close test pairs await a check by eye.</p><p class="n-part">Presenting</p><p>Open the near-duplicate tables in <code>docs/evaluation-record.md</code>. Ask why the 2% rule protects the split but does not define a duplicate. Pitfall: “zero leaked families” is not the same as “zero similar photos”; say so.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>07</span></div>
+</section>
+
+<!-- ============ 8. SECTION: MODEL AND TRAINING ============ -->
+<section class="slide section" aria-label="Section: Model and training">
+    <div class="slide-content" style="align-items:flex-start;">
+      <p class="tag reveal">Section 02</p>
+      <h2 class="reveal d1">Model and training</h2>
+      <div class="line-accent reveal d2"></div>
+    </div>
+  <div class="bottom-bar"><span>Training the model</span><span>08</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 2 covers the model and its training: why a pretrained RT-DETR detector was chosen, how the work was split between a laptop and a cloud GPU, and what the first training run showed.</p><p class="n-part">Presenting</p><p>Ask the room what they would check before spending GPU time on a training run.</p></aside>
+</section>
+
+<!-- ============ 9. WHY RT-DETR ============ -->
+<section class="slide" aria-label="Why RT-DETR">
+  <div class="slide-content">
+    <p class="tag reveal">Model choice</p>
+    <h2 class="reveal d1">Start from a model that already sees objects</h2>
+    <div class="grid g2 reveal d2">
+      <div class="card"><h3>RT-DETR-r18vd, then r50vd</h3><p class="muted">A transformer detector (Apache-2.0) pretrained on COCO, a general photo dataset with 80 everyday classes and no insects. Chosen to run on a laptop CPU; the current r50 model takes 1.14 s per photo there.</p></div>
+      <div class="card"><h3>Transfer learning</h3><p class="muted">Keep the pretrained backbone, which already knows edges, textures and shapes. Swap the 80-class output layer for a new 4-class one and train on trap photos.</p></div>
+      <div class="card"><h3>300 queries</h3><p class="muted">The model proposes up to 300 boxes per photo. A 100-box model would undercount trays of up to 106 insects.</p></div>
+      <div class="card"><h3>Pinned</h3><p class="muted">Exact model revision, dataset archive checksum, library versions and random seed are all recorded, so the run can be repeated.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The starting model is RT-DETR-r18vd, a transformer-based object detector under the Apache-2.0 licence, pretrained on COCO, a general photo dataset with 80 everyday classes and no insects. This is transfer learning: the pretrained backbone, which already recognises edges, textures and shapes, is kept, and the 80-class output layer is swapped for a new 4-class one trained on trap photos. The model proposes up to 300 boxes per photo, because a 100-box model would undercount trays of up to 106 insects. The first run used the small r18 backbone; later runs use the larger r50. RT-DETR was chosen to run on a laptop CPU, and the current model, r50-v5, takes a median 1.14 s per photo there, under the 5 s gate. Model revision, data checksum, library versions and seed are pinned so the run can be repeated.</p><p class="n-part">Presenting</p><p>Ask why 300 queries rather than 100. Likely question: why not train from scratch? Answer: the backbone already knows general shapes, so only the pest-specific part must be learned. Pitfall: the 1.14 s figure is a median of 10 photos on one reference laptop, not a guarantee for every machine.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>09</span></div>
+</section>
+
+<!-- ============ 10. TRAINING PIPELINE ============ -->
+<section class="slide" aria-label="Training pipeline">
+  <div class="slide-content">
+    <p class="tag reveal">Pipeline · built by an AI coding agent from a written spec and plan: plan, implement, run the tests, fix</p>
+    <h2 class="reveal d1">Laptop for logic, GPU for training</h2>
+    <div class="arch reveal d2">
+      <div class="lane"><h3>Laptop (CPU, tested)</h3>
+        <div class="node" style="--c:var(--color-actor-5)"><b>manifest.py</b> · families, dedup, split</div><div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-5)"><b>train.py</b> · loop, checkpoints, evaluate</div><div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-5)"><b>build_notebook.py</b> · writes the notebook</div></div>
+      <div class="lane"><h3>Colab (GPU)</h3>
+        <div class="node" style="--c:var(--color-actor-4)"><b>train_colab.ipynb</b> · generated, never hand-edited</div><div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-4)">download archive, verify checksums</div><div class="arrow">↓</div>
+        <div class="node" style="--c:var(--color-actor-4)">train 40–60 epochs, mixed precision</div></div>
+      <div class="lane"><h3>Google Drive</h3>
+        <div class="node" style="--c:var(--color-actor-2)"><b>last.pt</b> · resume after a disconnect</div>
+        <div class="node" style="--c:var(--color-actor-2)"><b>best.pt</b> · best validation score</div>
+        <div class="node" style="--c:var(--color-actor-2)"><b>history.jsonl</b> · one line per epoch</div></div>
+    </div>
+    <p class="reveal d3 muted small">Lesson from the first try: run the notebook in browser Colab. Mounting Drive from an editor connected to a Colab runtime failed with a connection reset.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>An AI coding agent built the pipeline from a written spec and plan, in a loop: plan, implement, run the tests, fix. The logic lives in a tested Python package on a laptop: <code>manifest.py</code> builds families, deduplicates and splits; <code>train.py</code> runs the training loop, checkpoints and evaluation; <code>build_notebook.py</code> writes the Colab notebook, which is generated and never hand-edited. On the GPU, the notebook verifies checksums and trains in mixed precision (60 epochs for r18-1, 40 for the later runs). Checkpoints on Google Drive (<code>last.pt</code>, <code>best.pt</code>, <code>history.jsonl</code>) survive disconnects. One lesson: run the notebook in browser Colab, because mounting Drive from an editor connected to a Colab runtime failed.</p><p class="n-part">Presenting</p><p>Show <code>build_notebook.py</code> and its <code>--check</code> mode, which confirms the notebook matches its source. Ask why nobody should edit code inside Colab. Pitfall: do not suggest the agent worked unsupervised; the spec, plan and tests came first.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>10</span></div>
+</section>
+
+<!-- ============ 11. TRAINING CURVE ============ -->
+<section class="slide" aria-label="Training curve">
+  <div class="slide-content">
+    <p class="tag reveal">Run r18-1 · A100 GPU (a T4 was planned) · 60 epochs</p>
+    <h2 class="reveal d1">Most learning happened in the first few epochs</h2>
+    <div class="reveal d2"><svg class="chart" viewBox="0 0 760 300" role="img" aria-label="Validation species mAP50 and training loss over 60 epochs">
+<line x1="104" x2="684" y1="260.0" y2="260.0" stroke="#EEEBE5"/><text x="96" y="264.0" text-anchor="end">0.60</text><line x1="104" x2="684" y1="180.0" y2="180.0" stroke="#EEEBE5"/><text x="96" y="184.0" text-anchor="end">0.70</text><line x1="104" x2="684" y1="100.0" y2="100.0" stroke="#EEEBE5"/><text x="96" y="104.0" text-anchor="end" style="fill:#B23A22;font-weight:600">gate 0.80</text><line x1="104" x2="684" y1="20.0" y2="20.0" stroke="#EEEBE5"/><text x="96" y="24.0" text-anchor="end">0.90</text><text x="692" y="264.0">3</text><text x="692" y="204.0">5</text><text x="692" y="144.0">7</text><text x="692" y="84.0">9</text><text x="692" y="24.0">11</text><text x="104.0" y="286" text-anchor="middle">0</text><text x="202.3" y="286" text-anchor="middle">10</text><text x="300.6" y="286" text-anchor="middle">20</text><text x="398.9" y="286" text-anchor="middle">30</text><text x="497.2" y="286" text-anchor="middle">40</text><text x="595.5" y="286" text-anchor="middle">50</text><text x="684.0" y="286" text-anchor="middle">59</text>
+<line x1="104" x2="684" y1="100.0" y2="100.0" stroke="#D94F30" stroke-dasharray="5 5" opacity="0.6"/>
+<polyline points="104.0,38.0 113.8,131.4 123.7,141.5 133.5,149.3 143.3,154.6 153.2,160.5 163.0,164.9 172.8,169.0 182.6,173.0 192.5,176.2 202.3,179.6 212.1,182.8 222.0,185.8 231.8,188.1 241.6,190.3 251.5,193.9 261.3,195.9 271.1,198.5 280.9,201.0 290.8,203.0 300.6,205.1 310.4,206.9 320.3,209.1 330.1,210.9 339.9,212.6 349.8,214.9 359.6,216.7 369.4,219.0 379.3,220.4 389.1,221.7 398.9,223.4 408.7,224.9 418.6,227.2 428.4,229.2 438.2,230.2 448.1,231.0 457.9,232.6 467.7,234.2 477.6,235.8 487.4,236.6 497.2,238.0 507.1,238.9 516.9,240.4 526.7,240.6 536.5,242.0 546.4,243.3 556.2,244.3 566.0,244.5 575.9,245.7 585.7,245.6 595.5,246.9 605.4,246.9 615.2,247.7 625.0,247.7 634.8,247.5 644.7,247.8 654.5,247.9 664.3,248.5 674.2,248.5 684.0,248.3" fill="none" stroke="#9E9790" stroke-width="2" stroke-dasharray="3 3"/>
+<polyline points="104.0,157.4 113.8,190.7 123.7,104.3 133.5,77.0 143.3,122.3 153.2,110.9 163.0,187.9 172.8,120.2 182.6,97.9 192.5,103.3 202.3,131.5 212.1,138.7 222.0,111.8 231.8,114.4 241.6,116.6 251.5,172.5 261.3,178.1 271.1,111.9 280.9,89.2 290.8,95.1 300.6,111.1 310.4,103.3 320.3,91.0 330.1,149.4 339.9,96.8 349.8,154.8 359.6,103.0 369.4,111.2 379.3,131.4 389.1,104.6 398.9,103.4 408.7,108.8 418.6,80.7 428.4,94.6 438.2,99.5 448.1,95.1 457.9,98.8 467.7,110.0 477.6,97.3 487.4,103.1 497.2,99.4 507.1,107.0 516.9,96.6 526.7,100.2 536.5,104.9 546.4,102.7 556.2,100.9 566.0,101.1 575.9,100.9 585.7,106.2 595.5,100.1 605.4,101.6 615.2,103.0 625.0,103.1 634.8,100.1 644.7,101.3 654.5,100.2 664.3,101.1 674.2,98.3 684.0,100.5" fill="none" stroke="#2A7B9B" stroke-width="3"/>
+<circle cx="133.5" cy="77.0" r="7" fill="#D94F30"/>
+<text x="145.5" y="69.0" style="fill:#B23A22;font-weight:600">best: epoch 3, 0.829</text>
+<text x="380" y="299" text-anchor="middle">epoch</text>
+<text transform="translate(16,140) rotate(-90)" text-anchor="middle">val species mAP50</text>
+<text transform="translate(750,140) rotate(90)" text-anchor="middle">train loss</text>
+</svg></div>
+    <p class="reveal d3 muted small">Blue line: validation species mAP50 (left axis). Grey dashed: training loss (right axis), which fell from 10.4 to 3.4 while the validation score stopped improving after epoch 3 and settled near 0.80. More epochs mostly fitted the training photos better.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Run r18-1 trained for 60 epochs on an A100 GPU, although a T4 had been planned. The blue line is validation species mAP50 (left axis); the grey dashed line is training loss (right axis). Training loss fell from 10.4 to 3.4, but the validation score peaked at 0.829 at epoch 3 and settled near 0.80. Most of the learning happened in the first few epochs. Later epochs mostly fitted the training photos better rather than improving on new ones, which is overfitting. The epoch-by-epoch values are in <code>docs/evaluation-record.md</code>.</p><p class="n-part">Presenting</p><p>Point out the gap: loss keeps falling while validation stops improving after epoch 3. Ask what you would change in the next run given this curve. Pitfall: do not compare the heights of the two lines; they use different axes.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>11</span></div>
+</section>
+
+<!-- ============ 12. SECTION: DID IT WORK? ============ -->
+<section class="slide section" aria-label="Section: Did it work?">
+    <div class="slide-content" style="align-items:flex-start;">
+      <p class="tag reveal">Section 03</p>
+      <h2 class="reveal d1">Did it work?</h2>
+      <div class="line-accent reveal d2"></div>
+    </div>
+  <div class="bottom-bar"><span>Training the model</span><span>12</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 3 asks whether the model worked. The answer turns on choosing the metric that matches the job, comparing against a model that does nothing, and keeping the test set for one honest look.</p><p class="n-part">Presenting</p><p>Before moving on, ask the room to guess whether the model passed. Keep the answer for the next slides.</p></aside>
+</section>
+
+<!-- ============ 13. TWO METRICS ============ -->
+<section class="slide" aria-label="Two metrics">
+  <div class="slide-content">
+    <p class="tag reveal">Pick the metric that matches the job</p>
+    <h2 class="reveal d1">Two metrics, two different questions</h2>
+    <div class="grid g2 reveal d2">
+      <div class="card"><h3>mAP50</h3><p class="muted">“If you sort all your boxes by confidence, do the real insects come first?” Uses every box, at every confidence. Measures <b>ranking</b>, averaged over classes. Needs a box to overlap a real insect by 50% (IoU ≥ 0.5).</p></div>
+      <div class="card"><h3>Count accuracy</h3><p class="muted">“Is the count per species within ±10% of the truth?” (±1 when fewer than 10.) Uses only boxes above a confidence <b>threshold</b>. This is what an app user sees.</p></div>
+    </div>
+    <p class="reveal d3 muted">A model can rank well and still count badly, if its threshold is wrong. That is exactly what happened.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Two metrics answer two different questions. mAP50 asks whether, when all boxes are sorted by confidence, the real insects come first; it uses every box at every confidence, averages over classes and needs a box to overlap an insect by at least half (IoU ≥ 0.5). Count accuracy asks whether the count per species is within ±10% of the truth, or ±1 when fewer than 10, and uses only boxes above a confidence threshold. That count is what an app user sees. A model can rank well and still count badly if its threshold is wrong, and that is exactly what happened here.</p><p class="n-part">Presenting</p><p>Make sure everyone can state the difference: mAP is about ranking, count accuracy is about a threshold. Ask which number someone reading the app would care about. Pitfall: do not call mAP50 “accuracy”.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>13</span></div>
+</section>
+
+<!-- ============ 14. TEST RESULT ============ -->
+<section class="slide" aria-label="Test result">
+  <div class="slide-content">
+    <p class="tag reveal">Run r18-1 · held-out test split · looked at once · threshold 0.5</p>
+    <h2 class="reveal d1">Good species ranking, no counts</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Test metric</th><th class="num">Result</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>Species mAP50</td><td class="num">0.835</td><td><span class="pill ok">≥ 0.80 met</span></td></tr>
+        <tr><td>Four-class mAP50</td><td class="num">0.720</td><td><span class="pill no">RBB male 0.638 and WSB female 0.618 below 0.70</span></td></tr>
+        <tr><td>Count accuracy</td><td class="num">0.456</td><td><span class="pill no">≥ 0.80 not met</span></td></tr>
+        <tr><td>Boxes kept at 0.5</td><td class="num">0</td><td class="muted">all 3,320 test insects missed</td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted">0.456 is not “almost half right”. It is exactly what a model that predicts nothing scores, because many photos hold just one insect and the ±1 tolerance lets an empty answer pass.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>On the held-out test split, looked at once at the specified threshold of 0.5, the model ranked species well: species mAP50 was 0.835, meeting the 0.80 gate. Four-class mAP50 was 0.720, with RBB male (0.638) and WSB female (0.618) below 0.70. But no box scored 0.5 or more, so all 3,320 test insects were missed. Count accuracy of 0.456 is not “almost half right”. It is exactly what a model that predicts nothing scores, because many photos hold just one insect and the ±1 tolerance lets an empty answer pass.</p><p class="n-part">Presenting</p><p>Lead with the headline: the model ranks insects well and counts none. Ask how 0.456 could come from a model that detected nothing. Pitfall: do not describe 0.456 as partial success.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>14</span></div>
+</section>
+
+<!-- ============ 15. THE BASELINE ============ -->
+<section class="slide" aria-label="The baseline">
+  <div class="slide-content">
+    <p class="tag reveal">Always print the do-nothing score</p>
+    <h2 class="reveal d1">Compare against a model that does nothing</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><div class="stat">46%</div><p class="muted small">of validation and test photos contain exactly one insect</p></div>
+      <div class="card"><div class="stat">0.474</div><p class="muted small">validation count accuracy for “always say zero”</p></div>
+      <div class="card"><div class="stat">60/60</div><p class="muted small">epochs where the trained model's validation count accuracy equalled that baseline</p></div>
+    </div>
+    <p class="reveal d3 muted">The training log showed this from epoch 0. The run was judged on mAP alone. Now every count result is printed beside the baseline, plus average error per species, bias, and error on crowded trays.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Always print the do-nothing score. On validation and test, 46% of photos contain exactly one insect, so “always say zero” scores 0.474 count accuracy on validation. The trained model’s validation count accuracy equalled that baseline in 60 of 60 epochs. The training log showed this from epoch 0, but the run was judged on mAP alone, and nothing printed the baseline beside it. Now every count result is printed beside the baseline, together with average error per species, bias and error on crowded trays.</p><p class="n-part">Presenting</p><p>Ask what the do-nothing score would be for a project the room knows. Pitfall: do not say the log hid the problem; it was visible from epoch 0, just never compared with a baseline.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>15</span></div>
+</section>
+
+<!-- ============ 16. AFTER THE FIRST RUN: REVIEW FIXES ============ -->
+<section class="slide" aria-label="Fixes after the first run">
+  <div class="slide-content">
+    <p class="tag reveal">After run r18-1 · one outside review (14 Oct) plus the agent's own review passes</p>
+    <h2 class="reveal d1">Treat training code like product code</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><h3>Silent maths failure</h3><p class="muted small">In half precision, the box-matching step could produce infinite costs. Fix: run the matcher and losses in full precision.</p></div>
+      <div class="card"><h3>Half-written checkpoint</h3><p class="muted small">A crash mid-save could corrupt <code>best.pt</code>. Fix: write to a temp file, then swap it in.</p></div>
+      <div class="card"><h3>Wrong resume</h3><p class="muted small">Resuming with changed settings would mix two experiments. Fix: fingerprint the config and data; refuse a mismatch.</p></div>
+      <div class="card"><h3>Lost randomness</h3><p class="muted small">Resume restarted the random streams. Fix: save and restore all random-number state.</p></div>
+      <div class="card"><h3>Flattering metric</h3><p class="muted small">Count accuracy alone hides a model that counts nothing. Fix: always report it beside the do-nothing baseline.</p></div>
+      <div class="card"><h3>Bad labels</h3><p class="muted small">NaN or infinite box coordinates could slip through. Fix: reject them on load.</p></div>
+    </div>
+    <p class="reveal d3 muted small">Timing matters: these fixes came after run r18-1, so r18-1 was trained without them. Run r50-1 (16–17 Oct) was their first GPU run.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>After run r18-1, one outside review on 14 October and the agent’s own review passes found six problems in the training code. Box matching in half precision could produce infinite costs, so the matcher and losses now run in full precision. A crash mid-save could corrupt <code>best.pt</code>, so saves now go to a temporary file first. Resuming with changed settings is refused by a fingerprint of the config and data, random-number state is saved and restored, count accuracy is reported beside the baseline, and labels with NaN or infinite coordinates are rejected. The fixes came after r18-1, so r18-1 was trained without them; run r50-1 (slide 24) was their first GPU run.</p><p class="n-part">Presenting</p><p>Ask which of the six problems a normal test suite would have caught first. Likely question: is training code really product code? Answer: it produces the model everyone relies on, so it gets the same review and tests. Pitfall: do not credit these fixes to r18-1’s results.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>16</span></div>
+</section>
+
+<!-- ============ 17. BASE VS FINE-TUNED ============ -->
+<section class="slide" aria-label="Base vs fine-tuned">
+  <div class="slide-content">
+    <p class="tag reveal">Run r18-1 · validation · 253 images · same evaluator as training</p>
+    <h2 class="reveal d1">All the skill came from fine-tuning</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Validation metric</th><th class="num">Base, untrained head (3 seeds)</th><th class="num">Fine-tuned</th></tr></thead>
+      <tbody>
+        <tr><td>Species mAP50</td><td class="num">0.001–0.007</td><td class="num"><b>0.829</b></td></tr>
+        <tr><td>Four-class mAP50</td><td class="num">0.001–0.003</td><td class="num"><b>0.704</b></td></tr>
+        <tr><td>Highest score on a photo</td><td class="num">0.71–0.82</td><td class="num">0.25</td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted">The untrained model is confidently random: its scores reach 0.82 on wrong boxes. Training taught the model <b>where</b> the insects are, and pushed every score under 0.25. The low scores came from training; slide 25 traces them to a bug in the training loss.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Was the skill learned, or was the model just undertrained? On the 253 validation images, the base model with an untrained 4-class head, scored under three random seeds, has species mAP50 of only 0.001–0.007; the fine-tuned model reaches 0.829. The untrained model is confidently random: its top scores reach 0.71–0.82 on wrong boxes. Training taught the model where the insects are, but pushed every score under 0.25. So the low scores came from training itself, not from too little training. Wave 2 found the cause: a bug in the training library’s loss (slide 25). With it fixed, the same recipe’s highest validation score rose from 0.31 to 0.94.</p><p class="n-part">Presenting</p><p>Ask why the untrained model has high scores but almost no mAP. Pitfall: do not read the low scores as a property of RT-DETR; they were a training bug, now fixed.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>17</span></div>
+</section>
+
+<!-- ============ 18. SCORES MEAN SOMETHING ============ -->
+<section class="slide" aria-label="Scores mean something">
+  <div class="slide-content">
+    <p class="tag reveal">Run r18-1 · validation · share of boxes that hit a real insect, by raw score</p>
+    <h2 class="reveal d1">Low scores, but in the right order</h2>
+    <div class="bars reveal d2"><div class="bar"><span class="v">&lt;1%</span><div class="fill" style="height:1%"></div><span class="x">0.01–0.02<br>n=18,354</span></div><div class="bar"><span class="v">14%</span><div class="fill" style="height:11%"></div><span class="x">0.02–0.04<br>n=3,458</span></div><div class="bar"><span class="v">65%</span><div class="fill hot" style="height:53%"></div><span class="x">0.04–0.06<br>n=1,329</span></div><div class="bar"><span class="v">81%</span><div class="fill" style="height:66%"></div><span class="x">0.06–0.10<br>n=1,065</span></div><div class="bar"><span class="v">94%</span><div class="fill" style="height:77%"></div><span class="x">0.10–0.15<br>n=534</span></div><div class="bar"><span class="v">91%</span><div class="fill" style="height:74%"></div><span class="x">0.15–0.20<br>n=85</span></div></div>
+    <p class="reveal d3 muted small">At a raw score of just 0.04–0.06, 65% of boxes are real insects. The model's ranking carries signal; its scores are on the wrong scale. Calibrated, a score of 0.05 would mean “about 5% likely”; here it means about 65%. Calibration can rescale that (next slide); the root cause, a bug in the training loss, came to light later (slide 25).</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>This chart groups validation boxes by raw score and shows the share that hit a real insect. Scores are low but in the right order: about 14% of boxes scoring 0.02–0.04 are real insects, 65% at 0.04–0.06, 81% at 0.06–0.10 and 94% at 0.10–0.15. The ranking carries signal, but the scores sit on the wrong scale: if calibrated, a score of 0.05 would mean about 5% likely, yet here it means about 65%. At the time, the team treated this mismatch as a calibration problem, which has a standard fix (next slide). Wave 2 later traced the low scores to a bug in the training library’s loss (slide 25); after the fix, raw scores are close to calibrated.</p><p class="n-part">Presenting</p><p>Ask whether a score of 0.05 should ever mean “probably an insect”. Pitfall: do not describe the low scores as a property of the model type; they were caused by a training bug.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>18</span></div>
+</section>
+
+<!-- ============ 19. CALIBRATION ============ -->
+<section class="slide" aria-label="Calibration">
+  <div class="slide-content">
+    <p class="tag reveal">Run r18-1 · Platt scaling: a 2-number curve from raw score to probability · fitted on validation · checked on 5 held-out folds</p>
+    <h2 class="reveal d1">Calibration fixes the scale, not the skill</h2>
+    <div class="grid g3 reveal d2">
+      <div class="card"><div class="stat">0.046</div><p class="muted small">raw score that now means “50% likely a real insect” (0.044–0.048 across folds)</p></div>
+      <div class="card"><div class="stat">0.092→0.019</div><p class="muted small">calibration error (average gap between score and hit rate), before and after</p></div>
+      <div class="card"><div class="stat">0.632</div><p class="muted small">r18-1's best validation count accuracy of any rule tried. The gate is 0.80.</p></div>
+    </div>
+    <table class="reveal d3">
+      <thead><tr><th>Counting rule (validation, held-out folds)</th><th class="num">Count accuracy</th><th class="num">WSB error, 30+ insects</th></tr></thead>
+      <tbody>
+        <tr><td>Threshold 0.5 (as specified)</td><td class="num">0.474</td><td class="num">44.4</td></tr>
+        <tr><td>Calibrated 50% (raw 0.046)</td><td class="num">0.597</td><td class="num">17.9</td></tr>
+        <tr><td>Best count threshold (raw 0.04)</td><td class="num">0.632</td><td class="num">15.8</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Platt scaling fits a two-number curve that maps raw scores to probabilities. It was fitted on validation and checked on five held-out folds (family-grouped subsets). A raw score of 0.046 now means “50% likely a real insect” (0.044–0.048 across folds), and calibration error, the average gap between score and hit rate, fell from 0.092 to 0.019. But calibration fixes the scale, not the skill. The best counting rule tried, a raw threshold of 0.04, reached 0.632 count accuracy, below the 0.80 gate, and crowded white stemborer trays were still miscounted by 15.8 insects on average.</p><p class="n-part">Presenting</p><p>Walk the table from top to bottom. Ask why a better scale cannot lift counts much above 0.632. Pitfall: do not present 0.04 as a fix; it was the demo threshold for r18-1 and r50-1 and held up on held-out folds. The current model, r50-v5, counts at 0.48.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>19</span></div>
+</section>
+
+<!-- ============ 20. CROWDED TRAYS ============ -->
+<section class="slide" aria-label="Crowded trays">
+  <div class="slide-content">
+    <p class="tag reveal">Run r18-1 · what calibration could not fix</p>
+    <h2 class="reveal d1">Crowded trays are the real problem</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Insects per photo</th><th class="num">Photos (WSB)</th><th class="num">Average count error, WSB</th><th class="num">Photos (RBB)</th><th class="num">Average count error, RBB</th></tr></thead>
+      <tbody>
+        <tr><td>1–9</td><td class="num">42</td><td class="num">2.3</td><td class="num">148</td><td class="num">0.8</td></tr>
+        <tr><td>10–29</td><td class="num">47</td><td class="num">6.3</td><td class="num">38</td><td class="num">2.7</td></tr>
+        <tr><td>30+</td><td class="num">18</td><td class="num"><b>15.8</b></td><td class="num">11</td><td class="num"><b>5.5</b></td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted">Validation, threshold 0.04. Both species are found on 97–99% of the photos where they occur, so the model rarely misses a species entirely. It misses individual insects when they crowd together. No threshold fixes that; it needs a better model. Later runs cut the 30+ stemborer error to 11.9 (r50-1) and 8.7 (r50-v5) on validation; on test, r50-v5&rsquo;s error is 4.87 on 23 photos. Crowded trays are still the weakest case.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The remaining failure is crowded trays. At threshold 0.04 on validation, the average white stemborer count error rises from 2.3 on photos with 1–9 insects to 6.3 at 10–29 and 15.8 at 30 or more; for rice black bug it rises from 0.8 to 2.7 to 5.5. Both species are found on 97–99% of the photos where they occur, so the model rarely misses a species entirely. It misses individual insects when they crowd together. No threshold fixes missed insects; that needs a better model. The later runs did improve it: the white stemborer error on the same 18 crowded photos fell to 11.9 with r50-1 and 8.7 with r50-v5, which tends to undercount them by about 4.6 insects. On the held-out test split, r50-v5’s 30+ stemborer error is 4.87 on 23 photos, lower than on validation, though with this few photos the difference may be the photos rather than the model. Crowded trays remain the weakest case.</p><p class="n-part">Presenting</p><p>Ask why lowering the threshold would not fix the 30+ row. Pitfall: do not confuse “finds the species” with “counts every insect”.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>20</span></div>
+</section>
+
+<!-- ============ 21. HOLDOUT DISCIPLINE ============ -->
+<section class="slide" aria-label="Holdout discipline">
+  <div class="slide-content">
+    <p class="tag reveal">Why we did not re-test</p>
+    <h2 class="reveal d1">Validation is for choices. Test is for one honest look.</h2>
+    <div class="grid g2 reveal d2">
+      <div class="card"><h3>Every choice used validation</h3><p class="muted">Checkpoint, threshold, calibration: all picked on validation photos only. Each look at the test set leaks a little of it into your decisions.</p></div>
+      <div class="card"><h3>The test look was saved</h3><p class="muted">r18-1's best validation result, 0.632, was already below the 0.80 gate, so re-testing could only confirm a failure. One further look was allowed, for a model that reaches 0.80 on validation. r50-1 (0.751) did not; three wave-2 models did. On 18 Oct it went to r50-v5, the model the rules had chosen: count accuracy 0.849 on test. No looks remain.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Validation is for choices; test is for one honest look. Every choice here, the checkpoint, the threshold and the calibration, was picked on validation photos only, because each look at the test set leaks a little of it into later decisions. The test set was not re-run after calibration. r18-1’s best validation result, 0.632, was already below the 0.80 gate, so a re-test could only confirm a failure. One further test look was allowed, and a written rule says it goes only to a model that reaches 0.80 count accuracy on validation. r50-1 (0.751) did not. Three wave-2 models did: RF-DETR-M (0.846), r50-v5 (0.834) and D-FINE-L (0.822). On 18 October the look went to r50-v5, the model the rules had already chosen, at its validation-chosen threshold of 0.48: count accuracy 0.849 on 252 test photos. The test set has now been seen twice and no looks remain: a later model needs a new held-out set such as field photos, and any public claim must say so. The two challengers were later scored on test by owner exception; those figures are post-hoc, for comparison only, and played no part in the choice.</p><p class="n-part">Presenting</p><p>Ask the room whether they would have re-run the test set. Likely question: is skipping the re-test less honest? Answer: r18-1’s one test result is reported on slide 14; spending a second look on a known failure would have left nothing for a model that might pass. r50-v5 was that model; its test result is on slide 27.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>21</span></div>
+</section>
+
+<!-- ============ 22. OUTSIDE COMPARISON ============ -->
+<section class="slide" aria-label="Outside comparison">
+  <div class="slide-content">
+    <p class="tag reveal">The <a href="https://doi.org/10.5281/zenodo.20066074" target="_blank" rel="noopener">dataset</a> ships its own detector benchmark</p>
+    <h2 class="reveal d1">Other models on the same photos</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Model</th><th class="num">Four-class mAP50</th><th class="num">Weakest class</th><th>Split</th></tr></thead>
+      <tbody>
+        <tr><td>YOLO11s / 12s / 26s (dataset authors, 20 epochs)</td><td class="num">0.86–0.87</td><td class="num">WSB female 0.69–0.72</td><td class="muted">authors' split</td></tr>
+        <tr><td>RT-DETR-r18vd, run r18-1 (validation)</td><td class="num">0.704</td><td class="num">WSB female 0.519</td><td class="muted">our family split</td></tr>
+        <tr><td>RT-DETR-r50vd, run r50-v5 (validation)</td><td class="num">0.861</td><td class="num">WSB female 0.826</td><td class="muted">our family split</td></tr>
+        <tr><td>RT-DETR-r50vd, run r50-v5 (test, 18 Oct)</td><td class="num">0.860</td><td class="num">RBB male 0.798</td><td class="muted">our family split</td></tr>
+        <tr><td>RF-DETR-M, wave 2 (validation)</td><td class="num">0.837</td><td class="num">WSB female 0.785</td><td class="muted">our family split</td></tr>
+        <tr><td>D-FINE-L, wave 2 (validation)</td><td class="num">0.848</td><td class="num">RBB male 0.777</td><td class="muted">our family split</td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted">Not a fair race: our split keeps copies of the same photo out of the test side, which should lower scores. The r18-1 gap was large enough to justify bigger models <b>on our split</b>; after the loss fix, r50-v5 is in the authors' range. White stemborer females were the hardest class for most models; for r50-v5 it is a near tie with RBB males on validation (0.826 and 0.829), and RBB males are its weakest class on test (0.798).</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The dataset ships its own detector benchmark. The dataset authors’ YOLO11s, YOLO12s and YOLO26s models, trained for 20 epochs, reach four-class mAP50 of 0.86–0.87 on the authors’ split; run r18-1 reaches 0.704 on validation in the family split. This is not a fair race: the family split keeps copies of the same photo out of the test side, which should lower scores. The r18-1 gap was large enough to justify trying bigger models on the family split. After the training-loss fix, run r50-v5 reaches 0.861, D-FINE-L 0.848 and RF-DETR-M 0.837 on validation, close to the authors’ 0.86–0.87; r50-v5 reaches 0.860 on the held-out test split. White stemborer females were the hardest class in the authors’ models, r18-1 and RF-DETR-M; in r50-v5 they (0.826) and RBB males (0.829) are almost tied on validation, and on test RBB males are its weakest class (0.798). D-FINE-L’s weakest class is RBB male (0.777).</p><p class="n-part">Presenting</p><p>Ask why a different split makes this comparison unfair. Pitfall: do not conclude that one model family is better; the numbers come from different splits, and no YOLO model was trained on the family split.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>22</span></div>
+</section>
+
+<!-- ============ 23. EXPORT TO ONNX ============ -->
+<section class="slide" aria-label="Export to ONNX">
+  <div class="slide-content">
+    <p class="tag reveal">Run r18-1 · from PyTorch to a portable file</p>
+    <h2 class="reveal d1">Two missing lines broke the export</h2>
+    <div class="two-col reveal d2">
+      <div class="code-block"><span class="c"># first export: 0 of 300 output rows matched PyTorch</span>
+torch.onnx.export(model, x, out, opset_version=<span class="n">17</span>)
+
+<span class="c"># fixed: trace the model as it runs in use</span>
+model.<span class="f">eval</span>()
+<span class="k">with</span> torch.<span class="f">no_grad</span>():
+    torch.onnx.export(model, x, out, opset_version=<span class="n">17</span>)</div>
+      <ul class="clean">
+        <li>In training mode, the traced graph froze values that should depend on the input.</li>
+        <li>A parity check compares ONNX and PyTorch on real photos: box overlap ≥ 0.99, score difference ≤ 0.001.</li>
+        <li>After the fix: 126 detections on 10 validation photos, all matched. File size 80.75 MB (r50-v5: 171.7 MB, 145 detections matched at threshold 0.48).</li>
+        <li>The check also reports how many detections it compared, so it cannot pass on zero boxes.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>To run outside PyTorch, the model is exported to ONNX, a portable model file format. The first export matched PyTorch on 0 of 300 output rows, because the model was traced in training mode, which froze values that should depend on the input. Adding <code>model.eval()</code> and <code>torch.no_grad()</code> fixed it. A parity check compares ONNX and PyTorch on real photos (box overlap ≥ 0.99, score difference ≤ 0.001). After the fix, all 126 detections on 10 validation photos matched, and the r18-1 file is 80.75 MB. The same check passes for the current model, r50-v5: 145 detections on 10 validation photos at its operating threshold of 0.48, with a 171.7 MB file. The check also reports how many detections it compared, so it cannot pass on zero boxes.</p><p class="n-part">Presenting</p><p>Show the two code blocks side by side. Ask why a check that compares zero boxes would still “pass”. Point to <code>tests/test_export_onnx.py</code>, which guards against the regression. Pitfall: parity covers 10 validation photos, not the full test split.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>23</span></div>
+</section>
+
+<!-- ============ RUN TWO ============ -->
+<section class="slide" aria-label="Run two: a bigger backbone">
+  <div class="slide-content">
+    <p class="tag reveal">Run r50-1 · Colab T4 · 40 epochs · 16–17 Oct · validation only</p>
+    <h2 class="reveal d1">Run two: a bigger backbone helped, and still fell short</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Validation</th><th class="num">r18-1</th><th class="num">r50-1</th></tr></thead>
+      <tbody>
+        <tr><td>Species mAP50 (best epoch)</td><td class="num">0.829</td><td class="num"><b>0.906</b></td></tr>
+        <tr><td>Four-class mAP50</td><td class="num">0.704</td><td class="num"><b>0.798</b></td></tr>
+        <tr><td>Count accuracy at 0.04, held-out folds (gate 0.80)</td><td class="num">0.632</td><td class="num"><b>0.751</b></td></tr>
+        <tr><td>Stemborer count error, trays with 30+</td><td class="num">15.8</td><td class="num"><b>11.9</b></td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted small">Two rules were written down before these numbers existed. Replace r18 if clearly better on crowded trays: met (better on 12 of 18 trays, worse on 4; 95% bootstrap interval for the gain 0.4 to 7.6 insects per tray). Spend the remaining test look only if counts reach 0.80: not met, so it stayed unspent. r50 still peaked early (epoch 4 of 40, counting from 0 as on the training-curve slide) and then fell back; training photos that repeat with no augmentation fit that pattern. The next run found a bigger cause.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Run r50-1 used a bigger backbone, RT-DETR-r50, for 40 epochs on a Colab T4, and was judged on validation only. It beat r18-1 on every row: species mAP50 0.906 against 0.829, four-class 0.798 against 0.704, count accuracy 0.751 against 0.632, and crowded-tray stemborer error 11.9 against 15.8. Two rules were written down before these numbers existed. The replacement rule was met: r50-1 was better on 12 of 18 crowded trays and worse on 4. The test-look rule was not met, so the one remaining test look stayed unspent. r50-1 still peaked early (epoch 4, counting from 0 as for r18-1) and then overfitted, probably because the training photos repeat with no augmentation.</p><p class="n-part">Presenting</p><p>Stress that the rules were fixed before the analysis, so the result could not be argued into a pass. Likely question: was the gain due to size alone? Answer: not provable; the run also changed batch size and schedule. r50-1 was the demo and workshop model, at the same 0.04 threshold, until r50-v5 replaced it on 17 October (next slide).</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>24</span></div>
+</section>
+
+<!-- ============ RUN THREE ============ -->
+<section class="slide" aria-label="Run three: the low scores were a library bug">
+  <div class="slide-content">
+    <p class="tag reveal">Wave 2 · Colab T4 · 40 epochs each · 17 Oct · validation, plus one test row (18 Oct)</p>
+    <h2 class="reveal d1">Run three: the low scores were a library bug</h2>
+    <p class="reveal d2 small">transformers 4.57.6 put RT-DETR&rsquo;s 100 training-only denoising queries into its main loss, which pushed real scores down. Version 5.18 <a href="https://github.com/huggingface/transformers/pull/48528" target="_blank" rel="noopener">fixed it</a>. The same r50 recipe on 5.20.1 is run r50-v5; RF-DETR-M and D-FINE-L are challengers.</p>
+    <table class="reveal d2">
+      <thead><tr><th>Validation unless stated</th><th class="num">r50-1</th><th class="num">r50-v5</th><th class="num">RF-DETR-M</th><th class="num">D-FINE-L</th></tr></thead>
+      <tbody>
+        <tr><td>Highest score on any photo</td><td class="num">0.31</td><td class="num"><b>0.94</b></td><td class="num">0.95</td><td class="num">0.96</td></tr>
+        <tr><td>Count threshold chosen on validation</td><td class="num">0.04</td><td class="num"><b>0.48</b></td><td class="num">0.44–0.48</td><td class="num">0.48–0.50</td></tr>
+        <tr><td>Count accuracy, held-out folds (gate 0.80)</td><td class="num">0.751</td><td class="num"><b>0.834</b></td><td class="num">0.846</td><td class="num">0.822</td></tr>
+        <tr><td>Sex classes below 0.70 mAP50</td><td class="num">1 of 4</td><td class="num"><b>0 of 4</b></td><td class="num">0 of 4</td><td class="num">0 of 4</td></tr>
+        <tr><td>Stemborer count error, trays with 30+</td><td class="num">11.9</td><td class="num"><b>8.7</b></td><td class="num">9.6</td><td class="num">8.6</td></tr>
+        <tr><td>Count accuracy, test split (252 photos)</td><td class="num muted">not tested</td><td class="num"><b>0.849</b></td><td class="num">0.806*</td><td class="num">0.833*</td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted small">Rules fixed beforehand. r50-v5 replaces r50-1 if clearly better on crowded trays: met (better on 12 of 18, worse on 5; 95% interval for the gain 0.2 to 7.2 insects per tray). A challenger must then clearly beat r50-v5: RF-DETR-M did not (interval from 0.7 better to 3.1 worse), though it passes the ship gates (122.0 MB, 0.33 s per photo); nor did D-FINE-L (0.822, below 0.834). r50-v5 stays the demo model: it counts at 0.48 and flags photos with a counted box below 0.64 (about 74% likely real) for review. On validation it undercounts crowded trays by about 4.6 insects. The one test look went to r50-v5 on 18 Oct: 0.849. *Challenger test figures are post-hoc, comparison only; they played no part in the choice.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Before wave 2, the low scores were treated as a calibration problem, and a review of run r50-1 guessed they came from how RT-DETR&rsquo;s loss treats small boxes. That guess was inferred from the library&rsquo;s design, never measured, and it was wrong. The cause was a bug in transformers 4.57.6: the main loss included the 100 denoising queries, which exist only during training, so box matching could pair real targets with those training-only queries. It was fixed in 5.18. Re-running the same r50 recipe on 5.20.1 (run r50-v5) lifts the highest validation score from 0.31 to 0.94, moves the count-optimal threshold from 0.04 to 0.48, and raises held-out count accuracy from 0.751 to 0.834, above the 0.80 gate on validation. All four sex classes now clear 0.70. Both comparison rules were written before the results. r50-v5 beat r50-1 on crowded trays (better on 12 of 18, worse on 5). RF-DETR-M counted slightly better overall (0.846) but did not clearly beat r50-v5 on crowded trays, so r50-v5 leads; RF-DETR-M still passes the ship gates (122.0 MB file, 0.33 s per photo). r50-v5 replaced r50-1 as the demo and workshop model on 17 October. It counts boxes scoring 0.48 or more and flags a photo for review when a counted box scores below 0.64, which calibrates to about 74% likely to be a real insect. It tends to undercount crowded trays by about 4.6 insects. D-FINE-L finished on 17 October and did not meet the rule either: its held-out count accuracy, 0.822, is below r50-v5’s 0.834, and on crowded trays it tied (8.56 against 8.67), so r50-v5 stays. The single test look then went to r50-v5 on 18 October, at 0.48 on 252 test photos: count accuracy 0.849 (do-nothing baseline 0.456), species mAP50 0.943 and every sex class above 0.70, so it meets all three model gates on test. At the owner’s request the two challengers were scored on test afterwards, RF-DETR-M at 0.806 and D-FINE-L at 0.833 count accuracy; that is post-hoc, for comparison only, and was not used to choose the model.</p><p class="n-part">Presenting</p><p>The lesson is that an explanation inferred from a library&rsquo;s design is a hypothesis, not a finding: calibration made the scores honest but treated a symptom. Ask what check would have caught the bug earlier; one answer is reading the loss code against the paper. Likely question: has the test set been used? Twice: once for r18-1 and once for r50-v5, so no looks remain. Pitfall: only r50-v5’s test figure is a pre-registered test look; do not rank models on the challengers’ post-hoc test figures. RF-DETR-M counted best on validation and worst on test, a reminder that a few points between these models are within run-to-run and split-to-split variation.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>25</span></div>
+</section>
+
+<!-- ============ 24. SECTION: WHERE IT STANDS ============ -->
+<section class="slide section" aria-label="Section: Where it stands">
+    <div class="slide-content" style="align-items:flex-start;">
+      <p class="tag reveal">Section 04</p>
+      <h2 class="reveal d1">Where it stands</h2>
+      <div class="line-accent reveal d2"></div>
+    </div>
+  <div class="bottom-bar"><span>Training the model</span><span>26</span></div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Section 4 sets out where the model stands against its ship gates, what comes next, and the habits worth taking from this case study into your own projects.</p><p class="n-part">Presenting</p><p>Ask the room whether they would ship this model for real use, and what evidence would change their answer.</p></aside>
+</section>
+
+<!-- ============ 25. STATUS ============ -->
+<section class="slide" aria-label="Status">
+  <div class="slide-content">
+    <p class="tag reveal">Ship gates from the model spec</p>
+    <h2 class="reveal d1">Model gates met on test; still a demo model</h2>
+    <table class="reveal d2">
+      <thead><tr><th>Gate</th><th>Result</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Species mAP50 ≥ 0.80 (test)</td><td>r50-v5 0.943 on test (validation 0.937; r18-1 0.835 on test)</td><td><span class="pill ok">met on test</span></td></tr>
+        <tr><td>Count accuracy ≥ 0.80</td><td>r50-v5 0.849 on test at 0.48 (do-nothing 0.456; validation 0.834)</td><td><span class="pill ok">met on test</span></td></tr>
+        <tr><td>Each sex class ≥ 0.70 mAP50</td><td>r50-v5 on test: all 4 met, lowest 0.798 (RBB male)</td><td><span class="pill ok">met on test</span></td></tr>
+        <tr><td>ONNX file ≤ 200 MB</td><td>r50-v5 171.7 MB</td><td><span class="pill ok">met</span></td></tr>
+        <tr><td>ONNX matches PyTorch</td><td>r50-v5: met on 10 validation photos</td><td><span class="pill wait">sample only</span></td></tr>
+        <tr><td>CPU latency ≤ 5 s per photo</td><td>r50-v5 1.14 s, laptop CPU</td><td><span class="pill ok">met</span></td></tr>
+        <tr><td>Weights</td><td>published on Kaggle (18 Oct) as a teaching demo</td><td><span class="pill ok">met</span></td></tr>
+      </tbody>
+    </table>
+    <p class="reveal d3 muted small">Model gates only; app gates are in the demo-app deck. Test: 252 photos, one look (18 Oct); the split has now had both its rule-based looks, plus a post-hoc comparison of the two challengers, so a later model needs a new held-out set, such as field photos. Field validation on phone photos and a data-protection review are still open.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>The model spec sets ship gates. r50-v5 had the single pre-registered test look on 18 October, at its validation-chosen threshold of 0.48 on 252 test photos, and meets all three model quality gates there. Species mAP50 is 0.943 on test (0.937 on validation; r18-1 scored 0.835 on test). Count accuracy is 0.849 on test against a gate of 0.80, where a model that predicts nothing scores 0.456 (0.834 on validation). All four sex classes clear 0.70 on test: RBB female 0.894, RBB male 0.798, WSB female 0.874 and WSB male 0.876. The 171.7 MB ONNX file is under the 200 MB limit, ONNX matches PyTorch on a 10-photo sample, and a photo takes 1.14 s on a laptop CPU. The weights are published on Kaggle as a teaching demo, one variation per model, each with its manifest and card. The test split has now had both its rule-based looks, by r18-1 and r50-v5, plus a post-hoc comparison of the two challengers, so no looks remain; a later model needs a new held-out set, such as field photos. The release gates for real counts (field validation on phone photos and a data-protection review) are still open, so r50-v5 stays a demo model.</p><p class="n-part">Presenting</p><p>Open <code>docs/model-card.md</code> to show how the status is stated publicly. Ask which open gate looks cheapest to close. Pitfall: do not call r50-v5 ready; meeting the model gates on test makes it a stronger demo model, not a field-ready one, and it stays exploratory until a field check on phone photos. App gates are in the demo-app deck.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>27</span></div>
+</section>
+
+<!-- ============ 26. TAKEAWAYS ============ -->
+<section class="slide" aria-label="Takeaways">
+  <div class="slide-content">
+    <p class="tag reveal">For workshop participants</p>
+    <h2 class="reveal d1">Six habits from one model</h2>
+    <ul class="clean reveal d2">
+      <li><b>Count families, not files.</b> Augmented copies across splits push every score up.</li>
+      <li><b>Match the metric to the job.</b> mAP measures ranking; the app needs counts.</li>
+      <li><b>Print the do-nothing baseline</b> next to every number.</li>
+      <li><b>Look at the raw outputs, then test the explanation.</b> A maximum score of 0.25 explained the zero counts; the cause turned out to be a library bug.</li>
+      <li><b>Validation for choices, test for one look.</b> Don't spend the test set on a known failure.</li>
+      <li><b>Review and test training code</b> like any other code: plan, implement, run the tests, fix. The agent drafted it; tests and a reviewer caught its bugs.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Six habits come out of this one model. Count families, not files, because augmented copies across splits push every score up. Match the metric to the job: mAP measures ranking, and the app needs counts. Print the do-nothing baseline next to every number. Look at the raw outputs, then test the explanation: a maximum score of 0.25 explained the zero counts, and the cause turned out to be a bug in the training library, not the model. Use validation for choices and the test set for one look. Review and test training code like any other code; the agent drafted it, and tests and a reviewer caught its bugs.</p><p class="n-part">Presenting</p><p>Ask which habit the room would have skipped; the baseline is the step most easily skipped. Pitfall: every habit applies equally to working professionals; say so.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>28</span></div>
+</section>
+
+<!-- ============ 27. SOURCES ============ -->
+<section class="slide" aria-label="Sources">
+  <div class="slide-content">
+    <p class="tag reveal">Sources and licences</p>
+    <h2 class="reveal d1">Credits</h2>
+    <ul class="clean reveal d2 small">
+      <li><b>Data:</b> Deleña, R.; Balleras, G.; Dequiña, B. J.; Jumawan, R.; Flores, C. <i>Annotated light-trap rice pest image dataset with detector-derived region-of-interest crops for species-sex recognition of rice black bug and white stemborer.</i> Version 1. Zenodo. <a href="https://doi.org/10.5281/zenodo.20066074" target="_blank" rel="noopener">doi:10.5281/zenodo.20066074</a>. <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Changes: images and labels regrouped into new train, validation and test splits.</li>
+      <li><b>Base models:</b> <a href="https://huggingface.co/PekingU/rtdetr_r18vd" target="_blank" rel="noopener"><code>PekingU/rtdetr_r18vd</code></a>, <a href="https://huggingface.co/PekingU/rtdetr_r50vd" target="_blank" rel="noopener"><code>PekingU/rtdetr_r50vd</code></a> and <a href="https://huggingface.co/Roboflow/rf-detr-medium" target="_blank" rel="noopener"><code>Roboflow/rf-detr-medium</code></a> on Hugging Face, Apache-2.0. D-FINE-L starts from <a href="https://huggingface.co/ustc-community/dfine-large-coco" target="_blank" rel="noopener"><code>ustc-community/dfine-large-coco</code></a> (COCO-only weights). RT-DETR: Zhao et al., <a href="https://arxiv.org/abs/2304.08069" target="_blank" rel="noopener">“DETRs Beat YOLOs on Real-time Object Detection”</a>, CVPR 2024.</li>
+      <li><b>Benchmark rows:</b> the <a href="https://doi.org/10.5281/zenodo.20066074" target="_blank" rel="noopener">dataset's</a> own <code>06_benchmark_tables/yolo/</code> results.</li>
+      <li><b>Numbers:</b> <a href="../evaluation-record.md" target="_blank" rel="noopener"><code>docs/evaluation-record.md</code></a> in the rice-pest-detector repository. Training runs r18-1 (13 Oct 2026), r50-1 (16–17 Oct 2026) and wave 2 (17 Oct 2026); r50-v5 test look 18 Oct 2026; analysis 14–18 Oct 2026.</li>
+      <li><b>AI use:</b> Claude Code (Anthropic) drafted most of the code, tests, training notebook, analysis and these slides under the project owner's direction. The owner approved every design and plan and ran the model training. The detector itself, RT-DETR, is a conventional object detector, not a language model.</li>
+    </ul>
+    <p class="reveal d3 muted small">For research, training and evaluation only. Not validated for field pest surveillance.</p>
+  </div>
+  <aside class="notes"><p class="n-part">About this slide</p><p>Credits and licences. The data is from Deleña et al. on Zenodo under CC BY 4.0, regrouped into new splits, and that credit must travel with any reuse. The base models are <code>PekingU/rtdetr_r18vd</code>, <code>PekingU/rtdetr_r50vd</code> and <code>Roboflow/rf-detr-medium</code> (all Apache-2.0); D-FINE-L starts from <code>ustc-community/dfine-large-coco</code>; RT-DETR is described by Zhao et al. at CVPR 2024. Numbers come from <code>docs/evaluation-record.md</code>. Claude Code drafted most of the code, tests, notebook, analysis and slides under the project owner’s direction; the owner approved every design and plan and ran the training. RT-DETR itself is a conventional object detector, not a language model. The model is not validated for field pest surveillance.</p><p class="n-part">Presenting</p><p>Point out that the CC BY 4.0 credit must travel with any reuse of the data. Ask what an AI-use statement for their own work would need to say. Pitfall: do not suggest the agent ran the training; the owner did.</p></aside>
+  <div class="bottom-bar"><span>Training the model</span><span>29</span></div>
+</section>
+
+</main>
+
+<script>
+/* ===== SlidePresentation: keyboard, touch, wheel nav; progress bar; nav dots; reveal-on-view ===== */
+class SlidePresentation {
+  constructor() {
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.progress = document.querySelector('.progress');
+    this.dots = document.querySelector('.dots');
+    this.wheelLock = false;
+    this.init();
+  }
+  init() {
+    this.buildDots();
+    this.setupIntersectionObserver();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.update(0);
+  }
+  buildDots() {
+    this.slides.forEach((s, i) => {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', `Go to slide ${i + 1}: ${s.getAttribute('aria-label') || ''}`);
+      b.addEventListener('click', () => this.goTo(i));
+      this.dots.appendChild(b);
+    });
+  }
+  setupIntersectionObserver() {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          this.update(this.slides.indexOf(e.target));
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach((s) => io.observe(s));
+  }
+  setupKeyboardNav() {
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+      if (e.key === 'Home') { e.preventDefault(); this.goTo(0); }
+      if (e.key === 'End') { e.preventDefault(); this.goTo(this.slides.length - 1); }
+    });
+  }
+  setupTouchNav() {
+    let y0 = null;
+    document.addEventListener('touchstart', (e) => { y0 = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      if (y0 === null) return;
+      const dy = y0 - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 50) (dy > 0 ? this.next() : this.prev());
+      y0 = null;
+    }, { passive: true });
+  }
+  setupWheelNav() {
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (this.wheelLock || Math.abs(e.deltaY) < 12) return;
+      this.wheelLock = true;
+      (e.deltaY > 0 ? this.next() : this.prev());
+      setTimeout(() => { this.wheelLock = false; }, 650);
+    }, { passive: false });
+  }
+  goTo(i) {
+    const idx = Math.max(0, Math.min(this.slides.length - 1, i));
+    this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+    this.update(idx);
+  }
+  next() { this.goTo(this.current + 1); }
+  prev() { this.goTo(this.current - 1); }
+  update(i) {
+    this.current = i;
+    this.progress.style.width = `${((i + 1) / this.slides.length) * 100}%`;
+    Array.from(this.dots.children).forEach((d, j) => d.classList.toggle('active', j === i));
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const deck = new SlidePresentation();
+  const params = new URLSearchParams(location.search);
+  /* Deep link: ?slide=12 opens slide 12 (1-based). */
+  if (params.has('slide')) {
+    const i = parseInt(params.get('slide'), 10) - 1;
+    deck.slides.forEach((s) => s.classList.add('visible'));
+    document.documentElement.style.scrollBehavior = 'auto';  /* jump, don't animate */
+    deck.slides[Math.max(0, i)].scrollIntoView({ behavior: 'instant', block: 'start' });
+    document.documentElement.style.scrollBehavior = '';
+    deck.update(Math.max(0, i));
+  }
+  /* QA hook: ?slide=N&solo renders only slide N (clean headless screenshots, no scrolling). */
+  if (params.has('solo') && params.has('slide')) {
+    const keep = parseInt(params.get('slide'), 10) - 1;
+    deck.slides.forEach((s, j) => { if (j !== keep) s.style.display = 'none'; });
+  }
+  /* QA hook: ?check lists slides whose content overflows the viewport (used by headless checks). */
+  if (params.has('check')) {
+    const bad = deck.slides.map((s, i) => {
+      const c = s.querySelector('.slide-content');
+      return c.scrollHeight > c.clientHeight + 1 || c.scrollWidth > c.clientWidth + 1 ? i + 1 : null;
+    }).filter((x) => x !== null);
+    const pre = document.createElement('pre');
+    pre.id = 'overflow-report';
+    pre.textContent = `OVERFLOW:${innerWidth}x${innerHeight}:${bad.join(',') || 'none'}`;
+    document.body.appendChild(pre);
+  }
+});
+</script>
+<div id="notes-panel" role="region" aria-label="Speaker notes"></div>
+<script>
+/* Speaker notes: press N to show or hide the notes for the slide in view. */
+(() => {
+  const panel = document.getElementById('notes-panel');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const current = () => slides.reduce((best, s) => Math.abs(s.getBoundingClientRect().top) < Math.abs(best.getBoundingClientRect().top) ? s : best, slides[0]);
+  const render = () => {
+    const s = current(); const n = s.querySelector('aside.notes');
+    panel.innerHTML = '<b>Notes · slide ' + (slides.indexOf(s) + 1) + '</b>' + (n ? n.innerHTML : 'No notes for this slide.');
+  };
+  document.addEventListener('keydown', (e) => { if (e.key === 'n' || e.key === 'N') { panel.classList.toggle('open'); render(); } });
+  document.addEventListener('scroll', () => { if (panel.classList.contains('open')) render(); }, { passive: true });
+  /* ?notes opens the panel on load (reading the deck alone, or headless checks). */
+  if (new URLSearchParams(location.search).has('notes')) window.addEventListener('load', () => { panel.classList.add('open'); render(); });
+})();
+</script>
+<div id="notes-sheet" aria-label="All speaker notes"></div>
+<script>
+/* Shift+N: every slide's notes on one printable page (press Shift+N again to return). */
+(() => {
+  const sheet = document.getElementById('notes-sheet');
+  const build = () => {
+    const items = Array.from(document.querySelectorAll('.slide')).map((s, i) => {
+      const h = s.querySelector('h1, h2'); const n = s.querySelector('aside.notes');
+      return '<div class="ns-item"><h2>' + (i + 1) + '. ' + (h ? h.textContent : '') + '</h2>' + (n ? n.innerHTML : '') + '</div>';
+    });
+    sheet.innerHTML = '<h1>' + document.title + ': notes</h1>' + items.join('');
+  };
+  document.addEventListener('keydown', (e) => { if (e.key === 'N' && e.shiftKey) { build(); document.body.classList.toggle('notes-sheet'); window.scrollTo(0, 0); } });
+})();
+</script>
+</body>
+</html>

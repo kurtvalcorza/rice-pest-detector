@@ -1,0 +1,56 @@
+Rice-Pest Detector
+Copyright 2026 Kurt Valcorza. Licensed under the Apache License, Version 2.0 (see LICENSE).
+Slide decks in docs/presentations/ are licensed CC BY 4.0.
+
+This repository includes or adapts the following third-party work.
+
+1. Pillow image resampling (app/lib/inference/preprocess.dart)
+   The app's bilinear resize is a Dart port of Pillow's libImaging/Resample.c,
+   so that on-device preprocessing matches the Python reference byte for byte.
+   Pillow licence notice, reproduced as its licence requires:
+
+   The Python Imaging Library (PIL) is
+
+       Copyright © 1997-2011 by Secret Labs AB
+       Copyright © 1995-2011 by Fredrik Lundh and contributors
+
+   Pillow is the friendly PIL fork. It is
+
+       Copyright © 2010 by Jeffrey A. Clark and contributors
+
+   Like PIL, Pillow is licensed under the open source MIT-CMU License:
+
+   By obtaining, using, and/or copying this software and/or its associated
+   documentation, you agree that you have read, understood, and will comply
+   with the following terms and conditions:
+
+   Permission to use, copy, modify and distribute this software and its
+   documentation for any purpose and without fee is hereby granted,
+   provided that the above copyright notice appears in all copies, and that
+   both that copyright notice and this permission notice appear in supporting
+   documentation, and that the name of Secret Labs AB or the author not be
+   used in advertising or publicity pertaining to distribution of the software
+   without specific, written prior permission.
+
+   SECRET LABS AB AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+   SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS.
+   IN NO EVENT SHALL SECRET LABS AB OR THE AUTHOR BE LIABLE FOR ANY SPECIAL,
+   INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+   OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
+
+2. RT-DETR base models (used at training time; no weights are included here)
+   PekingU/rtdetr_r50vd (current demo model) and PekingU/rtdetr_r18vd on Hugging Face,
+   Apache License 2.0.
+
+3. Hugging Face transformers (training and export code depends on it)
+   Apache License 2.0.
+
+4. Dataset (labels and split manifests in data/ are derived from it; no images are included)
+   Deleña, R.; Balleras, G.; Dequiña, B. J.; Jumawan, R.; Flores, C. Annotated light-trap rice pest
+   image dataset with detector-derived region-of-interest crops for species-sex recognition of rice
+   black bug and white stemborer. Version 1. Zenodo. doi:10.5281/zenodo.20066074.
+   Licence: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Changes: see data/README.md.
+
+Flutter package licences are listed at runtime on the app's licence page.

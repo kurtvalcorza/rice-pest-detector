@@ -1,0 +1,101 @@
+# Setup: what to install
+
+What you install depends on what you want to do. Find your row, install what it lists and skip the rest. Nothing needs admin rights except where noted. Install commands for Windows (winget), macOS (Homebrew) and Ubuntu (apt) are in the README, "Setup".
+
+| I want to… | Install | Time |
+| :-- | :-- | :-- |
+| Read the slides and the docs | A web browser | none |
+| Take part in the 2-hour session | Git, a coding agent, `uv` and Spec Kit. See [workshop-setup.md](workshop-setup.md) | about 15 min |
+| Run the Python tests and tools | Git, Python 3.12, the packages in `requirements.txt` | about 15 min |
+| Train a model | A Google account and a browser; training runs on Google Colab | none locally |
+| Export a model to ONNX, check parity, calibrate | Everything in the row "Run the Python tests and tools" | as above |
+| Run the demo app on an emulator | Flutter, Android Studio with the Android SDK and an emulator | 1–2 hours the first time |
+
+**Required for the 2-hour session:** Git and a clone of this repository; a coding agent you are allowed to use, set up safely; a terminal and an empty practice folder; and [uv](https://docs.astral.sh/uv/getting-started/installation/) with [Spec Kit](https://github.com/github/spec-kit) for Exercise 2. [workshop-setup.md](workshop-setup.md) walks through each one.
+
+**Optional**, each for one task:
+
+| To… | Install |
+| :-- | :-- |
+| Run the tests and tools | [Python 3.12](https://www.python.org/downloads/), then `pip install -r requirements.txt` |
+| Run the demo app | [Flutter](https://docs.flutter.dev/get-started/install), [Android Studio](https://developer.android.com/studio) and an Android emulator |
+| Run the training notebooks | A [Google Colab](https://colab.research.google.com) account (you sign in with a Google account) |
+| Let an agent work with the repository on GitHub | The [GitHub CLI](https://cli.github.com) (`gh`) or the [GitHub MCP server](https://github.com/github/github-mcp-server) |
+| Let an agent run the Colab notebooks | The [Colab MCP server](https://github.com/googlecolab/colab-mcp), which connects a local agent to a Colab session in your browser |
+
+None of these needs the trained weights. They are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector), and the demo app can download r50-v5 itself.
+
+## Git
+
+Download from [git-scm.com/downloads](https://git-scm.com/downloads), then:
+
+```bash
+git clone https://github.com/kurtvalcorza/rice-pest-detector.git
+cd rice-pest-detector
+```
+
+## Python tools and tests
+
+**Python 3.12** exactly: `pyproject.toml` requires `>=3.12,<3.13`. Download it from [python.org/downloads](https://www.python.org/downloads/). On Windows, tick "Add python.exe to PATH" on the installer's first screen. Check with `python --version`.
+
+Then make a virtual environment and install the packages:
+
+```powershell
+# Windows (PowerShell)
+python -m venv .venv
+.\.venv\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+.\.venv\Scripts\python -m pip install -r requirements.txt
+.\.venv\Scripts\python -m pytest
+```
+
+```bash
+# macOS or Linux
+python3.12 -m venv .venv
+.venv/bin/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pytest
+```
+
+The `torch` line installs the CPU build of PyTorch, which is much smaller than the default one; the tests and tools do not need the larger default build. `requirements.txt` lists every package and the versions the repository was tested with:
+
+| Package | Needed for |
+| :-- | :-- |
+| numpy, pillow | Everything: image loading, preprocessing, metrics |
+| torch, transformers 5.20.1, scipy, pycocotools | Loading checkpoints, evaluation (COCO mAP), ONNX export. transformers must be 5.18 or later: earlier versions have a training-loss bug for RT-DETR and D-FINE (see the evaluation record) |
+| onnx, onnxruntime | ONNX export, PyTorch–ONNX parity, calibration and threshold tools |
+| pytest, ruff, nbformat | Tests, lint, the notebook generator |
+
+`pyproject.toml` is the source of truth; `requirements.txt` mirrors it, and a test fails if they drift apart. If you use [uv](https://docs.astral.sh/uv/), `uv pip install -r requirements.txt` works the same way.
+
+Tests that need torch, transformers or onnxruntime are skipped automatically when those packages are missing, so a partial install still runs the rest.
+
+## Training
+
+Training runs on Google Colab with a T4 GPU, not on your computer. You need a Google account with at least 20 GB free in Google Drive (the notebook warns if there is less). Open a notebook from its Open in Colab badge in the README, "Training on Colab" (or upload it from `notebooks/` at [colab.research.google.com](https://colab.research.google.com) with File → Upload notebook), choose a T4 GPU runtime and run all cells; the notebook installs its own packages. Step-by-step instructions are in the README, "Training on Colab".
+
+Each notebook embeds the data files it needs; the images are downloaded from Zenodo during the run.
+
+## Demo app (optional)
+
+| | You need |
+| :-- | :-- |
+| Flutter | Stable channel, Dart 3.13.5 or later (tested with Flutter 3.47.7). On Windows, install it to a path **without spaces**, for example `C:\src\flutter`. [docs.flutter.dev/get-started/install](https://docs.flutter.dev/get-started/install) |
+| Android Studio | With the Android SDK, Platform-Tools, the Emulator and a system image (tested on Android 36, Google APIs, x86_64). [developer.android.com/studio](https://developer.android.com/studio) |
+| Your computer | Virtualisation turned on in the BIOS/UEFI (may need admin rights), about 15 GB free disk and 8 GB of RAM or more |
+
+Then run `flutter doctor` until the Android toolchain shows no errors, accept the licences with `flutter doctor --android-licenses`, create an emulator in Android Studio's Device Manager and, from `app/`, run:
+
+```bash
+flutter pub get
+flutter test
+flutter run --no-enable-impeller -d emulator-5554
+```
+
+The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.\tools\run_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. The app's own packages (`flutter_onnxruntime`, `image` and others) are listed in `app/pubspec.yaml` and installed by `flutter pub get`; you do not install them separately. More detail, including device tests, is in the README, "Demo app (Android)".
+
+## If something does not work
+
+- **`python` is not found, or opens the Microsoft Store:** Python is not on your PATH. Re-run the installer and tick "Add python.exe to PATH".
+- **The wrong Python version:** use `py -3.12 -m venv .venv` on Windows, or `python3.12 -m venv .venv` elsewhere.
+- **`pip install` fails on torch:** install the CPU build first, as above, then re-run `pip install -r requirements.txt`.
+- **A work or school laptop blocks installs:** ask your IT team, or use the browser-only rows above.

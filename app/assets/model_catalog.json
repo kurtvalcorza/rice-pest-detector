@@ -1,0 +1,83 @@
+{
+  "models": [
+    {
+      "url": "https://www.kaggle.com/api/v1/models/kurtvalcorza/rice-pest-detector/onnx/r50-v5/3/download/model.onnx",
+      "manifest": {
+        "id": "r50-v5",
+        "label": "r50-v5",
+        "architecture": "RT-DETR (ResNet-50)",
+        "base_model": "PekingU/rtdetr_r50vd",
+        "licence": "Apache-2.0",
+        "input_size": 640,
+        "threshold": 0.48,
+        "review_below": 0.64,
+        "sha256": "dc3927ae0967f6553721e18eec826305cca66c7fb5c8cd1789a8187d74f069c1",
+        "bytes": 171744970,
+        "outputs": [
+          "logits",
+          "pred_boxes"
+        ],
+        "num_classes": 4,
+        "validation": {
+          "count_accuracy": 0.834,
+          "species_map50": 0.937,
+          "wsb30_mae": 8.67
+        },
+        "validated": false
+      }
+    },
+    {
+      "url": "https://www.kaggle.com/api/v1/models/kurtvalcorza/rice-pest-detector/onnx/rf-detr-m/3/download/model.onnx",
+      "manifest": {
+        "id": "rfdetr-m",
+        "label": "RF-DETR-M",
+        "architecture": "RF-DETR (medium)",
+        "base_model": "Roboflow/rf-detr-medium",
+        "licence": "Apache-2.0",
+        "input_size": 576,
+        "threshold": 0.48,
+        "review_below": 0.63,
+        "sha256": "07161f11d2bfc390510627ddff72a8436045b1f79cccd00682f19359fe5c660f",
+        "bytes": 121956743,
+        "outputs": [
+          "logits",
+          "pred_boxes"
+        ],
+        "num_classes": 4,
+        "validation": {
+          "count_accuracy": 0.846,
+          "species_map50": 0.933,
+          "wsb30_mae": 9.56
+        },
+        "validated": false
+      }
+    },
+    {
+      "url": "https://www.kaggle.com/api/v1/models/kurtvalcorza/rice-pest-detector/onnx/d-fine-l/3/download/model.onnx",
+      "manifest": {
+        "id": "dfine-l",
+        "label": "D-FINE-L",
+        "architecture": "D-FINE (large)",
+        "base_model": "ustc-community/dfine-large-coco",
+        "licence": "Apache-2.0",
+        "input_size": 640,
+        "threshold": 0.5,
+        "review_below": 0.68,
+        "sha256": "c823f5d8f55b851d139b99f77dcc7b5fc54dc63e84b7516a5abdc59c8ef95e67",
+        "bytes": 125213572,
+        "outputs": [
+          "logits",
+          "pred_boxes"
+        ],
+        "num_classes": 4,
+        "validation": {
+          "count_accuracy": 0.822,
+          "species_map50": 0.94,
+          "wsb30_mae": 8.56
+        },
+        "notes": "ONNX scores differ from PyTorch by up to 0.003; kept detections identical at 0.48 (parity was not run at 0.50)",
+        "validated": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+ "id": "dfine-l",
+ "label": "D-FINE-L",
+ "architecture": "D-FINE (large)",
+ "base_model": "ustc-community/dfine-large-coco",
+ "licence": "Apache-2.0",
+ "input_size": 640,
+ "threshold": 0.5,
+ "review_below": 0.68,
+ "sha256": "c823f5d8f55b851d139b99f77dcc7b5fc54dc63e84b7516a5abdc59c8ef95e67",
+ "bytes": 125213572,
+ "outputs": [
+  "logits",
+  "pred_boxes"
+ ],
+ "num_classes": 4,
+ "validation": {
+  "count_accuracy": 0.822,
+  "species_map50": 0.94,
+  "wsb30_mae": 8.56
+ },
+ "notes": "ONNX scores differ from PyTorch by up to 0.003; kept detections identical at 0.48 (parity was not run at 0.50)",
+ "validated": false
+}

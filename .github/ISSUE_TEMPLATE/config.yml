@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Workshop questions
+    url: https://github.com/kurtvalcorza/rice-pest-detector/discussions/categories/q-a
+    about: Ask questions about the workshop or the code in Discussions (Q&A).
+  - name: Security vulnerabilities
+    url: https://github.com/kurtvalcorza/rice-pest-detector/security/policy
+    about: Report security problems privately. Please do not open a public issue.

@@ -1,0 +1,215 @@
+{
+  "@@locale": "en",
+  "appTitle": "Trap Pest Counter",
+  "modelNotice": "Experimental model. Counts are estimates and are not for pest-management decisions.",
+  "demoNotice": "Demo: real model weights, with a counting threshold chosen on validation photos. The counts have not been validated in the field.",
+  "noModelNotice": "No model is installed yet, so the app cannot count insects. Past counts can still be opened.",
+  "takePhoto": "Take a photo of the trap",
+  "choosePhoto": "Choose a photo",
+  "history": "Past counts",
+  "noHistory": "No counts yet.",
+  "analysing": "Counting insects…",
+  "resultTitle": "Count",
+  "speciesRBB": "Rice black bug (atangya)",
+  "speciesWSB": "White stemborer (puting aksip)",
+  "needsReview": "Please check this count against the photo",
+  "reviewLowConfidence": "Some insects were hard to recognise.",
+  "reviewCrowded": "Many insects in the photo: the count may be off.",
+  "shareCounts": "Share the counts",
+  "shareSummary": "Trap photo {date}: rice black bug {rbb}, white stemborer {wsb}. Model {model}, threshold {threshold}. Counts are estimates; please review.",
+  "@shareSummary": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "rbb": {
+        "type": "int"
+      },
+      "wsb": {
+        "type": "int"
+      },
+      "model": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "modelInfo": "Model {model} · threshold {threshold}",
+  "@modelInfo": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteEntry": "Delete",
+  "photoTooSmall": "This photo is too small. Take a closer photo of the trap.",
+  "photoUnreadable": "This file could not be opened as a photo.",
+  "about": "About",
+  "intendedUse": "A teaching demonstration of running a pest-counting model on a phone. It counts two pests in light-trap photos: rice black bug and white stemborer. It is not made for farm use, has not been validated in the field, and is not an official tool of any organisation. The counts are estimates and are not for pest-management decisions.",
+  "privacyNotice": "Photos and counts stay on this phone. Nothing is sent unless you choose to share it.",
+  "openSourceLicences": "Open-source licences",
+  "licences": "Data: Deleña et al., light-trap rice pest dataset, CC BY 4.0 (doi.org/10.5281/zenodo.20066074), regrouped into new splits. App and model code: Apache-2.0.",
+  "downloadModel": "Download the model ({size} MB)",
+  "@downloadModel": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "downloading": "Downloading the model…",
+  "downloadFailed": "The model download failed. Check the connection and try again.",
+  "settings": "Settings",
+  "modelSection": "Model",
+  "modelListHint": "r50-v5 is the default model. The others are demo models for comparison only.",
+  "notValidatedBanner": "Demo model, not validated. Use its counts only for comparison with the default model.",
+  "defaultTag": "Default",
+  "activeTag": "In use",
+  "notValidatedTag": "Not validated",
+  "modelDetails": "{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy}",
+  "@modelDetails": {
+    "placeholders": {
+      "architecture": {
+        "type": "String"
+      },
+      "size": {
+        "type": "int"
+      },
+      "threshold": {
+        "type": "String"
+      },
+      "accuracy": {
+        "type": "String"
+      }
+    }
+  },
+  "noModelsInstalled": "No models are installed.",
+  "switchedModel": "Now using {label}.",
+  "@switchedModel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "switchFailed": "That model could not be loaded. The previous model is still in use.",
+  "importModel": "Import a model from a file",
+  "importPickManifest": "Choose the model's manifest file (.json).",
+  "importPickModel": "Now choose the model file (.onnx).",
+  "importChecking": "Checking the model…",
+  "importDone": "Imported {label}. Tap it to use it.",
+  "@importDone": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "importErrorManifest": "The manifest file is not valid. Nothing was imported.",
+  "importErrorSize": "The model file is not the size its manifest gives. Nothing was imported.",
+  "importErrorChecksum": "The model file does not match its manifest checksum. Nothing was imported.",
+  "importErrorShape": "The model's inputs or outputs do not fit this app. Nothing was imported.",
+  "importErrorSelfTest": "The model failed its self-test. Nothing was imported.",
+  "importErrorExists": "A model with this id is already installed. Nothing was imported.",
+  "importErrorFile": "The files could not be read. Nothing was imported.",
+  "deleteModel": "Delete model",
+  "deleteModelConfirm": "Delete {label} from this phone?",
+  "@deleteModelConfirm": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "compareModels": "Compare models on one photo",
+  "compareTitle": "Model comparison",
+  "compareNotice": "Comparison of demo models: none of them is validated. The photo and results stay on this phone and are not saved to past counts.",
+  "compareProgress": "Running model {current} of {total}: {label}",
+  "@compareProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "compareTime": "{seconds} s",
+  "@compareTime": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "compareNoFlags": "No review flags",
+  "compareFailed": "This model could not count this photo.",
+  "downloadSection": "Download a model",
+  "downloadHint": "Published models. The app connects to the internet only when you tap Download, and checks each model before it can be used.",
+  "download": "Download",
+  "installedTag": "Installed",
+  "publishedDetails": "{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy} · {megabytes} MB",
+  "@publishedDetails": {
+    "placeholders": {
+      "architecture": {
+        "type": "String"
+      },
+      "size": {
+        "type": "int"
+      },
+      "threshold": {
+        "type": "String"
+      },
+      "accuracy": {
+        "type": "String"
+      },
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadProgress": "Downloaded {received} of {total} MB",
+  "@downloadProgress": {
+    "placeholders": {
+      "received": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadProgressUnknown": "Downloaded {received} MB",
+  "@downloadProgressUnknown": {
+    "placeholders": {
+      "received": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelDownload": "Cancel download",
+  "downloadCancelled": "Download cancelled. Nothing was installed.",
+  "downloadDone": "Downloaded {label}. Tap it to use it.",
+  "@downloadDone": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadErrorNetwork": "The download failed. Check the connection and try again. Nothing was installed.",
+  "downloadErrorSize": "The downloaded file is not the expected size. Nothing was installed.",
+  "downloadErrorChecksum": "The downloaded file does not match its checksum. Nothing was installed.",
+  "downloadErrorCheck": "The downloaded model failed its checks. Nothing was installed."
+}
