@@ -1,5 +1,7 @@
 """Export a trained RT-DETR checkpoint to ONNX under the inference contract (spec §4.5) and check
 parity with PyTorch: same kept detections (count and classes), box IoU >= 0.99, score diff <= 1e-3.
+Detections are paired by class and box overlap, not by list order, so near-equal scores that the two
+runtimes rank differently do not count as a failure.
 
 Export runs in inference mode (eval + no_grad). Exporting outside it froze input-dependent values
 into the graph and outputs diverged on any input other than the one used to trace.
@@ -90,6 +92,25 @@ def _iou(a, b) -> float:
     return inter / union if union > 0 else 1.0
 
 
+def _pair(a, b):
+    """Pair each ONNX detection with a PyTorch detection of the same class, greedily by highest box IoU.
+
+    Detections are not compared by list position: when scores are nearly equal, the two runtimes can rank the
+    same detections in a different order (and break exact ties differently from one platform to another).
+    Returns the pairs, or None when the counts differ or a detection has no same-class partner."""
+    if len(a) != len(b):
+        return None
+    candidates = sorted(((_iou(da, db), i, j) for i, da in enumerate(a) for j, db in enumerate(b)
+                         if da.class_id == db.class_id), reverse=True)
+    used_a, used_b, pairs = set(), set(), []
+    for _, i, j in candidates:
+        if i not in used_a and j not in used_b:
+            used_a.add(i)
+            used_b.add(j)
+            pairs.append((a[i], b[j]))
+    return pairs if len(pairs) == len(a) else None
+
+
 def parity(model, onnx_path: Path, images: list[np.ndarray], threshold: float = 0.5,
            width: int = INPUT_SIZE, height: int = INPUT_SIZE) -> dict:
     """Compare kept detections from PyTorch and ONNX Runtime on preprocessed (1,3,640,640) inputs."""
@@ -102,11 +123,12 @@ def parity(model, onnx_path: Path, images: list[np.ndarray], threshold: float = 
             ref = model(pixel_values=torch.from_numpy(x))
         a = postprocess(logits, boxes, width, height, threshold)
         b = postprocess(ref.logits.numpy(), ref.pred_boxes.numpy(), width, height, threshold)
-        if len(a) != len(b) or [d.class_id for d in a] != [d.class_id for d in b]:
+        pairs = _pair(a, b)
+        if pairs is None:
             failures.append({"image": i, "reason": f"kept {len(a)} vs {len(b)} or classes differ"})
             continue
-        compared += len(a)
-        for da, db in zip(a, b):
+        compared += len(pairs)
+        for da, db in pairs:
             max_score = max(max_score, abs(da.score - db.score))
             min_iou = min(min_iou, _iou(da, db))
         if max_score > SCORE_DIFF_MAX or min_iou < IOU_MIN:

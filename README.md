@@ -455,7 +455,7 @@ Every result, with the command and file it came from, is in [docs/evaluation-rec
 - Rebuilds the fine-tuned architecture from the base **config** (no base weights are downloaded), loads `best.pt`, and exports opset 17 with the contract's names and static shapes.
 - Writes `models/<name>.json` with the SHA-256, size and the source checkpoint's SHA-256.
 - **The export must run in inference mode** (`eval()` plus `no_grad()`). Outside it, the traced graph froze input-dependent values, and outputs diverged on any input other than the one used to trace. `tests/test_export_onnx.py` guards against this.
-- `parity(model, onnx_path, images, threshold)` applies the spec §4.5 tolerances and reports how many detections it compared, so a pass is never vacuous.
+- `parity(model, onnx_path, images, threshold)` pairs ONNX and PyTorch detections by class and box overlap, not by list order (near-equal scores can be ranked differently by the two runtimes), applies the spec §4.5 tolerances and reports how many detections it compared, so a pass is never vacuous.
 
 r50-v5 export: 171,744,970 bytes, SHA-256 `dc3927ae0967f6553721e18eec826305cca66c7fb5c8cd1789a8187d74f069c1`, from checkpoint `e0ae635d…` (epoch 1). Published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/r50-v5); the checkpoint is not.
 

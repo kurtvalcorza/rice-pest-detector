@@ -16,9 +16,23 @@ pytestmark = [pytest.mark.torch, pytest.mark.onnx]
 @pytest.fixture(scope="module")
 def tiny():
     torch.manual_seed(0)
+    # initializer_range 0.2, not the default 0.01: at 0.01 each untrained conv and eval-mode BatchNorm shrinks
+    # the signal, so every anchor gets the same encoder score and the outputs hardly depend on the input.
     cfg = RTDetrConfig(num_labels=4, num_queries=300, encoder_layers=1, decoder_layers=1, d_model=32,
-                       encoder_hidden_dim=32, decoder_in_channels=[32, 32, 32], use_pretrained_backbone=False)
+                       encoder_hidden_dim=32, decoder_in_channels=[32, 32, 32], use_pretrained_backbone=False,
+                       initializer_range=0.2)
     return RTDetrForObjectDetection(cfg).eval()
+
+
+def _max_row_mismatch(onnx_rows: np.ndarray, torch_rows: np.ndarray) -> float:
+    """Largest difference after pairing each ONNX query with its closest PyTorch query, one to one.
+
+    The two runtimes can order near-equal queries differently, so rows are matched rather than compared by index."""
+    dist = np.abs(onnx_rows[:, None, :] - torch_rows[None, :, :]).max(-1)
+    nearest = dist.argmin(1)
+    if len(set(nearest.tolist())) != len(nearest):
+        return float("inf")
+    return float(dist[np.arange(len(nearest)), nearest].max())
 
 
 @pytest.fixture(scope="module")
@@ -48,8 +62,9 @@ def test_outputs_match_pytorch_on_inputs_not_used_for_export(tiny, exported):
         logits, boxes = sess.run(["logits", "pred_boxes"], {"pixel_values": x})
         with torch.no_grad():
             out = tiny(pixel_values=torch.from_numpy(x))
-        assert np.abs(logits - out.logits.numpy()).max() < 1e-4
-        assert np.abs(boxes - out.pred_boxes.numpy()).max() < 1e-4
+        onnx_rows = np.concatenate([logits[0], boxes[0]], axis=1)
+        torch_rows = np.concatenate([out.logits.numpy()[0], out.pred_boxes.numpy()[0]], axis=1)
+        assert _max_row_mismatch(onnx_rows, torch_rows) < 1e-4
 
 
 def test_parity_report_uses_the_spec_tolerances(tiny, exported):
