@@ -53,12 +53,13 @@ Future<InstalledModel?> _sideloaded(ModelStore demoStore, File demoMeta) async {
       path: demoStore.modelFile.path, source: ModelSource.sideloaded);
 }
 
-/// Every installed model, registry first; a legacy entry whose id a registry model already uses is dropped.
+/// Every installed model, registry first; a legacy entry whose id or file (SHA-256) is already listed is dropped,
+/// so a side-loaded copy of a downloaded model appears once.
 Future<List<InstalledModel>> installedModels({required ModelPin pin, required ModelStore store,
     required ModelStore demoStore, required File demoMeta, ModelRegistry? registry}) async {
   final all = [...?await registry?.list()];
   for (final legacy in [await _pinned(pin, store), await _sideloaded(demoStore, demoMeta)]) {
-    if (legacy != null && all.every((m) => m.id != legacy.id)) all.add(legacy);
+    if (legacy != null && all.every((m) => m.id != legacy.id && m.sha256 != legacy.sha256)) all.add(legacy);
   }
   return sortModels(all);
 }

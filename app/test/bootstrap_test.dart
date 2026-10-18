@@ -150,12 +150,25 @@ void main() {
 
   test('installedModels lists registry, pin and side-loaded models together', () async {
     await install(store('model'));
-    await install(store('demo'));
-    demoMeta().writeAsStringSync(jsonEncode({'sha256': sha, 'bytes': payload.length, 'threshold': 0.4, 'label': 'dev'}));
+    final dev = utf8.encode('other onnx bytes');
+    await store('demo').dir.create(recursive: true);
+    await store('demo').modelFile.writeAsBytes(dev);
+    demoMeta().writeAsStringSync(jsonEncode({'sha256': sha256.convert(dev).toString(), 'bytes': dev.length,
+        'threshold': 0.4, 'label': 'dev'}));
     await register('rfdetr-m', [1, 2, 3]);
     final all = await installedModels(pin: pin(label: 'pinned'), store: store('model'), demoStore: store('demo'),
         demoMeta: demoMeta(), registry: registry());
     expect(all.map((m) => m.id).toSet(), {'rfdetr-m', 'pinned', 'dev'});
     expect(all.where((m) => m.deletable).map((m) => m.id), ['rfdetr-m']);
+  });
+
+  test('a side-loaded copy of a downloaded model is listed once, as the download', () async {
+    await register('r50-v5', payload);
+    await install(store('demo'));
+    demoMeta().writeAsStringSync(jsonEncode({'sha256': sha, 'bytes': payload.length, 'threshold': 0.48,
+        'label': 'r50-v5-demo'}));
+    final all = await installedModels(pin: const ModelPin('', '', 0), store: store('model'), demoStore: store('demo'),
+        demoMeta: demoMeta(), registry: registry());
+    expect(all.map((m) => m.id), ['r50-v5']);
   });
 }
