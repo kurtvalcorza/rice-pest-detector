@@ -1,5 +1,5 @@
-"""The committed split (data/) must hold the properties the build guarantees: no photo family and no
-near-duplicate group in two splits, one image per family in validation and test, and annotation files
+"""The committed split (data/) must hold the properties the build guarantees: no photo family, no near-duplicate
+group and no identical file in two splits, one image per family in validation and test, and annotation files
 that list exactly the manifest's images. The other split tests use synthetic data; this one reads the
 files that the notebooks and every recorded result actually used."""
 import json
@@ -27,6 +27,12 @@ def test_no_family_or_group_is_in_two_splits(manifest):
     for key in ("family", "group"):
         leaked = {k: v for k, v in _splits_by(manifest["images"], key).items() if len(v) > 1}
         assert not leaked, f"{len(leaked)} {key}(s) appear in more than one split"
+
+
+def test_no_photo_file_is_in_two_splits(manifest):
+    # Byte-identical files under different names would leak a photo across splits even with clean families.
+    leaked = {k: v for k, v in _splits_by(manifest["images"], "sha256").items() if len(v) > 1}
+    assert not leaked, f"{len(leaked)} file hash(es) appear in more than one split"
 
 
 def test_split_sizes_and_seed_match_the_record(manifest):

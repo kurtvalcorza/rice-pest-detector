@@ -13,7 +13,7 @@ Owner decisions about the repository, the app and the published models that are 
 | 2026-10-18 | The Kaggle model cards stay at version 3 when the repository's cards are revised. | Publishing a new version would change the app's pinned download URL; the cards in [model-cards/](model-cards/) are the current text. |
 | 2026-10-18 | The setup guides list only what this repository can use: no Docker, NVIDIA toolkit, local GPU or Kaggle notebooks. | Training runs on Colab; everything else runs on a laptop CPU or an emulator. |
 | 2026-10-18 | Published history is never rewritten; corrections are new commits. | The repository is public and cloned by workshop participants. |
-| 2026-10-18 | Pillow is pinned to 12.3.0. | `data/` and the app's golden resize fixtures were built with it; Pillow 13.0 resizes some shapes differently, and CI now checks the fixtures. |
+| 2026-10-18 | Pillow is pinned to 12.3.0 and NumPy to 2.5.4. | `data/` and the app's golden resize fixtures were built with them; Pillow 13.0 resizes some shapes differently, and CI now checks the fixtures. |
 | 2026-10-18 | The Stop hook blocks a stop once; if the tests still fail after the agent has carried on, it allows the stop with a warning. | Blocking every stop could keep an agent in a loop; the warning still says the work is not done. |
 | 2026-10-18 | Settings shows each model's validation count accuracy beside the do-nothing baseline (0.474). | A count accuracy means little without the score of a model that finds nothing. |
 | 2026-10-18 | D-FINE-L's 1e-3 parity score tolerance is waived (kept detections identical at 0.48 and 0.50; scores within 2.95e-3). | Details in [evaluation-record.md](evaluation-record.md), "D-FINE-L parity at 0.50 and owner waiver". |

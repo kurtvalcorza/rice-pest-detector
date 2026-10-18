@@ -12,6 +12,8 @@ owner: Kurt Valcorza
 
 > **Note (18 Oct 2026): edits for publication.** On 16 and 18 Oct 2026 this document was edited before the repository went public, without a note at the time. Names of organisations, of private repositories and of internal paths and files were removed or replaced with neutral wording (in the front matter, §1, §2, §4.6, §4.7, §5, §6, §7 and §9.2); the status line lost "implementation plan pending", and the §9.2 evidence location now points to the maintainers' records. No design decision, threshold or gate was changed.
 
+> **Note (18 Oct 2026): §4.7.** Since 17 Oct 2026 the sample photos for the tools that use the model are drawn from the validation split, not the test split.
+
 ## 1. Purpose
 
 Produce an open, CPU-friendly object detector for rice black bug and white stemborer in light-trap
