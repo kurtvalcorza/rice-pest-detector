@@ -77,6 +77,38 @@ def test_parity_report_uses_the_spec_tolerances(tiny, exported):
     assert report["max_score_diff"] <= 1e-3 and report["min_box_iou"] >= 0.99
 
 
+def test_parity_judges_each_image_on_its_own_result(monkeypatch, tmp_path):
+    # Regression: after one image missed the tolerance, every later image was reported with the running maximum.
+    import tools.export_onnx as ex
+    from rice_pest_detector.infer import Detection
+
+    class _Sess:
+        def __init__(self, *a, **k):
+            pass
+
+        def run(self, names, feeds):
+            return feeds["pixel_values"], feeds["pixel_values"]
+
+    def fake_post(logits, boxes, w, h, t):
+        off = float(np.asarray(logits).ravel()[0])  # image 0 carries a 5e-3 score offset, later images none
+        return [Detection(class_id=0, score=0.5 + off, x0=0, y0=0, x1=10, y1=10)]
+
+    class _Model:
+        def eval(self):
+            return self
+
+        def __call__(self, pixel_values):
+            z = np.zeros_like(pixel_values.numpy())
+            return type("R", (), {"logits": torch.from_numpy(z), "pred_boxes": torch.from_numpy(z)})()
+
+    monkeypatch.setattr(ex.ort, "InferenceSession", _Sess)
+    monkeypatch.setattr(ex, "postprocess", fake_post)
+    images = [np.full((1, 3, 4, 4), v, dtype=np.float32) for v in (5e-3, 0.0, 0.0)]
+    report = ex.parity(_Model(), tmp_path / "x.onnx", images, threshold=0.0)
+    assert [f["image"] for f in report["failures"]] == [0]
+    assert report["max_score_diff"] == pytest.approx(5e-3)
+
+
 def test_parity_flags_a_different_model(tiny, exported, tmp_path):
     torch.manual_seed(99)
     other = RTDetrForObjectDetection(tiny.config).eval()

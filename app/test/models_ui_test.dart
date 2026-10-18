@@ -181,8 +181,8 @@ void main() {
     expect(find.text('Model'), findsOneWidget);
     expect(find.text('r50-v5'), findsOneWidget);
     expect(find.text('RF-DETR-M'), findsOneWidget);
-    expect(find.text('RF-DETR-M arch · 576 px · threshold 0.48 · count accuracy 0.846'), findsOneWidget);
-    expect(find.text('r50-v5 arch · 640 px · threshold 0.48 · count accuracy 0.834'), findsOneWidget);
+    expect(find.text('RF-DETR-M arch · 576 px · threshold 0.48 · count accuracy 0.846 (doing nothing: 0.474)'), findsOneWidget);
+    expect(find.text('r50-v5 arch · 640 px · threshold 0.48 · count accuracy 0.834 (doing nothing: 0.474)'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('model-r50-v5')), matching: find.text('Default')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('model-r50-v5')), matching: find.text('In use')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('model-rfdetr-m')), matching: find.text('In use')), findsNothing);

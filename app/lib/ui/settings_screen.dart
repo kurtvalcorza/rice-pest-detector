@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../app/services.dart';
 import '../l10n/app_localizations.dart';
+import '../model/model_manifest.dart' show doNothingCountAccuracy;
 import '../model/model_registry.dart';
 import '../model/model_store.dart';
 import '../model/published_models.dart';
@@ -258,10 +259,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-/// Facts shown for a model: architecture, input size, counting threshold, validation count accuracy.
+/// Facts shown for a model: architecture, input size, counting threshold, validation count accuracy beside
+/// the do-nothing baseline.
 String modelDetails(AppLocalizations l, InstalledModel m) => l.modelDetails(
     m.architecture.isEmpty ? '—' : m.architecture, m.inputSize, m.threshold.toStringAsFixed(2),
-    m.validation == null ? '—' : m.validation!.countAccuracy.toStringAsFixed(3));
+    m.validation == null ? '—' : m.validation!.countAccuracy.toStringAsFixed(3),
+    doNothingCountAccuracy.toStringAsFixed(3));
 
 class ModelTags extends StatelessWidget {
   const ModelTags({super.key, required this.model, this.active = false});
@@ -331,7 +334,8 @@ class _PublishedTile extends StatelessWidget {
           ]),
           const SizedBox(height: 4),
           Text(l.publishedDetails(m.architecture, m.inputSize, m.threshold.toStringAsFixed(2),
-              m.validation.countAccuracy.toStringAsFixed(3), (m.bytes / 1e6).round())),
+              m.validation.countAccuracy.toStringAsFixed(3), doNothingCountAccuracy.toStringAsFixed(3),
+              (m.bytes / 1e6).round())),
           if (downloading) ...[
             const SizedBox(height: 8),
             LinearProgressIndicator(value: t == null || t <= 0 ? null : (received / t).clamp(0.0, 1.0)),

@@ -323,12 +323,13 @@ abstract class AppLocalizations {
   /// No description provided for @modelDetails.
   ///
   /// In en, this message translates to:
-  /// **'{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy}'**
+  /// **'{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy} (doing nothing: {baseline})'**
   String modelDetails(
     String architecture,
     int size,
     String threshold,
     String accuracy,
+    String baseline,
   );
 
   /// No description provided for @noModelsInstalled.
@@ -508,12 +509,13 @@ abstract class AppLocalizations {
   /// No description provided for @publishedDetails.
   ///
   /// In en, this message translates to:
-  /// **'{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy} · {megabytes} MB'**
+  /// **'{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy} (doing nothing: {baseline}) · {megabytes} MB'**
   String publishedDetails(
     String architecture,
     int size,
     String threshold,
     String accuracy,
+    String baseline,
     int megabytes,
   );
 

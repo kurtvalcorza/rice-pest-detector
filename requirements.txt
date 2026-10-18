@@ -9,7 +9,7 @@
 # torch is large. On a computer without an NVIDIA GPU, install the CPU build first, which is much smaller:
 #   python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 #
-# Tested on 2026-10-17 with Python 3.12.14 and: numpy 2.5.4, pillow 13.0.0, torch 2.14.1 (CPU),
+# Tested on 2026-10-17 with Python 3.12.14 and: numpy 2.5.4, pillow 12.3.0 (pinned: data/ and the app fixtures were built with it), torch 2.14.1 (CPU),
 # transformers 5.20.1, pycocotools 2.0.11, scipy 1.18.1, onnx 1.23.2, onnxruntime 1.31.0,
 # pytest 9.1.1, ruff 0.17.1, nbformat 5.11.1.
 
@@ -18,7 +18,7 @@
 
 # Base
 numpy>=1.26
-pillow>=10.3
+pillow==12.3.0
 
 # Training and export: load and run RT-DETR / D-FINE / RF-DETR checkpoints
 torch

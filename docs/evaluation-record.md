@@ -380,3 +380,16 @@ All three meet the three model gates on test. The test results agree with the va
 **What changed (owner decision).** `tools/export_onnx.parity()` now pairs detections by class and highest box IoU instead of by list position; the tolerances (same kept detections, IoU ≥ 0.99, score difference ≤ 1e-3) are unchanged. The export regression test matches output rows one to one in the same way, and its tiny model uses `initializer_range=0.2`, so its outputs depend on the input (only 138–145 of 300 selected queries are shared between a blank image and a random one; the 300th/301st score gap on the test inputs is 1.2e-4 or more). A check confirmed the matcher accepts the same outputs in shuffled order and rejects outputs from a different input. Full suite on transformers 5.20.1: 128 passed.
 
 **Effect on recorded results.** The parity figures above were computed with the order-based check and are not re-run. Pairing can only remove order-swap failures; the single r50-v5 query near the 0.04 cut that held a different proposal is a real difference and would still be reported.
+
+### D-FINE-L parity at 0.50 and owner waiver (2026-10-18)
+
+**Re-run.** Parity for D-FINE-L had been run only at 0.48, while the model counts at 0.50. It was re-run on the same 10 validation photos at 0.50 (and again at 0.48), with the ONNX file `rice-pest-dfine-l.onnx` (SHA-256 `c823f5d8…`) against the PyTorch checkpoint, using `parity()` after it was corrected to judge each photo on its own pairs (it had been comparing every photo after the first miss against the running maximum, so the earlier report listed images 5–9 where only 5 and 6 miss).
+
+| Threshold | Detections compared | Kept detections and classes | Min box IoU | Max score difference | Photos over 1e-3 |
+| :-- | --: | :-- | --: | --: | :-- |
+| 0.50 | 149 | identical on all 10 | 0.99999 | 2.95e-3 | 2 of 10 (images 5 and 6) |
+| 0.48 | 153 | identical on all 10 | 0.99999 | 2.95e-3 | 2 of 10 (images 5 and 6) |
+
+Data: `runs/run-dfine-l/parity_val10_t050_rerun.json`, `runs/run-dfine-l/parity_val10_t048_rerun.json`.
+
+**Owner decision (2026-10-18): waiver.** Because the kept detections, classes and boxes match at the counting threshold, and only scores differ (by at most 2.95e-3, which does not change any count), the owner waived the 1e-3 score tolerance for D-FINE-L as a teaching-demo comparison model. It stays on Kaggle and in the app's download list, with its "Not validated" tag. The tolerance itself is unchanged for any future model.

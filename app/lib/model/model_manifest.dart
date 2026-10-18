@@ -12,6 +12,10 @@ class ManifestInvalid implements Exception {
   String toString() => 'Model manifest is not valid: $detail';
 }
 
+/// Validation count accuracy of a model that always answers "no insects", on the same validation photos
+/// (docs/evaluation-record.md: 0.4743). Every count accuracy the app shows is shown beside it.
+const double doNothingCountAccuracy = 0.474;
+
 class ModelValidation {
   const ModelValidation({required this.countAccuracy, required this.speciesMap50, required this.wsb30Mae});
 

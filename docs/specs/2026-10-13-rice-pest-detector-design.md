@@ -10,6 +10,8 @@ owner: Kurt Valcorza
 
 > **Note (18 Oct 2026).** This is the design as approved on 13 Oct 2026, kept as written. Since then r18vd missed the quality bar; the default model is r50-v5 (RT-DETR-r50vd, transformers 5.20.1), which meets the §6 model gates on test (count accuracy 0.849, species mAP50 0.943). Wave 2 (RF-DETR-M at 576 px, D-FINE-L) did not replace it, so the export input size is now set per model. The weights are published on Kaggle (Apache-2.0, dataset credited) rather than on Hugging Face or as a GitHub release. Current status: README, "Status and release gates".
 
+> **Note (18 Oct 2026): edits for publication.** On 16 and 18 Oct 2026 this document was edited before the repository went public, without a note at the time. Names of organisations, of private repositories and of internal paths and files were removed or replaced with neutral wording (in the front matter, §1, §2, §4.6, §4.7, §5, §6, §7 and §9.2); the status line lost "implementation plan pending", and the §9.2 evidence location now points to the maintainers' records. No design decision, threshold or gate was changed.
+
 ## 1. Purpose
 
 Produce an open, CPU-friendly object detector for rice black bug and white stemborer in light-trap

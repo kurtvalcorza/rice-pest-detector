@@ -72,7 +72,7 @@
   "defaultTag": "Default",
   "activeTag": "In use",
   "notValidatedTag": "Not validated",
-  "modelDetails": "{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy}",
+  "modelDetails": "{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy} (doing nothing: {baseline})",
   "@modelDetails": {
     "placeholders": {
       "architecture": {
@@ -85,6 +85,9 @@
         "type": "String"
       },
       "accuracy": {
+        "type": "String"
+      },
+      "baseline": {
         "type": "String"
       }
     }
@@ -159,7 +162,7 @@
   "downloadHint": "Published models. The app connects to the internet only when you tap Download, and checks each model before it can be used.",
   "download": "Download",
   "installedTag": "Installed",
-  "publishedDetails": "{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy} · {megabytes} MB",
+  "publishedDetails": "{architecture} · {size} px · threshold {threshold} · count accuracy {accuracy} (doing nothing: {baseline}) · {megabytes} MB",
   "@publishedDetails": {
     "placeholders": {
       "architecture": {
@@ -172,6 +175,9 @@
         "type": "String"
       },
       "accuracy": {
+        "type": "String"
+      },
+      "baseline": {
         "type": "String"
       },
       "megabytes": {

@@ -19,6 +19,6 @@
   "species_map50": 0.94,
   "wsb30_mae": 8.56
  },
- "notes": "ONNX scores differ from PyTorch by up to 0.003; kept detections identical at 0.48 (parity was not run at 0.50)",
+ "notes": "ONNX scores differ from PyTorch by up to 0.003; kept detections identical at 0.48 and at 0.50 (score tolerance waived by the owner, 2026-10-18)",
  "validated": false
 }

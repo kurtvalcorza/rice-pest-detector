@@ -146,8 +146,9 @@ class AppLocalizationsFil extends AppLocalizations {
     int size,
     String threshold,
     String accuracy,
+    String baseline,
   ) {
-    return '$architecture · $size px · threshold $threshold · katumpakan ng bilang $accuracy';
+    return '$architecture · $size px · threshold $threshold · katumpakan ng bilang $accuracy (kung walang gagawin: $baseline)';
   }
 
   @override
@@ -263,9 +264,10 @@ class AppLocalizationsFil extends AppLocalizations {
     int size,
     String threshold,
     String accuracy,
+    String baseline,
     int megabytes,
   ) {
-    return '$architecture · $size px · threshold $threshold · katumpakan ng bilang $accuracy · $megabytes MB';
+    return '$architecture · $size px · threshold $threshold · katumpakan ng bilang $accuracy (kung walang gagawin: $baseline) · $megabytes MB';
   }
 
   @override

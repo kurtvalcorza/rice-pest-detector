@@ -1,0 +1,19 @@
+# Decision log
+
+Owner decisions about the repository, the app and the published models that are not recorded elsewhere. Model, evaluation and test-split decisions are in [evaluation-record.md](evaluation-record.md); design decisions are in the dated specs in [specs/](specs/), whose later changes are noted at the top of each.
+
+| Date | Decision | Why |
+| :-- | :-- | :-- |
+| 2026-10-16 | The app keeps its count history in one JSON file in app-private storage, not SQLite (the demo-app brief said SQLite). | One user's history is tens to hundreds of entries; JSON needs no native plugin and can be tested on the host (`app/lib/storage/history.dart`). |
+| 2026-10-17 | `AGENTS.md`, `CLAUDE.md` and `docs/workshop-setup.md` stay in the public repository. | They are the worked examples of agent configuration and the setup guide that workshop participants use. |
+| 2026-10-18 | The app is a teaching demo app: not made for farmers, not official and not validated in the field. App text, docs, decks and file names say "demo app". | The first brief (15 Oct) described a tool for farmers; the project's scope is teaching. |
+| 2026-10-18 | Every model in the app carries a "Not validated" tag, the default model included. | None of the models has been validated in the field or by experts. |
+| 2026-10-18 | The three trained models are published on Kaggle (Apache-2.0, dataset credited) as one model with three variations; `models/` in this repository holds manifests only. | The weights are too large for the repository, and the app needs a stable public download. |
+| 2026-10-18 | On Kaggle only version 3 of each variation is kept; versions 1 and 2 were deleted. | Version 3 carries the current file layout (`model.onnx`, `manifest.json`, the card as `README.md`), and the app is pinned to it. |
+| 2026-10-18 | The Kaggle model cards stay at version 3 when the repository's cards are revised. | Publishing a new version would change the app's pinned download URL; the cards in [model-cards/](model-cards/) are the current text. |
+| 2026-10-18 | The setup guides list only what this repository can use: no Docker, NVIDIA toolkit, local GPU or Kaggle notebooks. | Training runs on Colab; everything else runs on a laptop CPU or an emulator. |
+| 2026-10-18 | Published history is never rewritten; corrections are new commits. | The repository is public and cloned by workshop participants. |
+| 2026-10-18 | Pillow is pinned to 12.3.0. | `data/` and the app's golden resize fixtures were built with it; Pillow 13.0 resizes some shapes differently, and CI now checks the fixtures. |
+| 2026-10-18 | The Stop hook blocks a stop once; if the tests still fail after the agent has carried on, it allows the stop with a warning. | Blocking every stop could keep an agent in a loop; the warning still says the work is not done. |
+| 2026-10-18 | Settings shows each model's validation count accuracy beside the do-nothing baseline (0.474). | A count accuracy means little without the score of a model that finds nothing. |
+| 2026-10-18 | D-FINE-L's 1e-3 parity score tolerance is waived (kept detections identical at 0.48 and 0.50; scores within 2.95e-3). | Details in [evaluation-record.md](evaluation-record.md), "D-FINE-L parity at 0.50 and owner waiver". |

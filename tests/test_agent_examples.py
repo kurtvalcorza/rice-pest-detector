@@ -41,6 +41,51 @@ def test_off_switch_allows_stop():
     assert code == 0 and "RICE_PEST_STOP_HOOK=off" in msg
 
 
+def test_second_block_is_allowed_with_a_warning_so_the_agent_cannot_loop():
+    code, msg = load_hook().decide(1, "Some tests failed.", disabled=False, already_active=True)
+    assert code == 0 and "still failing" in msg and "not done" in msg
+
+
+def _run_main(monkeypatch, event, returncode=1, raises=None):
+    import io
+    import subprocess
+
+    hook = load_hook()
+    monkeypatch.delenv("RICE_PEST_STOP_HOOK", raising=False)
+    monkeypatch.setattr(hook.shutil, "which", lambda name: "flutter")
+
+    def fake_run(*args, **kwargs):
+        if raises:
+            raise raises
+        return subprocess.CompletedProcess(args, returncode, stdout="Some tests failed.", stderr="")
+
+    monkeypatch.setattr(hook.subprocess, "run", fake_run)
+    monkeypatch.setattr(hook.sys, "stdin", io.StringIO(json.dumps(event) if event is not None else ""))
+    return hook.main()
+
+
+def test_main_blocks_a_first_stop_while_tests_fail(monkeypatch):
+    assert _run_main(monkeypatch, {"hook_event_name": "Stop", "stop_hook_active": False}) == 2
+
+
+def test_main_allows_the_stop_when_the_hook_is_already_active(monkeypatch):
+    assert _run_main(monkeypatch, {"hook_event_name": "Stop", "stop_hook_active": True}) == 0
+
+
+def test_main_reads_no_or_bad_input_as_a_first_stop(monkeypatch):
+    assert _run_main(monkeypatch, None) == 2
+
+
+def test_main_allows_a_stop_when_tests_pass(monkeypatch):
+    assert _run_main(monkeypatch, {"stop_hook_active": False}, returncode=0) == 0
+
+
+def test_main_fails_open_when_flutter_test_times_out(monkeypatch):
+    import subprocess
+
+    assert _run_main(monkeypatch, {}, raises=subprocess.TimeoutExpired("flutter test", 600)) == 0
+
+
 def test_settings_run_the_hook_with_a_quoted_project_dir_and_allow_only_flutter_test():
     settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     command = settings["hooks"]["Stop"][0]["hooks"][0]["command"]

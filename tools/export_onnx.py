@@ -113,7 +113,7 @@ def _pair(a, b):
 
 def parity(model, onnx_path: Path, images: list[np.ndarray], threshold: float = 0.5,
            width: int = INPUT_SIZE, height: int = INPUT_SIZE) -> dict:
-    """Compare kept detections from PyTorch and ONNX Runtime on preprocessed (1,3,640,640) inputs."""
+    """Compare kept detections from PyTorch and ONNX Runtime on preprocessed (1,3,S,S) inputs."""
     sess = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
     model = model.eval()
     failures, max_score, min_iou, compared = [], 0.0, 1.0, 0
@@ -128,11 +128,12 @@ def parity(model, onnx_path: Path, images: list[np.ndarray], threshold: float = 
             failures.append({"image": i, "reason": f"kept {len(a)} vs {len(b)} or classes differ"})
             continue
         compared += len(pairs)
-        for da, db in pairs:
-            max_score = max(max_score, abs(da.score - db.score))
-            min_iou = min(min_iou, _iou(da, db))
-        if max_score > SCORE_DIFF_MAX or min_iou < IOU_MIN:
-            failures.append({"image": i, "reason": f"score diff {max_score:.2e}, iou {min_iou:.4f}"})
+        # Judge each image on its own pairs; the running max/min are only for the overall report.
+        img_score = max((abs(da.score - db.score) for da, db in pairs), default=0.0)
+        img_iou = min((_iou(da, db) for da, db in pairs), default=1.0)
+        max_score, min_iou = max(max_score, img_score), min(min_iou, img_iou)
+        if img_score > SCORE_DIFF_MAX or img_iou < IOU_MIN:
+            failures.append({"image": i, "reason": f"score diff {img_score:.2e}, iou {img_iou:.4f}"})
     return {"images": len(images), "threshold": threshold, "max_score_diff": max_score,
             "min_box_iou": min_iou, "detections_compared": compared, "failures": failures}
 

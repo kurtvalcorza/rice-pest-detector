@@ -371,7 +371,7 @@ Each record below is one execution, as recorded in [`docs/evaluation-record.md`]
 - **Runtime:** CPU, ONNX Runtime `CPUExecutionProvider`; version and CPU model not recorded
 - **Procedure:** 10 validation photos at threshold 0.48; a second, query-by-query comparison at 0.04; CPU time as the median over 10 photos
 - **Observed result:** at 0.48, kept detections and classes identical, box IoU 1.000, maximum score difference 2.95e-3, above the 1e-3 tolerance. At 0.04, maximum score difference 7.5e-3 and minimum box IoU 0.989, and two photos differed by one or two detections near the cut. Median CPU time 0.14 s per photo.
-- **Caveats:** parity was checked at 0.48, not at this model's counting threshold of 0.50; the manifest's `notes` field records that kept detections are identical at 0.48 and that parity was not run at 0.50; 10 photos only; one laptop; no phone measured
+- **Caveats:** parity was first checked at 0.48; a re-run at this model's counting threshold of 0.50 (2026-10-18) also found kept detections and classes identical, with scores differing by up to 2.95e-3 on 2 of the 10 photos. The owner waived the 1e-3 score tolerance for this teaching demo (dated in `docs/evaluation-record.md`), and the manifest's `notes` field records it; 10 photos only; one laptop; no phone measured
 
 ## Citation
 

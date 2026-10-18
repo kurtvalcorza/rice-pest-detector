@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Needed in every build type: the app downloads models from Kaggle (home screen and Settings).
+         Photos and counts never leave the phone unless the user shares them. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="rice_pest_app"
         android:name="${applicationName}"

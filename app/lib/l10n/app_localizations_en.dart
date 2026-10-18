@@ -146,8 +146,9 @@ class AppLocalizationsEn extends AppLocalizations {
     int size,
     String threshold,
     String accuracy,
+    String baseline,
   ) {
-    return '$architecture · $size px · threshold $threshold · count accuracy $accuracy';
+    return '$architecture · $size px · threshold $threshold · count accuracy $accuracy (doing nothing: $baseline)';
   }
 
   @override
@@ -263,9 +264,10 @@ class AppLocalizationsEn extends AppLocalizations {
     int size,
     String threshold,
     String accuracy,
+    String baseline,
     int megabytes,
   ) {
-    return '$architecture · $size px · threshold $threshold · count accuracy $accuracy · $megabytes MB';
+    return '$architecture · $size px · threshold $threshold · count accuracy $accuracy (doing nothing: $baseline) · $megabytes MB';
   }
 
   @override

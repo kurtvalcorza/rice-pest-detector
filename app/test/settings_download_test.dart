@@ -51,9 +51,9 @@ void main() {
     await openSettings(tester);
     expect(find.text('Download a model'), findsOneWidget);
     expect(inRow('dfine-l', find.text('D-FINE-L')), findsOneWidget);
-    expect(inRow('dfine-l', find.text('D-FINE (large) · 640 px · threshold 0.50 · count accuracy 0.822 · 125 MB')),
+    expect(inRow('dfine-l', find.text('D-FINE (large) · 640 px · threshold 0.50 · count accuracy 0.822 (doing nothing: 0.474) · 125 MB')),
         findsOneWidget);
-    expect(inRow('rfdetr-m', find.text('RF-DETR (medium) · 576 px · threshold 0.48 · count accuracy 0.846 · 122 MB')),
+    expect(inRow('rfdetr-m', find.text('RF-DETR (medium) · 576 px · threshold 0.48 · count accuracy 0.846 (doing nothing: 0.474) · 122 MB')),
         findsOneWidget);
     expect(inRow('dfine-l', find.widgetWithText(FilledButton, 'Download')), findsOneWidget);
     expect(inRow('dfine-l', find.text('Installed')), findsNothing);

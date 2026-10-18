@@ -39,6 +39,13 @@ jobs:
       - name: Run pytest
         run: python -m pytest -q
 
+      # The app's golden fixtures must match a fresh build from the Python reference (Pillow is pinned
+      # because resize output differs between versions).
+      - name: Check the app's golden fixtures
+        run: |
+          python -m tools.export_app_fixtures --check
+          python app/tool/export_resize_fixtures.py --check
+
   app:
     name: Flutter app tests
     runs-on: ubuntu-latest

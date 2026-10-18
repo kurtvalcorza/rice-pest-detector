@@ -572,7 +572,7 @@ The debug APK is about 184 MB, mostly ONNX Runtime's native libraries for every 
 
 | Suite | Command | Count | Covers |
 | :-- | :-- | --: | :-- |
-| Python | `.\.venv\Scripts\python -m pytest` | 128 | data pipeline, splits, metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration |
+| Python | `.\.venv\Scripts\python -m pytest` | 141 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
 | Dart (PC) | `flutter test` in `app/` | 138 | contract parity, decoding, counting, history, model store and registry, model import and download checks, localisation, screens (including the no-model state, settings and compare) |
 | Dart (device) | `flutter drive … --no-enable-impeller` | 1 | the real app starting with no model installed (note: `flutter drive` uninstalls the app afterwards, which also removes a demo model) |
 
@@ -621,7 +621,7 @@ rice-pest-detector/
 
 This repository ships a small agent setup, used in the *Coding with AI Agents* workshop and usable as a pattern:
 
-- `.claude/settings.json`: a **Stop hook** (`.claude/hooks/require_green_tests.py`) that runs `flutter test` in `app/` when Claude Code tries to finish, and blocks "done" while tests fail. It allows the stop with a warning if Flutter is not installed. Switch it off with `RICE_PEST_STOP_HOOK=off`. The settings also pre-approve `flutter test`.
+- `.claude/settings.json`: a **Stop hook** (`.claude/hooks/require_green_tests.py`) that runs `flutter test` in `app/` when Claude Code tries to finish, and blocks "done" while tests fail. It blocks once per stop: if the tests still fail after the agent has carried on, it allows the stop with a warning, so the agent cannot loop. It also allows the stop with a warning if Flutter is not installed or the run times out. Switch it off with `RICE_PEST_STOP_HOOK=off`. The settings also pre-approve `flutter test`.
 - `.claude/skills/refactor-safely/SKILL.md`: a skill for behaviour-preserving refactors, mirrored in `.agents/skills/` for agents that read that folder.
 - `.claude/agents/find-callers.md`: a read-only sub-agent that lists every use of a setting before a refactor.
 
@@ -676,6 +676,7 @@ This repository was built with substantial help from an AI coding assistant (Cla
 | `NOTICE` | Third-party notices |
 | `docs/inference-contract.md` | The pre- and post-processing contract |
 | `docs/evaluation-record.md` | Data-prep checks, runs, review fixes, results |
+| `docs/decisions.md` | Dated owner decisions about the repository, the app and the published models |
 | `app/lib/inference/contract.dart` | The app's copy of the contract constants |
 | `SECURITY.md` | How to report a vulnerability, and what is in scope |
 | `CONTRIBUTING.md` | How to report a bug, ask a question or propose a change |
