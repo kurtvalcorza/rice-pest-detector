@@ -10,7 +10,7 @@ description: "Task list for the Trap Pest Counter phone app"
 
 **Status**: The app is built. Each done task `[x]` ends with the files that implement it (→). Open tasks `[ ]` are work that does not exist in the repository yet.
 
-**Tests**: Required. Constitution Principle III (test-first) is non-negotiable: every test task below was written first and failed for the right reason before its implementation task.
+**Tests**: Required. Constitution Principle III (test-first) is non-negotiable: the app was built test-first, milestone by milestone (README, "Demo app"); the test tasks below are listed before the code they cover, but no record shows each one failing first.
 
 **Organization**: Tasks are grouped by user story so each story can be built, tested and shown on its own.
 

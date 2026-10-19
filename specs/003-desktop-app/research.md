@@ -51,7 +51,7 @@ The stack was left open on purpose ("plan both, decide in research"). This file 
 
 ## R6. Language choice
 
-**Decision**: On first start, use Filipino when the system locale's language is `fil` or `tl`, else English. A Language setting stores the choice next to the active-model setting. `RicePestApp` already accepts a `locale`. Desktop-specific wording (for example "computer" instead of "phone", "Copy the counts") goes in new ARB keys used only on desktop, so the phone's strings are unchanged.
+**Decision**: On first start, use Filipino when the system locale's language is `fil` or `tl`, else English. A Language setting stores the choice in `settings.json` (data-model, Settings). `RicePestApp` already accepts a `locale`. Desktop-specific wording (for example "computer" instead of "phone", "Copy the counts") goes in new ARB keys used only on desktop, so the phone's strings are unchanged.
 
 ## R7. Packaging
 

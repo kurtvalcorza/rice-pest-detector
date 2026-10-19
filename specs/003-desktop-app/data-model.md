@@ -2,7 +2,7 @@
 
 **Feature**: [spec.md](spec.md) | **Plan**: [plan.md](plan.md)
 
-The desktop reuses the phone app's data unchanged (FR-009, Principle VII). Only **Settings** is new. All files live in the per-user application-support folder (research R5).
+The desktop reuses the phone app's data unchanged (FR-009, Principle VII). Only **Settings** is new. All files live in the per-user application-support folder (research R5): `models/` (with `models/active.json`), `model/` (the pinned default model's download), `photos/`, `history/history.json` and `settings.json`. The phone's developer side-load folder `demo/` is not used on the desktop.
 
 ## Model (existing: `InstalledModel`, `ModelManifest`)
 

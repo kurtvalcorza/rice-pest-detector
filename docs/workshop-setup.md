@@ -1,57 +1,35 @@
-# Coding with AI Agents: setup before the session
+# Coding with AI Agents: the workshop, at your own pace
 
-About 15 minutes, done before the day. The session is two hours of short talks, a live demo of the Android demo app and three short exercises. You can take part with any coding agent, or with none: everything is shown on screen, and you can pair with someone who has one.
+This page takes you through the *Coding with AI Agents* workshop on your own, in the same order as the session: six modules, three exercises, and a longer Spec Kit exercise to finish. Allow about three hours, in as many sittings as you like. There is no facilitator, so every exercise has a way to check your work and an answer to compare with.
 
-## What you need, at a glance
+**The slides.** Open `docs/presentations/coding-with-ai-agents-2h.html` from your clone in a web browser (GitHub shows the file's source, not the slides). Move with the arrow keys, and press **N** to show each slide's notes: the "About this slide" part says what the speaker said. Each module below gives its slide numbers. The "Presenting" part of the notes was for the speaker; skip it.
 
-| | Needed for | Required? |
-| :-- | :-- | :-- |
-| Git and this repository, cloned | The specs, agent setup and case studies used in the session | Yes |
-| A coding agent you are allowed to use | Exercises 0, 1 and 2 | Yes, to follow along hands-on. Otherwise watch, or pair up |
-| A terminal and an empty practice folder | Exercises 1 and 2 | Yes |
-| `uv` and Spec Kit | Exercise 2 | Yes, for Exercise 2 |
+**What you need:** Git and this repository, an AI coding agent, an empty practice folder, and `uv` with Spec Kit for Module 3. Module 0 sets them up.
 
-That is all the session needs. Nothing in this repository has to be built for it, and the app demo runs on the presenter's machine. The model weights are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector) as a teaching demo.
+## Module 0. Introduction and set-up (slides 1–8, about 30 minutes)
 
-Anything else (running the tests, the training notebooks, the demo app, or the Colab, Kaggle and GitHub MCP servers) is optional and listed by task in [setup.md](setup.md).
+Read slides 1–7: what the workshop covers, how it was made with AI, and why free tiers can train on what you type.
 
-## 1. Clone this repository
+### Install what you need
 
-Install Git if you do not have it ([setup.md, Git](setup.md#git)), then:
+Follow [setup.md](setup.md) for [Git](setup.md#git), [an AI coding agent](setup.md#an-ai-coding-agent) and [`uv` and Spec Kit](setup.md#uv-and-spec-kit), then clone this repository. Python, Flutter and the training tools are not needed. To see what you already have, [setup.md](setup.md#let-your-agent-check-what-is-installed) has a prompt that asks your agent to check, without installing anything.
 
-```bash
-git clone https://github.com/kurtvalcorza/rice-pest-detector.git
-```
+### Set up your agent safely
 
-What you will open from it during the session:
-
-| When | Open | What it shows |
-| :-- | :-- | :-- |
-| Module 2 | `.claude/skills/`, `.claude/agents/`, `.claude/hooks/` | A working skill, read-only sub-agent and Stop hook, the three extension points the module explains |
-| Module 3, the real specs | `.specify/memory/constitution.md`, `specs/` | Spec Kit specs: the project's constitution, the model (001), the phone app (002) and the desktop app (003) |
-| Module 5 and after | `docs/presentations/*.html` (open in a browser) | The session deck, the two case studies (training the model, building the app) and the deep dive on agent harnesses and context engineering |
-| Any time | `README.md`, `docs/evaluation-record.md` | How the project works, and every result with its provenance |
-
-## 2. A coding agent, set up safely
-
-Use the agent you already have, whatever it is: one that runs in a terminal, in your editor or in the browser. Before the session:
-
-1. **Check its terms.** Some agents exclude users under 18. Pick one whose terms allow you, or plan to watch and navigate for a partner.
-2. **Sign in once** and send it a test message, so you are not creating an account during the session.
+1. **Check its terms.** Some agents exclude users under 18. Pick one whose terms allow you.
+2. **Sign in once** and send it a test message.
 3. **Switch training off.** Many free tiers may use what you type to improve their models. Find the data or training setting and turn it off.
-4. **Know what not to paste.** Never paste personal or confidential material (company code, client data) or graded work. Everything in the session is safe to type.
+4. **Know what not to paste.** Never paste personal or confidential material (company code, client data) or graded work. Everything in this workshop is safe to type.
 
-### Or let your agent do steps 3 and 4
-
-Once your agent works, you can ask it to do the rest. Open it in the cloned `rice-pest-detector` folder and send:
+Once your agent works, you can let it install the rest of what this workshop needs. Open it in the cloned `rice-pest-detector` folder and send:
 
 > Read docs/workshop-setup.md and the "uv and Spec Kit" section of docs/setup.md. First tell me what is already installed and what is missing, and wait. Then make the practice folder and install only uv and Spec Kit, asking me before each command, and check that `specify --help` works. Do not change account, system or security settings, do not use admin rights, and do not install Flutter or Android tools.
 
-Read its plan before you approve anything, and read each command before it runs: the `uv` installer downloads and runs a script from the internet. This is a small version of what the session is about. The repository's `AGENTS.md` repeats these limits for any agent that reads it.
+Read its plan before you approve anything, and read each command before it runs: the `uv` installer downloads and runs a script from the internet. This is a small version of what the workshop is about. The repository's `AGENTS.md` repeats these limits for any agent that reads it.
 
-## 3. A terminal and a practice folder
+### Make a practice folder
 
-The exercises start from scratch, so keep them outside the cloned repository. Open your usual terminal (PowerShell on Windows; Terminal on macOS or Linux) and make an empty folder, for example:
+The exercises start from scratch, so keep them outside the cloned repository:
 
 ```bash
 mkdir agents-practice
@@ -59,38 +37,76 @@ cd agents-practice
 git init
 ```
 
-`git init` is optional but recommended: with Git, every change the agent makes shows up in `git diff` and can be undone with `git restore .`.
+With Git, every change the agent makes shows up in `git diff` and can be undone with `git restore .`.
 
-## 4. `uv` and Spec Kit (for Exercise 2)
+### Exercise 0: one prompt (slide 8, 5 minutes)
 
-Exercise 2 and section 7 use [Spec Kit](https://github.com/github/spec-kit), which installs with `uv`. Follow [setup.md, uv and Spec Kit](setup.md#uv-and-spec-kit), including its optional two-minute dry run with your agent.
+The demo app counts rice pests in a photo of a light trap. An agent drafted it; a person directed every step. See it: the screenshots in the demo-app case study (open `docs/presentations/demo-app-process.html` in a browser), or run it yourself ([Optional: run the demo app](#optional-run-the-demo-app-on-an-emulator)).
 
-## 5. Optional, after the session: run the Python tests
+Now **write down the one prompt you think built this app**. If you have an agent, try it in your practice folder and look at what comes back. Keep what you wrote: Module 1 shows how the app really started.
 
-See [setup.md, Python tools and tests](setup.md#python-tools-and-tests).
+## Module 1. Direct (slides 9–18, about 15 minutes)
 
-## 6. Optional, in your own time: run the demo app on an emulator
+Read slides 9–18: why the one-shot prompt fails, the agent loop, `AGENTS.md`, and how to read a plan and when to stop the agent.
 
-Not needed for the session. Install Flutter, Android Studio and an emulator first: [setup.md, Demo app](setup.md#demo-app-optional) (allow one to two hours the first time). Then start the emulator and, from the repository's `app/` folder:
+**Compare your Exercise 0 prompt** with slide 15, "How the app actually started", and with the "Behind the scenes: prompts used" slides in the demo-app case study. The first prompt was a question about the tech stack, not a build request, and fourteen short prompts followed, each settling a decision.
+
+**Check yourself:** which decisions did your prompt leave to the agent? Typical gaps are the platform (phone, web or desktop), where the photos come from, what the model is and where it runs, what counts as "done", and what the app must never do (here: give spray or treatment advice).
+
+## Module 2. Context (slides 19–35, about 40 minutes)
+
+Read slides 19–33: an agent is a model plus a *harness*, context windows and why long sessions cost more, skills, hooks, sub-agents and MCP. The examples are real: `.claude/skills/`, `.claude/agents/` and `.claude/hooks/` in this repository.
+
+### Exercise 1: conduct, do not one-shot (slide 34, 10 minutes)
+
+In your practice folder, with your agent:
+
+1. Take your Exercise 0 prompt.
+2. Ask your agent for a plan first, and no code yet.
+3. Read the plan: what did it assume? Correct one thing.
+4. Approve one step only, and watch what it runs.
+5. Stop it if it leaves the plan.
+
+**Check yourself** (slide 35's debrief): name one assumption in the plan you corrected, a moment you would have stopped it, and something it never asked you.
+
+<details>
+<summary>What good answers look like</summary>
+
+- **An assumption you corrected:** for example, it planned a web app when you meant a phone app, assumed it could train a model on the spot, or invented a data source.
+- **A moment to stop it:** it installed packages or created files outside the step you approved, or started on step two.
+- **What it never asked:** usually who the users are, what counts as done, how accurate the counts must be, and what it must never do. Those gaps are what a written spec closes, which is Module 3.
+
+</details>
+
+## Module 3. Specify (slides 36–62, about 45 minutes)
+
+Read slides 36–59: what a spec is, the anatomy of a real one, acceptance criteria, and ten spec-driven frameworks compared. The real specs are in this repository: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) and [`specs/`](../specs/), for the model (001), the phone app (002) and a desktop app (003).
+
+### Exercise 2: Spec Kit (slides 60–61, 15 minutes)
+
+In a new folder, on an idea of your own (your Exercise 0 app is fine):
 
 ```bash
-flutter run --no-enable-impeller -d emulator-5554
+specify init my-project --integration <your-agent-key>
 ```
 
-The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.	ools
-un_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. More detail, including device tests, is in the README, "Demo app (Android)".
+Your agent's key is in Spec Kit's [integrations list](https://github.github.io/spec-kit/reference/integrations.html), for example `agy`, `claude` or `codex`. Open the new folder in your agent and type in its chat (Codex uses `$speckit-…` instead of `/speckit-…`):
 
-**The model.** The trained weights are not part of this repository; they are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector). A fresh install opens with "No model is installed yet", and counting is off until the model is downloaded. The app's home screen offers **Download the model**: the app fetches r50-v5 (about 172 MB) from Kaggle, checks its size and SHA-256 and then counts, with the notice "Demo: real model weights … not validated in the field".
+```text
+/speckit-constitution   the ground rules for the project
+/speckit-specify        what you want and why, not how
+/speckit-clarify        let it ask about what is ambiguous
+```
 
-## 7. Exercise in your own time: spec the desktop app with Spec Kit
+Read the `spec.md` it wrote.
 
-About 45 minutes. In the session, Exercise 2 showed Spec Kit on stage. Here you run the whole flow yourself on a real feature: a desktop version of the demo app (Windows, macOS and Linux). You write the specification, the plan and the task list, but no code. Then you compare your result with ours in [`specs/003-desktop-app/`](../specs/003-desktop-app/).
+**Check yourself** (slide 62's debrief): is the spec ready to build from? Every requirement has a number where it needs one, and every question clarify asked has an answer. Name one question clarify asked that your Exercise 0 prompt never answered, one gap it missed, and one requirement that needed a number. Compare with the counting rule in [`specs/002-mobile-app/spec.md`](../specs/002-mobile-app/spec.md): a detection counts when its score is at or above the model's threshold (0.48 for the default model), not "when the model is confident".
 
-The steps follow Spec Kit's own [quickstart](https://github.github.io/spec-kit/quickstart.html). Read it alongside this section for what each command does.
+### Going further: the whole Spec Kit flow on the desktop app (about 45 minutes)
 
-**You need:** this repository, cloned (section 1); `uv` and Spec Kit (section 4); and an agent with its command-line tool ([setup.md, An AI coding agent](setup.md#an-ai-coding-agent)). Any agent Spec Kit supports works; find its integration key in Spec Kit's [integrations list](https://github.github.io/spec-kit/reference/integrations.html). The examples use the agents from the workshop demos, run in VS Code: Antigravity (`agy`), Claude Code (`claude`) and Codex (`codex`). Naming them is not an endorsement; see [setup.md, An AI coding agent](setup.md#an-ai-coding-agent).
+Here you run every step of Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html), on a real feature: a desktop version of the demo app. You write the specification, the plan and the task list, but no code, then compare with ours in [`specs/003-desktop-app/`](../specs/003-desktop-app/). Any agent Spec Kit supports works; the examples use `claude`, and you replace it with your agent's key.
 
-### Step 1. Start from a clean branch
+#### Step 1. Start from a clean branch
 
 This repository already contains our Spec Kit run, so remove it on a branch of your own first. Your answers then cannot copy ours, and `main` keeps ours for the comparison at the end:
 
@@ -100,7 +116,7 @@ git rm -r -q .specify specs .claude/skills/speckit-*
 git commit -m "Start the Spec Kit exercise from scratch"
 ```
 
-### Step 2. Initialise Spec Kit in the repository
+#### Step 2. Initialise Spec Kit in the repository
 
 ```bash
 specify init --here --integration claude
@@ -108,7 +124,7 @@ specify init --here --integration claude
 
 Replace `claude` with your agent's key, for example `agy` or `codex`. `--here` sets Spec Kit up in the current folder instead of a new one; it asks before merging into a folder that is not empty (add `--force` to skip the question). It adds `.specify/` (templates, scripts, a blank constitution) and the `speckit-*` commands for your agent. Run `git status` to see exactly what it added. If it reformatted a file you already had, such as `.claude/settings.json`, `git diff` shows it and `git checkout -- <file>` puts it back.
 
-### Step 3. Run the commands in your agent
+#### Step 3. Run the commands in your agent
 
 Open the repository folder in VS Code, open your agent's panel, and run each command on its own, reading what it wrote before you go on. Type the text after each command as its argument. In Codex, type `$speckit-…` instead of `/speckit-…`.
 
@@ -134,9 +150,9 @@ Open the repository folder in VS Code, open your agent's panel, and run each com
 
 Stop here. `/speckit-implement` and `/speckit-converge` would build the app, which is not part of this exercise.
 
-### Step 4. Compare with ours
+#### Step 4. Compare with ours
 
-Your files are under `specs/001-desktop-app/`: Spec Kit numbers features from 001, and your branch has no others. Ours is `specs/003-desktop-app/` on `main`, because `main` also holds the specs for the model (001) and the phone app (002). Compare them:
+Your files are under a folder such as `specs/001-desktop-app/` (Spec Kit picks the name): Spec Kit numbers features from 001, and your branch has no others. Ours is `specs/003-desktop-app/` on `main`, because `main` also holds the specs for the model (001) and the phone app (002). Compare them:
 
 ```bash
 git diff main -- .specify/memory/constitution.md
@@ -157,10 +173,36 @@ Questions to answer for yourself:
 
 **Clean up:** `git switch main`, then `git branch -D my-speckit-run`.
 
+## Module 4. Guard (slides 63–71, about 15 minutes)
+
+Read slides 63–71: the agent acts with your permissions, prompt injection (including through files you ask it to review), the "lethal trifecta", secrets and sandboxes.
+
+**Do it:** open your agent's settings and check the six safe defaults on slide 71 against them: approvals on; network off unless the task needs it; no secrets in the repository; edits scoped to the folders the task needs; every command reviewed before it runs; every new dependency checked. Which one would be hardest to keep in your own work, and what would make it easier?
+
+## Module 5. Share (slides 72–83, about 20 minutes)
+
+Read slides 72–83: how an agent built the real app, licences, the model behind it, and how teams use agents. Then go deeper:
+
+- **Training the model:** `docs/presentations/model-training.html`, and [`specs/001-model-training/`](../specs/001-model-training/).
+- **Building the app:** `docs/presentations/demo-app-process.html`, and [`specs/002-mobile-app/`](../specs/002-mobile-app/).
+- **Agent harnesses and context engineering:** `docs/presentations/harness-context-engineering.html`.
+
+**The five takeaways:** conduct the agent, do not one-shot it; write the spec before the code; put the rules that matter in hooks, tests and CI; treat text from outside as untrusted; an agent drafts, a person decides and stays accountable.
+
+## Optional: run the demo app on an emulator
+
+Not needed for the session. Install Flutter, Android Studio and an emulator first: [setup.md, Demo app](setup.md#demo-app-optional) (allow one to two hours the first time). Then start the emulator and, from the repository's `app/` folder:
+
+```bash
+flutter run --no-enable-impeller -d emulator-5554
+```
+
+The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.\tools\run_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. More detail, including device tests, is in the README, "Demo app (Android)".
+
+**The model.** The trained weights are not part of this repository; they are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector). A fresh install opens with "No model is installed yet", and counting is off until the model is downloaded. The app's home screen offers **Download the model**: the app fetches r50-v5 (about 172 MB) from Kaggle, checks its size and SHA-256 and then counts, with the notice "Demo: real model weights … not validated in the field".
+
 ## If something does not work
 
 - **An install fails** (`uv`, `specify`, Git, Python): see [setup.md, If something does not work](setup.md#if-something-does-not-work).
-- **A work or school laptop blocks installs:** skip step 4 and pair with someone for Exercise 2, or ask your IT team before the day. Without Git, download the repository as a ZIP from its GitHub page instead.
-- **No agent, or under 18 and none allowed:** you can still do Exercise 0 on paper and navigate for a partner in Exercises 1 and 2.
-
-On the day, bring the laptop charged, and the agent signed in.
+- **No agent, or under 18 and none allowed:** you can still read the slides, do Exercise 0 on paper, and read the plans and specs in this repository; or pair with someone who has an agent and read every action before it is approved.
+- **A work or school laptop blocks installs:** ask your IT team, or use a personal machine.

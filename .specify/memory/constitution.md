@@ -51,7 +51,7 @@ inclusive `score >= threshold`.
   pass.
 - A change is not done until its project's whole suite passes (`python -m pytest`, `flutter test`,
   and the suite of any new client), locally and in CI.
-- Generated files (fixtures, notebooks, decks) MUST have a `--check` mode, and CI MUST run it.
+- Generated files in this repository (golden fixtures, notebooks) MUST have a `--check` mode, and CI MUST run it.
 
 ### IV. Rules Fixed Before Results
 

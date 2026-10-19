@@ -11,18 +11,17 @@ What you install depends on what you want to do. Find your row, install what it 
 | Train a model | A Google account and a browser; training runs on Google Colab | none locally |
 | Export a model to ONNX, check parity, calibrate | Everything in the row "Run the Python tests and tools" | as above |
 | Run the demo app on an emulator | Flutter, Android Studio with the Android SDK and an emulator | 1–2 hours the first time |
+| Run notebooks and scripts on Colab from a terminal | The Colab CLI (Linux and macOS; on Windows, inside WSL). See [Colab CLI](#colab-cli-optional) | about 15 min |
+| Let an agent run the Colab notebooks, or use Kaggle | The Colab MCP and Kaggle MCP servers. See [MCP](#let-your-agent-work-with-colab-and-kaggle-mcp) | about 10 min |
+| Let an agent work with the repository on GitHub | The [GitHub CLI](https://cli.github.com) (`gh`, row in the table below) or the [GitHub MCP server](https://github.com/github/github-mcp-server) | about 5 min |
 
-**Optional**, each for one task:
+## Let your agent check what is installed
 
-| To… | Install |
-| :-- | :-- |
-| Run the tests and tools | [Python 3.12](https://www.python.org/downloads/), then `pip install -r requirements.txt` |
-| Run the demo app | [Flutter](https://docs.flutter.dev/get-started/install), [Android Studio](https://developer.android.com/studio) and an Android emulator |
-| Run the training notebooks | A [Google Colab](https://colab.research.google.com) account (you sign in with a Google account) |
-| Let an agent work with the repository on GitHub | The [GitHub CLI](https://cli.github.com) (`gh`) or the [GitHub MCP server](https://github.com/github/github-mcp-server) |
-| Let an agent run the Colab notebooks | The [Colab MCP server](https://github.com/googlecolab/colab-mcp), which connects a local agent to a Colab session in your browser |
-| Run notebooks and scripts on Colab from a terminal | The [Colab CLI](https://github.com/googlecolab/google-colab-cli) (Linux and macOS; on Windows, inside WSL). See [Colab CLI](#colab-cli-optional) |
-| Let an agent use Kaggle (models, datasets, notebooks) | The [Kaggle MCP server](https://www.kaggle.com/docs/mcp). Set-up for both MCP servers: [below](#let-your-agent-work-with-colab-and-kaggle-mcp) |
+Once an agent works ([An AI coding agent](#an-ai-coding-agent)), it can tell you what you already have. Open it in the cloned `rice-pest-detector` folder and send:
+
+> Read docs/setup.md. Without installing or changing anything, check which of these I have and their versions: git, uv, specify, python 3.12, the agent CLIs (agy, claude, codex), flutter, adb, colab, and on Windows wsl. Show a table with the tool, what this repository needs it for, the version or "missing", and the setup.md section that installs it. Then wait for me.
+
+Every command it runs should be a version check (`git --version` and the like): approve each one, and stop it if it tries to install or change anything. Then install only the rows your task needs.
 
 None of these needs the trained weights. They are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector), and the demo app can download r50-v5 itself.
 
@@ -44,7 +43,7 @@ The sections below give each tool's details and how to check it works.
 
 ## Git
 
-Install it with `winget install --id Git.Git -e` (Windows), `brew install git` (macOS) or `sudo apt install git` (Ubuntu), or download it from [git-scm.com/downloads](https://git-scm.com/downloads). Check with `git --version`, then clone the repository:
+Install it with the Git row of the [table above](#install-commands-by-operating-system), or download it from [git-scm.com/downloads](https://git-scm.com/downloads). Check with `git --version`, then clone the repository:
 
 ```bash
 git clone https://github.com/kurtvalcorza/rice-pest-detector.git
@@ -53,7 +52,7 @@ cd rice-pest-detector
 
 ## An AI coding agent
 
-What you install here is the agent's *harness*: the program around the AI model that reads your files, runs commands and asks your permission ("Agent = Model + Harness" in the session deck). Any coding agent you are allowed to use works. The workshop demos happened to use three, each as a VS Code extension with its command-line tool, so the steps below cover those. **Naming them is not a recommendation or an endorsement:** this project has no affiliation with any of these companies, receives nothing from them, and is not endorsed by them. Each is a third-party product under its own terms, data practices and pricing, which change; check them before you sign up. Choosing an agent and setting it up safely (terms, age limits, training settings) is in [workshop-setup.md, section 2](workshop-setup.md#2-a-coding-agent-set-up-safely).
+What you install here is the agent's *harness*: the program around the AI model that reads your files, runs commands and asks your permission ("Agent = Model + Harness" in the session deck). Any coding agent you are allowed to use works. The workshop demos happened to use three, each as a VS Code extension with its command-line tool, so the steps below cover those. **Naming them is not a recommendation or an endorsement:** this project has no affiliation with any of these companies, receives nothing from them, and is not endorsed by them. Each is a third-party product under its own terms, data practices and pricing, which change; check them before you sign up. Choosing an agent and setting it up safely (terms, age limits, training settings) is in [workshop-setup.md, "Set up your agent safely"](workshop-setup.md#set-up-your-agent-safely).
 
 **1. An editor.** The demos used VS Code: download it from [code.visualstudio.com](https://code.visualstudio.com), or `winget install Microsoft.VisualStudioCode` (Windows) or `brew install --cask visual-studio-code` (macOS).
 
@@ -93,8 +92,6 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Or with a package manager: `winget install --id astral-sh.uv -e` (Windows) or `brew install uv` (macOS).
-
 Close and reopen the terminal so it finds `uv`.
 
 **Install Spec Kit:**
@@ -104,7 +101,7 @@ uv tool install specify-cli
 specify --help
 ```
 
-If `specify --help` prints its commands, you are ready. The session was prepared on Spec Kit 1.2.0; 1.2.1 or later works the same way.
+If `specify --help` prints its commands, you are ready. This repository's Spec Kit files were made with Spec Kit 1.2.1.
 
 **Optional dry run** (two minutes; it confirms Spec Kit and your agent work together):
 
@@ -112,7 +109,7 @@ If `specify --help` prints its commands, you are ready. The session was prepared
 specify init setup-check --integration <your-agent>
 ```
 
-Replace `<your-agent>` with your agent's key, for example `claude`, `copilot`, `gemini`, `codex`, `cursor-agent` or `opencode` (the [full list](https://github.github.io/spec-kit/reference/integrations.html)). Open your agent in the new `setup-check` folder and type `/speckit-` in its chat: the Spec Kit commands should appear. Codex uses `$speckit-…` instead. Then delete the `setup-check` folder.
+Replace `<your-agent>` with your agent's key, for example `agy`, `claude`, `codex`, `copilot`, `cursor-agent`, `gemini` or `opencode` (the [full list](https://github.github.io/spec-kit/reference/integrations.html)). Open your agent in the new `setup-check` folder and type `/speckit-` in its chat: the Spec Kit commands should appear. Codex uses `$speckit-…` instead. Then delete the `setup-check` folder.
 
 ## Python tools and tests
 
@@ -198,7 +195,7 @@ Two MCP servers let a coding agent on your computer work with the notebooks and 
 
    In clients configured with an `mcpServers` JSON block, the same server is `"colab-mcp": {"command": "uvx", "args": ["git+https://github.com/googlecolab/colab-mcp"], "timeout": 30000}`.
 2. Restart Claude Code and run `/mcp`: `colab-mcp` should be listed as connected.
-3. Ask the agent to open a Colab connection. It opens Colab in your browser; sign in with your Google account there, choose a T4 GPU runtime, and the agent's notebook tools appear once the session is connected.
+3. Ask the agent to open a Colab connection. It opens Colab in your browser; sign in with your Google account there, and the agent's notebook tools appear once the session is connected.
 4. Check the connection: ask it to add a cell that runs `!nvidia-smi` in the connected session and run it. It should report the GPU.
 
 Code the agent runs in Colab uses your account's compute and can read your Google Drive once you mount it. Read each cell before you approve it, and run training cells one at a time.
@@ -238,7 +235,7 @@ flutter pub get
 flutter test
 ```
 
-`flutter pub get` installs the app's own packages (`flutter_onnxruntime`, `image` and others, listed in `app/pubspec.yaml`); you do not install them separately. If `flutter test` passes, the toolchain is ready. Running the app is in [workshop-setup.md, section 6](workshop-setup.md#6-optional-in-your-own-time-run-the-demo-app-on-an-emulator).
+`flutter pub get` installs the app's own packages (`flutter_onnxruntime`, `image` and others, listed in `app/pubspec.yaml`); you do not install them separately. If `flutter test` passes, the toolchain is ready. Running the app is in [workshop-setup.md, "Optional: run the demo app"](workshop-setup.md#optional-run-the-demo-app-on-an-emulator).
 
 ## If something does not work
 

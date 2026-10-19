@@ -14,7 +14,7 @@ Add Windows, macOS and Linux targets to the existing Flutter app in `app/`, so t
 
 **Primary Dependencies**: `flutter_onnxruntime` 1.9.0 (ONNX Runtime 1.28.x on all three desktops), `image`, `file_selector`, `path_provider`, `http`, `crypto` (all existing); `desktop_drop` (new, for drag and drop)
 
-**Storage**: Files in the per-user application-support folder: `models/<id>/` (model + manifest), `photos/` (copies of counted photos), `history/history.json`, `models/active.json`, `settings.json` (new: language)
+**Storage**: Files in the per-user application-support folder: `models/<id>/` (installed models + manifests), `model/` (the pinned default model's download), `photos/` (copies of counted photos), `history/history.json`, `models/active.json`, `settings.json` (new: language)
 
 **Testing**: `flutter test` (unit and widget, host-side, all platforms); `integration_test` on a desktop target for the end-to-end count; `pytest` for the new parity tool
 
@@ -26,7 +26,7 @@ Add Windows, macOS and Linux targets to the existing Flutter app in `app/`, so t
 
 **Constraints**: No network except a user-started model download (Principle V); one model loaded at a time in Compare; exact counts and flags against the reference on 60 photo-model pairs (SC-001)
 
-**Scale/Scope**: 6 existing screens (home, result, settings, compare, about, plus the not-validated banner); 3 published models; about 5 new desktop service classes and 1 new setting
+**Scale/Scope**: 5 existing screens (home, result, settings, compare, about) plus the not-validated banner; 3 published models; about 5 new desktop service classes and 1 new setting
 
 ## Constitution Check
 
