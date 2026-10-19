@@ -5,7 +5,7 @@
 // against Pillow's exif_transpose. decode_test checks the JPEG path matches Pillow for tags 1-8.
 //
 // JPEG decoders differ by a level or two per pixel (IDCT and colour conversion), so real-photo
-// parity with Python is detection-level (spec §4.5 tolerance), not byte-level.
+// parity with Python is detection-level (the export parity tolerance), not byte-level.
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;

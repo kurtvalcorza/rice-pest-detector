@@ -1,4 +1,4 @@
-"""Export a trained RT-DETR checkpoint to ONNX under the inference contract (spec §4.5) and check
+"""Export a trained RT-DETR checkpoint to ONNX under the inference contract (docs/inference-contract.md) and check
 parity with PyTorch: same kept detections (count and classes), box IoU >= 0.99, score diff <= 1e-3.
 Detections are paired by class and box overlap, not by list order, so near-equal scores that the two
 runtimes rank differently do not count as a failure.

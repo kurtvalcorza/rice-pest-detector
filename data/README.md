@@ -14,4 +14,4 @@ Labels and split manifests derived from:
 - **Exclusions.** One family (`img_2002`) was excluded because an image had no label file. It is listed, with the reason, in `exclusions.json`.
 - **Format.** YOLO labels were converted to COCO JSON (`annotations_{train,val,test}.json`). `split_manifest.json` records each image's family, split, SHA-256, size and source path in the archive.
 
-The rules are in `docs/specs/2026-10-13-rice-pest-detector-design.md` §4.1 and the checks in `docs/evaluation-record.md`.
+The rules are in `specs/001-model-training/spec.md` (FR-001 to FR-006) and the checks in `docs/evaluation-record.md`.

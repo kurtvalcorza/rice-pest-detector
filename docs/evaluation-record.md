@@ -176,7 +176,7 @@ Reading:
 
 ## Figures used in the teaching decks (2026-10-16)
 
-The HTML decks in `docs/presentations/` quote figures that were computed from run files but not yet written here. They are recorded now, generated from the files named, so every deck number has a source. Dataset facts on the decks (6,760 published training images, 1,353 families, 0 pest-free images, 0 of 7,098 metadata rows with capture date, place or trap, trays of up to 106 insects) come from the design spec, §2-§3.
+The HTML decks in `docs/presentations/` quote figures that were computed from run files but not yet written here. They are recorded now, generated from the files named, so every deck number has a source. Dataset facts on the decks (6,760 published training images, 1,353 families, 0 pest-free images, 0 of 7,098 metadata rows with capture date, place or trap, trays of up to 106 insects) come from the dataset facts checked on 2026-10-13, now recorded in `specs/001-model-training/research.md`, R0.
 
 **Training curve** (`runs/run-r18/history.jsonl`, 60 rows, epochs numbered from 0). Training loss 10.40 at epoch 0 to 3.39 at epoch 59. Validation count accuracy at threshold 0.5 took one value in all 60 epochs: 0.4743 (the no-detection baseline). Validation species mAP50 by epoch: 0.728, 0.687, 0.795, 0.829, 0.772, 0.786, 0.690, 0.775, 0.803, 0.796, 0.761, 0.752, 0.785, 0.782, 0.779, 0.709, 0.702, 0.785, 0.814, 0.806, 0.786, 0.796, 0.811, 0.738, 0.804, 0.732, 0.796, 0.786, 0.761, 0.794, 0.796, 0.789, 0.824, 0.807, 0.801, 0.806, 0.801, 0.787, 0.803, 0.796, 0.801, 0.791, 0.804, 0.800, 0.794, 0.797, 0.799, 0.799, 0.799, 0.792, 0.800, 0.798, 0.796, 0.796, 0.800, 0.798, 0.800, 0.799, 0.802, 0.799.
 
@@ -344,7 +344,7 @@ Executed with the Colab CLI on a Colab **T4**, 40 epochs, with the committed not
 
 **Owner decision (2026-10-18):** the single test look goes to r50-v5, the model the rules chose and the app ships, at its validation-chosen threshold 0.48. Run once, locally on CPU, with the repository's own evaluation code: the same `evaluation_id`, `check_cached_test`, `evaluate` and atomic write as the notebook's locked test cell; the model was rebuilt from the base config and `best.pt` loaded. The result is bound to the weights, manifest, annotations, threshold and evaluator version (`runs/run-r50v5/test_metrics.json`: `best.pt` `e0ae635d…`, manifest `d505f2d6…`, annotations `d602a8d8…`, threshold 0.48, evaluator version 2).
 
-| Gate (design spec §6) | Test, 252 images | Validation, out-of-fold |
+| Gate (`specs/001-model-training`, SC-002 to SC-006) | Test, 252 images | Validation, out-of-fold |
 | :-- | --: | --: |
 | Species mAP50 ≥ 0.80 | **0.943**: met | 0.937 |
 | Count accuracy ≥ 0.80 | **0.849**: met (no-detection baseline 0.456) | 0.834 |

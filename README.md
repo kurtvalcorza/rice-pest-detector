@@ -22,7 +22,7 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 
 **Who it is for.** Participants in the *Coding with AI Agents* workshop, and anyone learning to build software with AI coding agents. The repository is a worked example of the whole path, from a written spec to a tested, documented result:
 
-- **Specs before code.** The design specs for the model and the app ([docs/specs/](docs/specs/)), written before the agent built anything.
+- **Specs before code.** [Spec Kit](https://github.com/github/spec-kit) specs for the project: a [constitution](.specify/memory/constitution.md) and one folder per feature in [specs/](specs/): the model (001), the phone app (002) and a planned desktop app (003), each with its spec, plan and task list. A self-paced exercise walks you through Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html) on the desktop app ([docs/workshop-setup.md](docs/workshop-setup.md), section 7).
 - **Agent configuration.** The `AGENTS.md` briefing, a skill, a read-only sub-agent and a Stop hook that keeps the agent working until the tests pass (`.claude/`).
 - **A model, trained and judged by rules fixed in advance.** Colab training notebooks, evaluation, calibration and ONNX export, with every result and its provenance in [docs/evaluation-record.md](docs/evaluation-record.md).
 - **A demonstration app.** A Flutter Android app (`app/`) built milestone by milestone, test-first, that counts both species on a trap photo and can switch between and compare models. It shows how to put a model behind an app; it is not a tool for farmers and is not validated for any pest-management decision.
@@ -53,6 +53,7 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 | Run the training notebooks | A [Google Colab](https://colab.research.google.com) account (you sign in with a Google account) |
 | Let an agent work with the repository on GitHub | The [GitHub CLI](https://cli.github.com) (`gh`) or the [GitHub MCP server](https://github.com/github/github-mcp-server) |
 | Let an agent run the Colab notebooks | The [Colab MCP server](https://github.com/googlecolab/colab-mcp), which connects a local agent to a Colab session in your browser |
+| Let an agent use Kaggle (models, datasets, notebooks) | The [Kaggle MCP server](https://www.kaggle.com/docs/mcp). Set-up for both MCP servers: [docs/setup.md](docs/setup.md), "Let your agent work with Colab and Kaggle (MCP)" |
 
 **Install commands.** Windows uses [winget](https://learn.microsoft.com/windows/package-manager/winget/) (built into Windows 10 and 11; run in PowerShell), macOS uses [Homebrew](https://brew.sh), Linux examples are for Ubuntu 24.04. Close and reopen the terminal after installing, so it finds the new commands.
 
@@ -301,7 +302,7 @@ flowchart TB
 
 ## Status and release gates
 
-### Model quality gates (design spec §6), r50-v5 on test
+### Model quality gates (`specs/001-model-training`, SC-002 to SC-006), r50-v5 on test
 
 Run r50-v5: RT-DETR-r50vd on transformers 5.20.1, 40 epochs on a Colab T4, best checkpoint at epoch 1 (counting from 0). Threshold, calibration and the choice of model were fixed on validation; the test split was then evaluated once (2026-10-18). Full detail: `docs/evaluation-record.md`, "Wave 2" and "Test look".
 
@@ -320,7 +321,7 @@ Crowded trays remain the weakest case: on test, white stemborer counts on trays 
 
 These are held by the project owner. Until all are met, the app stays a demo and shows the not-validated notice.
 
-1. **Model.** Passes spec §6 with a threshold chosen on validation; ONNX export and parity done. **Met by r50-v5 (2026-10-18).**
+1. **Model.** Passes the model quality gates above with a threshold chosen on validation; ONNX export and parity done. **Met by r50-v5 (2026-10-18).**
 2. **Field validation on phone photos.** The model card excludes images from other trap designs, cameras or crops. A consented set of phone photos taken in the field, labelled by experts and scored with `count_errors`, is needed first.
 3. **Weights.** Published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector) as a teaching demo, and `app/assets/model_pin.json` points at r50-v5 there (`"kind": "demo"`, threshold 0.48). **Met (2026-10-18).**
 4. **Wording review.** The app's English text, and its Filipino draft (to be reviewed by a native speaker), checked so that nothing reads as agronomic advice.
@@ -455,7 +456,7 @@ Every result, with the command and file it came from, is in [docs/evaluation-rec
 - Rebuilds the fine-tuned architecture from the base **config** (no base weights are downloaded), loads `best.pt`, and exports opset 17 with the contract's names and static shapes.
 - Writes `models/<name>.json` with the SHA-256, size and the source checkpoint's SHA-256.
 - **The export must run in inference mode** (`eval()` plus `no_grad()`). Outside it, the traced graph froze input-dependent values, and outputs diverged on any input other than the one used to trace. `tests/test_export_onnx.py` guards against this.
-- `parity(model, onnx_path, images, threshold)` pairs ONNX and PyTorch detections by class and box overlap, not by list order (near-equal scores can be ranked differently by the two runtimes), applies the spec §4.5 tolerances and reports how many detections it compared, so a pass is never vacuous.
+- `parity(model, onnx_path, images, threshold)` pairs ONNX and PyTorch detections by class and box overlap, not by list order (near-equal scores can be ranked differently by the two runtimes), applies the parity tolerances (`specs/001-model-training`, SC-005) and reports how many detections it compared, so a pass is never vacuous.
 
 r50-v5 export: 171,744,970 bytes, SHA-256 `dc3927ae0967f6553721e18eec826305cca66c7fb5c8cd1789a8187d74f069c1`, from checkpoint `e0ae635d…` (epoch 1). Published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/r50-v5); the checkpoint is not.
 
@@ -599,8 +600,9 @@ rice-pest-detector/
 │   ├── calibrate_scores.py       # Platt calibration, validation only
 │   └── run_emulator.ps1 / .sh    # start an emulator and run the demo app
 ├── tests/                    # pytest suite
+├── .specify/                 # Spec Kit: constitution (memory/), templates, scripts
+├── specs/                    # Spec Kit features: 001 model, 002 phone app, 003 desktop app (planned)
 ├── docs/
-│   ├── specs/                # design specs (model and app)
 │   ├── inference-contract.md
 │   ├── evaluation-record.md  # every result, with provenance
 │   ├── model-card.md         # index of the model cards
@@ -624,6 +626,7 @@ This repository ships a small agent setup, used in the *Coding with AI Agents* w
 - `.claude/settings.json`: a **Stop hook** (`.claude/hooks/require_green_tests.py`) that runs `flutter test` in `app/` when Claude Code tries to finish, and blocks "done" while tests fail. It blocks once per stop: if the tests still fail after the agent has carried on, it allows the stop with a warning, so the agent cannot loop. It also allows the stop with a warning if Flutter is not installed or the run times out. Switch it off with `RICE_PEST_STOP_HOOK=off`. The settings also pre-approve `flutter test`.
 - `.claude/skills/refactor-safely/SKILL.md`: a skill for behaviour-preserving refactors, mirrored in `.agents/skills/` for agents that read that folder.
 - `.claude/agents/find-callers.md`: a read-only sub-agent that lists every use of a setting before a refactor.
+- `.claude/skills/speckit-*`: the Spec Kit commands (`/speckit-constitution`, `/speckit-specify`, `/speckit-plan`, `/speckit-tasks` and the rest), installed by `specify init --here --integration claude`.
 
 ## Licences and attribution
 
@@ -666,8 +669,10 @@ This repository was built with substantial help from an AI coding assistant (Cla
 
 | Document | What it holds |
 | :-- | :-- |
-| `docs/specs/2026-10-13-rice-pest-detector-design.md` | Model design, quality gates, owner gates |
-| `docs/specs/2026-10-15-demo-app-design.md` | Original design brief for the demo app, and its release gates |
+| `.specify/memory/constitution.md` | The project's Spec Kit constitution: the principles every spec and plan is checked against |
+| `specs/001-model-training/` | Spec, plan and tasks for the model: split, training, quality gates, export, publishing |
+| `specs/002-mobile-app/` | Spec, plan and tasks for the Android demo app |
+| `specs/003-desktop-app/` | Spec, plan and tasks for a desktop version of the app (planned, not built) |
 | `docs/setup.md` | What to install, by task |
 | `docs/workshop-setup.md` | Setup for the 2-hour session |
 | `docs/model-card.md` | Index of the model cards |
