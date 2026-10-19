@@ -20,6 +20,7 @@ What you install depends on what you want to do. Find your row, install what it 
 | Run the training notebooks | A [Google Colab](https://colab.research.google.com) account (you sign in with a Google account) |
 | Let an agent work with the repository on GitHub | The [GitHub CLI](https://cli.github.com) (`gh`) or the [GitHub MCP server](https://github.com/github/github-mcp-server) |
 | Let an agent run the Colab notebooks | The [Colab MCP server](https://github.com/googlecolab/colab-mcp), which connects a local agent to a Colab session in your browser |
+| Run notebooks and scripts on Colab from a terminal | The [Colab CLI](https://github.com/googlecolab/google-colab-cli) (Linux and macOS; on Windows, inside WSL). See [Colab CLI](#colab-cli-optional) |
 | Let an agent use Kaggle (models, datasets, notebooks) | The [Kaggle MCP server](https://www.kaggle.com/docs/mcp). Set-up for both MCP servers: [below](#let-your-agent-work-with-colab-and-kaggle-mcp) |
 
 None of these needs the trained weights. They are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector), and the demo app can download r50-v5 itself.
@@ -109,6 +110,35 @@ Tests that need torch, transformers or onnxruntime are skipped automatically whe
 
 Nothing to install on your computer: training runs on Google Colab with a T4 GPU. You need a Google account with at least 20 GB free in Google Drive (the notebook warns if there is less). Each notebook installs its own packages and downloads the images from Zenodo during the run. How to run a notebook: the README, "Training on Colab".
 
+### Colab CLI (optional)
+
+The [Colab CLI](https://github.com/googlecolab/google-colab-cli) (`google-colab-cli`) starts Colab runtimes, including T4 GPUs, and runs notebooks and scripts on them from your terminal, so you or an agent can train without the browser. The later runs in the evaluation record (r50-1 and the second wave) were made with it. It supports **Linux and macOS only**; on Windows, install it inside WSL.
+
+**Windows only: install WSL first.** In PowerShell **as administrator** (once; it needs virtualisation turned on in the BIOS/UEFI):
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+Restart if asked, open **Ubuntu** from the Start menu and create its Linux user. Run everything below in that Ubuntu terminal. Your Windows files are under `/mnt/c/`, but cloning the repository inside Ubuntu (`git clone` as in [Git](#git)) is faster.
+
+**Install** (Linux, macOS or WSL). It needs `uv` ([uv and Spec Kit](#uv-and-spec-kit), the macOS or Linux command), which also fetches the Python 3.12 the CLI requires:
+
+```bash
+uv tool install google-colab-cli
+colab --help
+```
+
+**Sign in and check it works.** The first command that talks to Colab prints a sign-in URL: open it in any browser (on Windows, your normal one), sign in with your Google account, and paste the code it shows back into the terminal. Then start a small CPU runtime, run one line on it, and release it:
+
+```bash
+colab new
+echo "print('Hello from Google Colab!')" | colab exec
+colab stop
+```
+
+The sign-in token is saved in `~/.config/colab-cli/token.json`; keep it private, and delete it to sign out. Upgrade later with `uv tool upgrade google-colab-cli`. Every runtime uses your Colab quota until you `colab stop` it.
+
 ### Let your agent work with Colab and Kaggle (MCP)
 
 Two MCP servers let a coding agent on your computer work with the notebooks and the published models. Both are optional; training works without them. The steps are for **Claude Code**; other clients are covered on each server's own page.
@@ -170,5 +200,6 @@ flutter test
 - **`python` is not found, or opens the Microsoft Store:** Python is not on your PATH. Re-run the installer and tick "Add python.exe to PATH".
 - **The wrong Python version:** use `py -3.12 -m venv .venv` on Windows, or `python3.12 -m venv .venv` elsewhere.
 - **`pip install` fails on torch:** install the CPU build first, as above, then re-run `pip install -r requirements.txt`.
+- **`wsl --install` fails:** run PowerShell as administrator, and turn on virtualisation in the BIOS/UEFI.
 - **`uv` or `specify` is "not found":** open a new terminal. On Windows, sign out and back in if it still fails.
 - **A work or school laptop blocks installs:** ask your IT team, or use the browser-only rows above. Without Git, download the repository as a ZIP from its GitHub page.
