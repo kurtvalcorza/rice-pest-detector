@@ -8,7 +8,7 @@ A rice-pest detector (Python: data pipeline, training, ONNX export) and a Flutte
 
 ## Setting up for the Coding with AI Agents session
 
-If you are asked to set this repository up for the workshop, follow `docs/workshop-setup.md` and nothing else:
+If you are asked to set this repository up for the workshop, follow `docs/workshop-setup.md`, and the sections of `docs/setup.md` it links to for installs, and nothing else:
 
 - First report what is already installed and what is missing, then wait for the person to confirm.
 - Install only what that guide lists for the session (`uv` and Spec Kit). Ask before each install command, and show the command first.

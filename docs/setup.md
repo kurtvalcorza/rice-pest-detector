@@ -5,13 +5,11 @@ What you install depends on what you want to do. Find your row, install what it 
 | I want to… | Install | Time |
 | :-- | :-- | :-- |
 | Read the slides and the docs | A web browser | none |
-| Take part in the 2-hour session | Git, a coding agent, `uv` and Spec Kit. See [workshop-setup.md](workshop-setup.md) | about 15 min |
+| Take part in the 2-hour session, or do its exercises on your own | Git, a coding agent, `uv` and Spec Kit. The course path is in [workshop-setup.md](workshop-setup.md) | about 15 min |
 | Run the Python tests and tools | Git, Python 3.12, the packages in `requirements.txt` | about 15 min |
 | Train a model | A Google account and a browser; training runs on Google Colab | none locally |
 | Export a model to ONNX, check parity, calibrate | Everything in the row "Run the Python tests and tools" | as above |
 | Run the demo app on an emulator | Flutter, Android Studio with the Android SDK and an emulator | 1–2 hours the first time |
-
-**Required for the 2-hour session:** Git and a clone of this repository; a coding agent you are allowed to use, set up safely; a terminal and an empty practice folder; and [uv](https://docs.astral.sh/uv/getting-started/installation/) with [Spec Kit](https://github.com/github/spec-kit) for Exercise 2. [workshop-setup.md](workshop-setup.md) walks through each one.
 
 **Optional**, each for one task:
 
@@ -34,6 +32,43 @@ Download from [git-scm.com/downloads](https://git-scm.com/downloads), then:
 git clone https://github.com/kurtvalcorza/rice-pest-detector.git
 cd rice-pest-detector
 ```
+
+## uv and Spec Kit
+
+[Spec Kit](https://github.com/github/spec-kit) writes a spec before any code; the workshop's Exercise 2 and the self-paced exercise use it. It installs with `uv`, which also fetches a suitable Python (3.11 or later) if you do not have one.
+
+**Install `uv`:**
+
+```powershell
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+```bash
+# macOS or Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Or with a package manager: `winget install --id astral-sh.uv -e` (Windows) or `brew install uv` (macOS).
+
+Close and reopen the terminal so it finds `uv`.
+
+**Install Spec Kit:**
+
+```bash
+uv tool install specify-cli
+specify --help
+```
+
+If `specify --help` prints its commands, you are ready. The session was prepared on Spec Kit 1.2.0; 1.2.1 or later works the same way.
+
+**Optional dry run** (two minutes; it confirms Spec Kit and your agent work together):
+
+```bash
+specify init setup-check --integration <your-agent>
+```
+
+Replace `<your-agent>` with your agent's key, for example `claude`, `copilot`, `gemini`, `codex`, `cursor-agent` or `opencode` (the [full list](https://github.github.io/spec-kit/reference/integrations.html)). Open your agent in the new `setup-check` folder and type `/speckit-` in its chat: the Spec Kit commands should appear. Codex uses `$speckit-…` instead. Then delete the `setup-check` folder.
 
 ## Python tools and tests
 
@@ -80,7 +115,7 @@ Each notebook embeds the data files it needs; the images are downloaded from Zen
 
 Two MCP servers let a coding agent on your computer work with the notebooks and the published models. Both are optional; training works without them. The steps are for **Claude Code**; other clients are covered on each server's own page.
 
-**Colab MCP** ([googlecolab/colab-mcp](https://github.com/googlecolab/colab-mcp)) connects a local agent to a Colab session open in your browser, so the agent can add and run notebook cells there. It needs `uv` (see [workshop-setup.md](workshop-setup.md), section 4) and a client that runs on your computer and supports tool-list change notifications: Claude Code, Gemini CLI and Windsurf are the ones its page names.
+**Colab MCP** ([googlecolab/colab-mcp](https://github.com/googlecolab/colab-mcp)) connects a local agent to a Colab session open in your browser, so the agent can add and run notebook cells there. It needs `uv` (see [uv and Spec Kit](#uv-and-spec-kit)) and a client that runs on your computer and supports tool-list change notifications: Claude Code, Gemini CLI and Windsurf are the ones its page names.
 
 1. Add the server, for your user only (not to the repository):
 
@@ -115,16 +150,9 @@ Code the agent runs in Colab uses your account's compute and can read your Googl
 
 A signed-in Kaggle connection can create and change things on your account (models, datasets, notebook sessions). Approve each tool call, and prefer OAuth, which you can revoke from Kaggle's settings.
 
-## Spec Kit exercise: plan the desktop app
+### Spec Kit exercise
 
-A self-paced exercise that follows Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html) on a real feature: a desktop version of the demo app. You need Git, an agent (Claude Code or Antigravity), `uv` and Spec Kit (`uv tool install specify-cli`). In short:
-
-1. On a branch of your own, remove our Spec Kit run (`.specify/`, `specs/`, `.claude/skills/speckit-*`) so you start from scratch.
-2. `specify init --here --integration claude` (or `--integration agy` for Antigravity).
-3. In your agent, run `/speckit-constitution`, `/speckit-specify`, optionally `/speckit-clarify`, then `/speckit-plan`, `/speckit-tasks` and optionally `/speckit-analyze`, with the prompts given in the full walkthrough. Stop before `/speckit-implement`.
-4. Compare your files with ours: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) and [`specs/003-desktop-app/`](../specs/003-desktop-app/).
-
-The full walkthrough, with the exact commands, prompts and questions to check your result, is in [workshop-setup.md, section 7](workshop-setup.md#7-exercise-in-your-own-time-spec-the-desktop-app-with-spec-kit).
+A self-paced exercise follows Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html) on a real feature, a desktop version of the demo app: [workshop-setup.md, section 7](workshop-setup.md#7-exercise-in-your-own-time-spec-the-desktop-app-with-spec-kit). It needs Git, an agent, and `uv` with Spec Kit ([above](#uv-and-spec-kit)).
 
 ## Demo app (optional)
 
@@ -144,9 +172,12 @@ flutter run --no-enable-impeller -d emulator-5554
 
 The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.\tools\run_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. The app's own packages (`flutter_onnxruntime`, `image` and others) are listed in `app/pubspec.yaml` and installed by `flutter pub get`; you do not install them separately. More detail, including device tests, is in the README, "Demo app (Android)".
 
+**The model.** The trained weights are not part of this repository; they are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector). A fresh install opens with "No model is installed yet", and counting is off until the model is downloaded. The app's home screen offers **Download the model**: the app fetches r50-v5 (about 172 MB) from Kaggle, checks its size and SHA-256 and then counts, with the notice "Demo: real model weights … not validated in the field".
+
 ## If something does not work
 
 - **`python` is not found, or opens the Microsoft Store:** Python is not on your PATH. Re-run the installer and tick "Add python.exe to PATH".
 - **The wrong Python version:** use `py -3.12 -m venv .venv` on Windows, or `python3.12 -m venv .venv` elsewhere.
 - **`pip install` fails on torch:** install the CPU build first, as above, then re-run `pip install -r requirements.txt`.
-- **A work or school laptop blocks installs:** ask your IT team, or use the browser-only rows above.
+- **`uv` or `specify` is "not found":** open a new terminal. On Windows, sign out and back in if it still fails.
+- **A work or school laptop blocks installs:** ask your IT team, or use the browser-only rows above. Without Git, download the repository as a ZIP from its GitHub page.
