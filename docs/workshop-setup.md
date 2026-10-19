@@ -189,6 +189,25 @@ Read slides 72–83: how an agent built the real app, licences, the model behind
 
 **The five takeaways:** conduct the agent, do not one-shot it; write the spec before the code; put the rules that matter in hooks, tests and CI; treat text from outside as untrusted; an agent drafts, a person decides and stays accountable.
 
+### Going further: train the model yourself (about 7 hours, mostly waiting)
+
+The model-training case study shows how the detector was trained. Here you start a training run of the demo model's recipe (r50-v5) yourself, on a free Colab GPU, and compare your numbers with the published ones. You need a Google account with at least 20 GB free in Google Drive and a browser; nothing is installed on your computer ([setup.md, Training](setup.md#training)).
+
+1. **Open the notebook.** Open [`notebooks/train_colab_r50v5.ipynb` in Colab](https://colab.research.google.com/github/kurtvalcorza/rice-pest-detector/blob/main/notebooks/train_colab_r50v5.ipynb) (the badge in the README, "Training on Colab", does the same).
+2. **Choose a GPU.** Runtime → Change runtime type → **T4 GPU**. The notebook stops early if no GPU is attached.
+3. **Leave the settings as they are.** The notebook runs the published recipe unchanged: 40 epochs, which took 6.2 hours on a T4 for the published run. Keep the browser tab open; a free Colab session can end before that, and Run all then picks up where it stopped (step 4).
+
+   *Short on time?* The published run's best checkpoint came at epoch 1 (counting from 0). You can change `epochs=40` to a smaller number in the cell that starts `from rice_pest_detector.train import`, but then it is your own experiment: the learning-rate schedule spreads over the epochs you choose, so your numbers will differ from the published run's.
+4. **Run it.** Runtime → Run all, and accept the Google Drive prompt. The notebook installs its packages, downloads the dataset from Zenodo and checks every image (about 20 minutes), then trains (about 9 minutes per epoch on a T4). If Colab disconnects, choose Run all again: training resumes from Drive.
+5. **The last cell stops on purpose.** It refuses to evaluate on the test photos (`THRESHOLD = None`): in this project the test split is looked at only under rules written down in advance (constitution Principle IV). The run is finished when the training cell prints the path of `best.pt`.
+6. **Release the GPU.** Runtime → Disconnect and delete runtime, so the run stops using your Colab quota.
+
+**Check yourself.** In Google Drive, open `rice-pest-detector/run-r50v5/best.json`: it holds your best validation species mAP50 (`map50_species`) and the epoch it came from; `history.jsonl` beside it has one line per epoch. Compare with the published r50-v5 run in [`docs/evaluation-record.md`](evaluation-record.md) ("Wave 2"): 0.937 at epoch 1. Then answer: why is the threshold for counting chosen on validation photos and never on test photos? (The model-training case study and [`specs/001-model-training/research.md`](../specs/001-model-training/research.md), R6, explain it.)
+
+**With your agent.** This is a good place to practise Module 2: ask your agent to explain what the `fit` cell and `src/rice_pest_detector/train.py` do before you run them, and check its explanation against the README, "What the training loop guarantees". To start runs from a terminal or let an agent drive Colab, see [setup.md, Colab CLI](setup.md#colab-cli-optional) and [MCP](setup.md#let-your-agent-work-with-colab-and-kaggle-mcp).
+
+**After training.** Choosing a counting threshold, exporting to ONNX and checking parity with PyTorch run on your computer with the Python tools ([setup.md, Python tools and tests](setup.md#python-tools-and-tests)); the steps are in the README, "Evaluation", "Export to ONNX and parity" and "Choosing a demo threshold". An exported model can be imported into the demo app from Settings, where it is marked "Demo model, not validated".
+
 ## Optional: run the demo app on an emulator
 
 Not needed for the session. Install Flutter, Android Studio and an emulator first: [setup.md, Demo app](setup.md#demo-app-optional) (allow one to two hours the first time). Then start the emulator and, from the repository's `app/` folder:
