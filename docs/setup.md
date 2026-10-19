@@ -5,6 +5,7 @@ What you install depends on what you want to do. Find your row, install what it 
 | I want to… | Install | Time |
 | :-- | :-- | :-- |
 | Read the slides and the docs | A web browser | none |
+| Use a coding agent | An editor, an agent you are allowed to use and its command-line tool. See [A coding agent](#a-coding-agent) | about 10 min |
 | Take part in the 2-hour session, or do its exercises on your own | Git, a coding agent, `uv` and Spec Kit. The course path is in [workshop-setup.md](workshop-setup.md) | about 15 min |
 | Run the Python tests and tools | Git, Python 3.12, the packages in `requirements.txt` | about 15 min |
 | Train a model | A Google account and a browser; training runs on Google Colab | none locally |
@@ -33,6 +34,32 @@ Download from [git-scm.com/downloads](https://git-scm.com/downloads), then:
 git clone https://github.com/kurtvalcorza/rice-pest-detector.git
 cd rice-pest-detector
 ```
+
+## A coding agent
+
+Any coding agent you are allowed to use works. The workshop demos happened to use three, each as a VS Code extension with its command-line tool, so the steps below cover those. **Naming them is not a recommendation or an endorsement:** this project has no affiliation with any of these companies, receives nothing from them, and is not endorsed by them. Each is a third-party product under its own terms, data practices and pricing, which change; check them before you sign up. Choosing an agent and setting it up safely (terms, age limits, training settings) is in [workshop-setup.md, section 2](workshop-setup.md#2-a-coding-agent-set-up-safely).
+
+**1. An editor.** The demos used VS Code: download it from [code.visualstudio.com](https://code.visualstudio.com), or `winget install Microsoft.VisualStudioCode` (Windows) or `brew install --cask visual-studio-code` (macOS).
+
+**2. The agent's extension.** In VS Code, open the Extensions view (Ctrl+Shift+X, or Cmd+Shift+X on macOS) and install the one for your agent, or run `code --install-extension <id>`:
+
+| Agent (alphabetical) | Extension id | Notes |
+| :-- | :-- | :-- |
+| Antigravity | `google.google-antigravity` | VS Code 1.90 or later; signs in with a Google account. [Getting started](https://antigravity.google/docs/getting-started) |
+| Claude Code | `anthropic.claude-code` | VS Code 1.94 or later; needs an account type that includes Claude Code (see its [guide](https://code.claude.com/docs/en/vs-code)) |
+| Codex | `openai.chatgpt` | Signs in with a ChatGPT account or another method it offers. [Guide](https://learn.chatgpt.com/docs/codex/ide) |
+
+Open the extension's panel once and sign in. It works when it answers a test message.
+
+**3. The agent's command-line tool.** Spec Kit's integrations for these agents (`agy`, `claude`, `codex`) expect the CLI, and the MCP set-up below uses the `claude` command:
+
+| Agent (alphabetical) | macOS, Linux or WSL | Windows (PowerShell) | Check |
+| :-- | :-- | :-- | :-- |
+| Antigravity | `curl -fsSL https://antigravity.google/cli/install.sh \| bash` | `irm https://antigravity.google/cli/install.ps1 \| iex` | `agy --version` |
+| Claude Code | `curl -fsSL https://claude.ai/install.sh \| bash` | `irm https://claude.ai/install.ps1 \| iex` | `claude --version` |
+| Codex | `curl -fsSL https://chatgpt.com/codex/install.sh \| sh` | `npm install -g @openai/codex` (needs [Node.js](https://nodejs.org)) | `codex --version` |
+
+Open a new terminal after installing, so it finds the command. Package-manager installs exist too (for example `brew install --cask claude-code` or `winget install Anthropic.ClaudeCode`); each vendor's guide lists them. The Claude Code extension carries its own copy of the CLI for its chat panel, but the `claude` command in a terminal needs this install. On Windows, Git for Windows (see [Git](#git)) lets Claude Code use Bash; without it, it uses PowerShell. Each installer downloads and runs a script from the internet: read the command before you run it.
 
 ## uv and Spec Kit
 
@@ -143,7 +170,7 @@ The sign-in token is saved in `~/.config/colab-cli/token.json`; keep it private,
 
 ### Let your agent work with Colab and Kaggle (MCP)
 
-Two MCP servers let a coding agent on your computer work with the notebooks and the published models. Both are optional; training works without them. The steps are for **Claude Code**; other clients are covered on each server's own page.
+Two MCP servers let a coding agent on your computer work with the notebooks and the published models. Both are optional; training works without them. The commands are shown for Claude Code, one of the agents the demos used; other clients are covered on each server's own page.
 
 **Colab MCP** ([googlecolab/colab-mcp](https://github.com/googlecolab/colab-mcp)) connects a local agent to a Colab session open in your browser, so the agent can add and run notebook cells there. It needs `uv` (see [uv and Spec Kit](#uv-and-spec-kit)) and a client that runs on your computer and supports tool-list change notifications: Claude Code, Gemini CLI and Windsurf are the ones its page names.
 

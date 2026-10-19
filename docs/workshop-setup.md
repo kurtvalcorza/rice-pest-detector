@@ -77,7 +77,8 @@ Not needed for the session. Install Flutter, Android Studio and an emulator firs
 flutter run --no-enable-impeller -d emulator-5554
 ```
 
-The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.	oolsun_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. More detail, including device tests, is in the README, "Demo app (Android)".
+The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.	ools
+un_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. More detail, including device tests, is in the README, "Demo app (Android)".
 
 **The model.** The trained weights are not part of this repository; they are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector). A fresh install opens with "No model is installed yet", and counting is off until the model is downloaded. The app's home screen offers **Download the model**: the app fetches r50-v5 (about 172 MB) from Kaggle, checks its size and SHA-256 and then counts, with the notice "Demo: real model weights … not validated in the field".
 
@@ -87,7 +88,7 @@ About 45 minutes. In the session, Exercise 2 showed Spec Kit on stage. Here you 
 
 The steps follow Spec Kit's own [quickstart](https://github.github.io/spec-kit/quickstart.html). Read it alongside this section for what each command does.
 
-**You need:** this repository, cloned (section 1); `uv` and Spec Kit (section 4); and an agent. The steps are written for **Claude Code** (integration key `claude`) and **Antigravity** (key `agy`). Other agents work too: see Spec Kit's [integrations list](https://github.github.io/spec-kit/reference/integrations.html) for your key.
+**You need:** this repository, cloned (section 1); `uv` and Spec Kit (section 4); and an agent with its command-line tool ([setup.md, A coding agent](setup.md#a-coding-agent)). Any agent Spec Kit supports works; find its integration key in Spec Kit's [integrations list](https://github.github.io/spec-kit/reference/integrations.html). The examples use the agents from the workshop demos, run in VS Code: Antigravity (`agy`), Claude Code (`claude`) and Codex (`codex`). Naming them is not an endorsement; see [setup.md, A coding agent](setup.md#a-coding-agent).
 
 ### Step 1. Start from a clean branch
 
@@ -105,11 +106,11 @@ git commit -m "Start the Spec Kit exercise from scratch"
 specify init --here --integration claude
 ```
 
-For Antigravity, use `--integration agy`. `--here` sets Spec Kit up in the current folder instead of a new one; it asks before merging into a folder that is not empty (add `--force` to skip the question). It adds `.specify/` (templates, scripts, a blank constitution) and the `speckit-*` commands for your agent. Run `git status` to see exactly what it added. If it reformatted a file you already had, such as `.claude/settings.json`, `git diff` shows it and `git checkout -- <file>` puts it back.
+Replace `claude` with your agent's key, for example `agy` or `codex`. `--here` sets Spec Kit up in the current folder instead of a new one; it asks before merging into a folder that is not empty (add `--force` to skip the question). It adds `.specify/` (templates, scripts, a blank constitution) and the `speckit-*` commands for your agent. Run `git status` to see exactly what it added. If it reformatted a file you already had, such as `.claude/settings.json`, `git diff` shows it and `git checkout -- <file>` puts it back.
 
 ### Step 3. Run the commands in your agent
 
-Open your agent in the repository folder and run each command on its own, reading what it wrote before you go on. Type the text after each command as its argument.
+Open the repository folder in VS Code, open your agent's panel, and run each command on its own, reading what it wrote before you go on. Type the text after each command as its argument. In Codex, type `$speckit-…` instead of `/speckit-…`.
 
 1. **Constitution**: the project's rules, which every later step is checked against.
 
