@@ -29,11 +29,26 @@ android {
         versionName = flutter.versionName
     }
 
+    // Published APKs are signed with one fixed key, so a newer release installs over an older
+    // one and keeps the count history. The key comes from these environment variables (the
+    // Build APK workflow sets them from repository secrets on app-v* tags). Without them, as on a
+    // developer's machine or a pull request, the release build is signed with the debug key.
+    val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+    val releaseSigning = keystorePath != null && file(keystorePath).exists()
+    signingConfigs {
+        if (releaseSigning) {
+            create("release") {
+                storeFile = file(keystorePath!!)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (releaseSigning) "release" else "debug")
         }
     }
 }
