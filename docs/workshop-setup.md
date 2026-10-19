@@ -246,7 +246,22 @@ The reasons, with the alternatives that were rejected, are in [`specs/001-model-
 
 **Check yourself.** In Google Drive, open `rice-pest-detector/run-r50v5/best.json`: it holds your best validation species mAP50 (`map50_species`) and the epoch it came from; `history.jsonl` beside it has one line per epoch. Compare with the published r50-v5 run in [`docs/evaluation-record.md`](evaluation-record.md) ("Wave 2"): 0.937 at epoch 1. Then answer: why is the threshold for counting chosen on validation photos and never on test photos? (The model-training case study and [`specs/001-model-training/research.md`](../specs/001-model-training/research.md), R6, explain it.)
 
-**With your agent.** This is a good place to practise Module 2: ask your agent to explain what the `fit` cell and `src/rice_pest_detector/train.py` do before you run them, and check its explanation against the README, "What the training loop guarantees". To start runs from a terminal or let an agent drive Colab, see [setup.md, Colab CLI](setup.md#colab-cli-optional) and [MCP](setup.md#let-your-agent-work-with-colab-and-kaggle-mcp).
+#### Exercise: reverse-engineer the notebook with your agent (about 20 minutes, no GPU needed)
+
+Agents are good at reading code you did not write, and turning it into a spec is how [`specs/001-model-training/`](../specs/001-model-training/) and [`specs/002-mobile-app/`](../specs/002-mobile-app/) were made. You can do this before, during or instead of a training run. Open your agent in the cloned repository and send:
+
+> Reverse-engineer notebooks/train_colab_r50v5.ipynb. Do not run it and do not change any file. Five cells hold the data files as long encoded text: say what they contain, but do not read their contents. 1) List the cells in order, one line each on what it does. 2) Find out how the notebook is made: which script generates it and from which source files. 3) Explain what happens if Colab disconnects in the middle of training, citing the code. 4) Write a short spec of the notebook: what it must do and why, as numbered requirements I could test. Then wait for me.
+
+**Check its work** against what the repository says:
+
+- **The cells:** the README, "Training notebooks", draws all 24 of them, from mounting Drive to the locked test cell.
+- **How it is made:** `tools/build_notebook.py`, with `--check` (README, "Training on Colab"). If your agent says the notebook was written by hand, it is wrong.
+- **Disconnects:** "How the notebook is built, and why" above, and `load_checkpoint` and `check_experiment` in `src/rice_pest_detector/train.py`.
+- **Its spec:** compare with requirements FR-007 to FR-009 in [`specs/001-model-training/spec.md`](../specs/001-model-training/spec.md) and with [`contracts/notebook-generator.md`](../specs/001-model-training/contracts/notebook-generator.md). What did your agent miss, and what did it invent?
+
+This is Module 2 and Module 3 together: watch how much of its context window the notebook uses (the five data cells are encoded text, two of them about 2 MB each, which is why the prompt tells it to skip them), and notice that a spec reverse-engineered from code records what the code does, not whether it was the right thing to build.
+
+To start runs from a terminal or let an agent drive Colab, see [setup.md, Colab CLI](setup.md#colab-cli-optional) and [MCP](setup.md#let-your-agent-work-with-colab-and-kaggle-mcp).
 
 **After training.** Choosing a counting threshold, exporting to ONNX and checking parity with PyTorch run on your computer with the Python tools ([setup.md, Python tools and tests](setup.md#python-tools-and-tests)); the steps are in the README, "Evaluation", "Export to ONNX and parity" and "Choosing a demo threshold". An exported model can be imported into the demo app from Settings, where it is marked "Demo model, not validated".
 
