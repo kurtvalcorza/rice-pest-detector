@@ -71,7 +71,15 @@ See [setup.md, Python tools and tests](setup.md#python-tools-and-tests).
 
 ## 6. Optional, in your own time: run the demo app on an emulator
 
-Not needed for the session; allow one to two hours for the first install. See [setup.md, Demo app](setup.md#demo-app-optional), which also explains how the app downloads the model.
+Not needed for the session. Install Flutter, Android Studio and an emulator first: [setup.md, Demo app](setup.md#demo-app-optional) (allow one to two hours the first time). Then start the emulator and, from the repository's `app/` folder:
+
+```bash
+flutter run --no-enable-impeller -d emulator-5554
+```
+
+The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.	oolsun_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. More detail, including device tests, is in the README, "Demo app (Android)".
+
+**The model.** The trained weights are not part of this repository; they are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector). A fresh install opens with "No model is installed yet", and counting is off until the model is downloaded. The app's home screen offers **Download the model**: the app fetches r50-v5 (about 172 MB) from Kaggle, checks its size and SHA-256 and then counts, with the notice "Demo: real model weights … not validated in the field".
 
 ## 7. Exercise in your own time: spec the desktop app with Spec Kit
 

@@ -107,9 +107,7 @@ Tests that need torch, transformers or onnxruntime are skipped automatically whe
 
 ## Training
 
-Training runs on Google Colab with a T4 GPU, not on your computer. You need a Google account with at least 20 GB free in Google Drive (the notebook warns if there is less). Open a notebook from its Open in Colab badge in the README, "Training on Colab" (or upload it from `notebooks/` at [colab.research.google.com](https://colab.research.google.com) with File → Upload notebook), choose a T4 GPU runtime and run all cells; the notebook installs its own packages. Step-by-step instructions are in the README, "Training on Colab".
-
-Each notebook embeds the data files it needs; the images are downloaded from Zenodo during the run.
+Nothing to install on your computer: training runs on Google Colab with a T4 GPU. You need a Google account with at least 20 GB free in Google Drive (the notebook warns if there is less). Each notebook installs its own packages and downloads the images from Zenodo during the run. How to run a notebook: the README, "Training on Colab".
 
 ### Let your agent work with Colab and Kaggle (MCP)
 
@@ -126,7 +124,7 @@ Two MCP servers let a coding agent on your computer work with the notebooks and 
    In clients configured with an `mcpServers` JSON block, the same server is `"colab-mcp": {"command": "uvx", "args": ["git+https://github.com/googlecolab/colab-mcp"], "timeout": 30000}`.
 2. Restart Claude Code and run `/mcp`: `colab-mcp` should be listed as connected.
 3. Ask the agent to open a Colab connection. It opens Colab in your browser; sign in with your Google account there, choose a T4 GPU runtime, and the agent's notebook tools appear once the session is connected.
-4. Then ask it, for example: "In the connected Colab session, add a cell that runs `!nvidia-smi`, run it and tell me which GPU we have." Start small like this before you let it work with a training notebook.
+4. Check the connection: ask it to add a cell that runs `!nvidia-smi` in the connected session and run it. It should report the GPU.
 
 Code the agent runs in Colab uses your account's compute and can read your Google Drive once you mount it. Read each cell before you approve it, and run training cells one at a time.
 
@@ -146,13 +144,9 @@ Code the agent runs in Colab uses your account's compute and can read your Googl
    ```
 
    On Windows PowerShell use `$env:KAGGLE_API_TOKEN`. The token ends up in your user configuration, not in the repository: never use `--scope project` for it, which writes `.mcp.json` into the folder. Revoke the token on Kaggle when you no longer need it.
-4. Check with `/mcp`, then ask, for example: "List the variations of the Kaggle model kurtvalcorza/rice-pest-detector."
+4. Check the connection: `/mcp` shows `kaggle` as connected, and asking the agent to list the variations of the Kaggle model `kurtvalcorza/rice-pest-detector` returns r50-v5, RF-DETR-M and D-FINE-L.
 
 A signed-in Kaggle connection can create and change things on your account (models, datasets, notebook sessions). Approve each tool call, and prefer OAuth, which you can revoke from Kaggle's settings.
-
-### Spec Kit exercise
-
-A self-paced exercise follows Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html) on a real feature, a desktop version of the demo app: [workshop-setup.md, section 7](workshop-setup.md#7-exercise-in-your-own-time-spec-the-desktop-app-with-spec-kit). It needs Git, an agent, and `uv` with Spec Kit ([above](#uv-and-spec-kit)).
 
 ## Demo app (optional)
 
@@ -162,17 +156,14 @@ A self-paced exercise follows Spec Kit's [quickstart](https://github.github.io/s
 | Android Studio | With the Android SDK, Platform-Tools, the Emulator and a system image (tested on Android 36, Google APIs, x86_64). [developer.android.com/studio](https://developer.android.com/studio) |
 | Your computer | Virtualisation turned on in the BIOS/UEFI (may need admin rights), about 15 GB free disk and 8 GB of RAM or more |
 
-Then run `flutter doctor` until the Android toolchain shows no errors, accept the licences with `flutter doctor --android-licenses`, create an emulator in Android Studio's Device Manager and, from `app/`, run:
+Then run `flutter doctor` until the Android toolchain shows no errors, accept the licences with `flutter doctor --android-licenses`, and create an emulator in Android Studio's Device Manager with the system image above. Check the install from `app/`:
 
 ```bash
 flutter pub get
 flutter test
-flutter run --no-enable-impeller -d emulator-5554
 ```
 
-The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.\tools\run_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. The app's own packages (`flutter_onnxruntime`, `image` and others) are listed in `app/pubspec.yaml` and installed by `flutter pub get`; you do not install them separately. More detail, including device tests, is in the README, "Demo app (Android)".
-
-**The model.** The trained weights are not part of this repository; they are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector). A fresh install opens with "No model is installed yet", and counting is off until the model is downloaded. The app's home screen offers **Download the model**: the app fetches r50-v5 (about 172 MB) from Kaggle, checks its size and SHA-256 and then counts, with the notice "Demo: real model weights … not validated in the field".
+`flutter pub get` installs the app's own packages (`flutter_onnxruntime`, `image` and others, listed in `app/pubspec.yaml`); you do not install them separately. If `flutter test` passes, the toolchain is ready. Running the app is in [workshop-setup.md, section 6](workshop-setup.md#6-optional-in-your-own-time-run-the-demo-app-on-an-emulator).
 
 ## If something does not work
 
