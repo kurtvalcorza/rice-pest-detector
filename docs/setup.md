@@ -112,7 +112,9 @@ Nothing to install on your computer: training runs on Google Colab with a T4 GPU
 
 ### Colab CLI (optional)
 
-The [Colab CLI](https://github.com/googlecolab/google-colab-cli) (`google-colab-cli`) starts Colab runtimes, including T4 GPUs, and runs notebooks and scripts on them from your terminal, so you or an agent can train without the browser. The later runs in the evaluation record (r50-1 and the second wave) were made with it. It supports **Linux and macOS only**; on Windows, install it inside WSL.
+The [Colab CLI](https://github.com/googlecolab/google-colab-cli) (`google-colab-cli`) starts Colab runtimes, including T4 GPUs, and runs notebooks and scripts on them from your terminal, so you or an agent can train without the browser. The later runs in the evaluation record (r50-1 and the second wave) were made with it.
+
+> **Why WSL on Windows:** the Colab CLI's [README](https://github.com/googlecolab/google-colab-cli#readme) says it "currently supports Linux and macOS only. Windows is not supported at this time." WSL (Windows Subsystem for Linux) runs a real Linux on Windows, so the CLI runs there unchanged.
 
 **Windows only: install WSL first.** In PowerShell **as administrator** (once; it needs virtualisation turned on in the BIOS/UEFI):
 
