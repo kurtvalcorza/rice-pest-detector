@@ -1,11 +1,11 @@
 # Setup: what to install
 
-What you install depends on what you want to do. Find your row, install what it lists and skip the rest. Nothing needs admin rights except where noted. Install commands for Windows (winget), macOS (Homebrew) and Ubuntu (apt) are in the README, "Setup".
+What you install depends on what you want to do. Find your row, install what it lists and skip the rest. Nothing needs admin rights except where noted. The commands for Windows (winget), macOS (Homebrew) and Linux (Ubuntu) are in [Install commands by operating system](#install-commands-by-operating-system).
 
 | I want to… | Install | Time |
 | :-- | :-- | :-- |
 | Read the slides and the docs | A web browser | none |
-| Use a coding agent | An editor, an agent you are allowed to use and its command-line tool. See [A coding agent](#a-coding-agent) | about 10 min |
+| Use a coding agent | An editor, an agent you are allowed to use and its command-line tool. See [An AI coding agent](#an-ai-coding-agent) | about 10 min |
 | Take part in the 2-hour session, or do its exercises on your own | Git, a coding agent, `uv` and Spec Kit. The course path is in [workshop-setup.md](workshop-setup.md) | about 15 min |
 | Run the Python tests and tools | Git, Python 3.12, the packages in `requirements.txt` | about 15 min |
 | Train a model | A Google account and a browser; training runs on Google Colab | none locally |
@@ -26,18 +26,34 @@ What you install depends on what you want to do. Find your row, install what it 
 
 None of these needs the trained weights. They are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector), and the demo app can download r50-v5 itself.
 
+## Install commands by operating system
+
+Windows uses [winget](https://learn.microsoft.com/windows/package-manager/winget/) (built into Windows 10 and 11; run in PowerShell), macOS uses [Homebrew](https://brew.sh), Linux examples are for Ubuntu 24.04. Close and reopen the terminal after installing, so it finds the new commands.
+
+| Tool | Windows (winget) | macOS (Homebrew) | Linux (Ubuntu) |
+| :-- | :-- | :-- | :-- |
+| Git | `winget install --id Git.Git -e` | `brew install git` | `sudo apt install git` |
+| uv | `winget install --id astral-sh.uv -e` | `brew install uv` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| Spec Kit (after uv) | `uv tool install specify-cli` | same | same |
+| Python 3.12 (optional) | `winget install --id Python.Python.3.12 -e` | `brew install python@3.12` | `sudo apt install python3.12 python3.12-venv` |
+| GitHub CLI (optional) | `winget install --id GitHub.cli -e` | `brew install gh` | [official instructions](https://github.com/cli/cli/blob/trunk/docs/install_linux.md) |
+| Android Studio (optional) | `winget install --id Google.AndroidStudio -e` | `brew install --cask android-studio` | [download](https://developer.android.com/studio) |
+| Flutter (optional) | [install guide](https://docs.flutter.dev/get-started/install/windows) (no winget package); unzip to a path without spaces, e.g. `C:\src\flutter` | `brew install --cask flutter` | `sudo snap install flutter --classic` |
+
+The sections below give each tool's details and how to check it works.
+
 ## Git
 
-Download from [git-scm.com/downloads](https://git-scm.com/downloads), then:
+Install it with `winget install --id Git.Git -e` (Windows), `brew install git` (macOS) or `sudo apt install git` (Ubuntu), or download it from [git-scm.com/downloads](https://git-scm.com/downloads). Check with `git --version`, then clone the repository:
 
 ```bash
 git clone https://github.com/kurtvalcorza/rice-pest-detector.git
 cd rice-pest-detector
 ```
 
-## A coding agent
+## An AI coding agent
 
-Any coding agent you are allowed to use works. The workshop demos happened to use three, each as a VS Code extension with its command-line tool, so the steps below cover those. **Naming them is not a recommendation or an endorsement:** this project has no affiliation with any of these companies, receives nothing from them, and is not endorsed by them. Each is a third-party product under its own terms, data practices and pricing, which change; check them before you sign up. Choosing an agent and setting it up safely (terms, age limits, training settings) is in [workshop-setup.md, section 2](workshop-setup.md#2-a-coding-agent-set-up-safely).
+What you install here is the agent's *harness*: the program around the AI model that reads your files, runs commands and asks your permission ("Agent = Model + Harness" in the session deck). Any coding agent you are allowed to use works. The workshop demos happened to use three, each as a VS Code extension with its command-line tool, so the steps below cover those. **Naming them is not a recommendation or an endorsement:** this project has no affiliation with any of these companies, receives nothing from them, and is not endorsed by them. Each is a third-party product under its own terms, data practices and pricing, which change; check them before you sign up. Choosing an agent and setting it up safely (terms, age limits, training settings) is in [workshop-setup.md, section 2](workshop-setup.md#2-a-coding-agent-set-up-safely).
 
 **1. An editor.** The demos used VS Code: download it from [code.visualstudio.com](https://code.visualstudio.com), or `winget install Microsoft.VisualStudioCode` (Windows) or `brew install --cask visual-studio-code` (macOS).
 

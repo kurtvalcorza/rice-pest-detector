@@ -35,41 +35,10 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 
 ## Setup
 
-**Required for the 2-hour session** (about 15 minutes; step by step in [docs/workshop-setup.md](docs/workshop-setup.md)):
+- **What to install, by task**, with the commands for Windows (winget), macOS (Homebrew) and Linux (Ubuntu): [docs/setup.md](docs/setup.md).
+- **Coding with AI Agents**, the 2-hour session or its exercises on your own: [docs/workshop-setup.md](docs/workshop-setup.md). It needs Git and this repository, an AI coding agent you are allowed to use (set up safely), an empty practice folder, and `uv` with Spec Kit, and it has a prompt that lets your agent check and install them, asking before each command.
 
-- **Git and this repository.** Install [Git](https://git-scm.com/downloads), then `git clone https://github.com/kurtvalcorza/rice-pest-detector.git`.
-- **A coding agent you are allowed to use, set up safely.** Check that its terms allow your age, sign in once before the day, switch off training on your data and never paste personal, confidential or graded material.
-- **A terminal and an empty practice folder**, outside the cloned repository.
-- **[uv](https://docs.astral.sh/uv/getting-started/installation/) and [Spec Kit](https://github.com/github/spec-kit)** for Exercise 2: `uv tool install specify-cli`, then check that `specify --help` prints its commands.
-
-[docs/workshop-setup.md](docs/workshop-setup.md) also has a prompt that lets your agent check what is installed and set up the practice folder, `uv` and Spec Kit, asking before each command.
-
-**Optional** (not needed for the session):
-
-| To… | Install |
-| :-- | :-- |
-| Run the tests and tools | [Python 3.12](https://www.python.org/downloads/), then `pip install -r requirements.txt` |
-| Run the demo app | [Flutter](https://docs.flutter.dev/get-started/install), [Android Studio](https://developer.android.com/studio) and an Android emulator |
-| Run the training notebooks | A [Google Colab](https://colab.research.google.com) account (you sign in with a Google account) |
-| Let an agent work with the repository on GitHub | The [GitHub CLI](https://cli.github.com) (`gh`) or the [GitHub MCP server](https://github.com/github/github-mcp-server) |
-| Let an agent run the Colab notebooks | The [Colab MCP server](https://github.com/googlecolab/colab-mcp), which connects a local agent to a Colab session in your browser |
-| Let an agent use Kaggle (models, datasets, notebooks) | The [Kaggle MCP server](https://www.kaggle.com/docs/mcp). Set-up for both MCP servers: [docs/setup.md](docs/setup.md), "Let your agent work with Colab and Kaggle (MCP)" |
-
-**Install commands.** Windows uses [winget](https://learn.microsoft.com/windows/package-manager/winget/) (built into Windows 10 and 11; run in PowerShell), macOS uses [Homebrew](https://brew.sh), Linux examples are for Ubuntu 24.04. Close and reopen the terminal after installing, so it finds the new commands.
-
-| Tool | Windows (winget) | macOS (Homebrew) | Linux (Ubuntu) |
-| :-- | :-- | :-- | :-- |
-| Git | `winget install --id Git.Git -e` | `brew install git` | `sudo apt install git` |
-| uv | `winget install --id astral-sh.uv -e` | `brew install uv` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| Spec Kit (after uv) | `uv tool install specify-cli` | same | same |
-| Python 3.12 (optional) | `winget install --id Python.Python.3.12 -e` | `brew install python@3.12` | `sudo apt install python3.12 python3.12-venv` |
-| GitHub CLI (optional) | `winget install --id GitHub.cli -e` | `brew install gh` | [official instructions](https://github.com/cli/cli/blob/trunk/docs/install_linux.md) |
-| Android Studio (optional) | `winget install --id Google.AndroidStudio -e` | `brew install --cask android-studio` | [download](https://developer.android.com/studio) |
-| Flutter (optional) | [install guide](https://docs.flutter.dev/get-started/install/windows) (no winget package); unzip to a path without spaces, e.g. `C:\src\flutter` | `brew install --cask flutter` | `sudo snap install flutter --classic` |
-
-On a work or school laptop, installs may be blocked: ask your IT team before the day, or pair with someone for the exercises.
-
-Before the session, follow [docs/workshop-setup.md](docs/workshop-setup.md). For any other task, [docs/setup.md](docs/setup.md) lists what to install, task by task.
+On a work or school laptop, installs may be blocked: ask your IT team first, or pair with someone for the exercises.
 
 ---
 

@@ -88,7 +88,7 @@ About 45 minutes. In the session, Exercise 2 showed Spec Kit on stage. Here you 
 
 The steps follow Spec Kit's own [quickstart](https://github.github.io/spec-kit/quickstart.html). Read it alongside this section for what each command does.
 
-**You need:** this repository, cloned (section 1); `uv` and Spec Kit (section 4); and an agent with its command-line tool ([setup.md, A coding agent](setup.md#a-coding-agent)). Any agent Spec Kit supports works; find its integration key in Spec Kit's [integrations list](https://github.github.io/spec-kit/reference/integrations.html). The examples use the agents from the workshop demos, run in VS Code: Antigravity (`agy`), Claude Code (`claude`) and Codex (`codex`). Naming them is not an endorsement; see [setup.md, A coding agent](setup.md#a-coding-agent).
+**You need:** this repository, cloned (section 1); `uv` and Spec Kit (section 4); and an agent with its command-line tool ([setup.md, An AI coding agent](setup.md#an-ai-coding-agent)). Any agent Spec Kit supports works; find its integration key in Spec Kit's [integrations list](https://github.github.io/spec-kit/reference/integrations.html). The examples use the agents from the workshop demos, run in VS Code: Antigravity (`agy`), Claude Code (`claude`) and Codex (`codex`). Naming them is not an endorsement; see [setup.md, An AI coding agent](setup.md#an-ai-coding-agent).
 
 ### Step 1. Start from a clean branch
 
