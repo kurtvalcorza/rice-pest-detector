@@ -32,14 +32,12 @@ Windows uses [winget](https://learn.microsoft.com/windows/package-manager/winget
 | Tool | Windows (winget) | macOS (Homebrew) | Linux (Ubuntu) |
 | :-- | :-- | :-- | :-- |
 | Git | `winget install --id Git.Git -e` | `brew install git` | `sudo apt install git` |
-| uv | `winget install --id astral-sh.uv -e` | `brew install uv` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| Spec Kit (after uv) | `uv tool install specify-cli` | same | same |
 | Python 3.12 (optional) | `winget install --id Python.Python.3.12 -e` | `brew install python@3.12` | `sudo apt install python3.12 python3.12-venv` |
 | GitHub CLI (optional) | `winget install --id GitHub.cli -e` | `brew install gh` | [official instructions](https://github.com/cli/cli/blob/trunk/docs/install_linux.md) |
 | Android Studio (optional) | `winget install --id Google.AndroidStudio -e` | `brew install --cask android-studio` | [download](https://developer.android.com/studio) |
 | Flutter (optional) | [install guide](https://docs.flutter.dev/get-started/install/windows) (no winget package); unzip to a path without spaces, e.g. `C:\src\flutter` | `brew install --cask flutter` | `sudo snap install flutter --classic` |
 
-The sections below give each tool's details and how to check it works.
+`uv` and Spec Kit have their own installers, in [uv and Spec Kit](#uv-and-spec-kit); the agents' are in [An AI coding agent](#an-ai-coding-agent). The sections below give each tool's details and how to check it works.
 
 ## Git
 

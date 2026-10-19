@@ -76,7 +76,7 @@ Now **write down the one prompt you think built this app**. If you have an agent
 
 Read slides 9–18: why the one-shot prompt fails, the agent loop, `AGENTS.md`, and how to read a plan and when to stop the agent.
 
-**Compare your Exercise 0 prompt** with slide 15, "How the app actually started", and with the "Behind the scenes: prompts used" slides in the demo-app case study. The first prompt was a question about the tech stack, not a build request, and fourteen short prompts followed, each settling a decision.
+**Compare your Exercise 0 prompt** with slide 15, "How the app actually started", and with the "Behind the scenes: prompts used" slides in the demo-app case study. The first prompt was a question about the tech stack, not a build request, and there were fourteen short prompts in all, each settling a decision.
 
 **Check yourself:** which decisions did your prompt leave to the agent? Typical gaps are the platform (phone, web or desktop), where the photos come from, what the model is and where it runs, what counts as "done", and what the app must never do (here: give spray or treatment advice).
 
@@ -127,7 +127,7 @@ Your agent's key is in Spec Kit's [integrations list](https://github.github.io/s
 
 Read the `spec.md` it wrote.
 
-**Check yourself** (slide 62's debrief): is the spec ready to build from? Every requirement has a number where it needs one, and every question clarify asked has an answer. Name one question clarify asked that your Exercise 0 prompt never answered, one gap it missed, and one requirement that needed a number. Compare with the counting rule in [`specs/002-mobile-app/spec.md`](../specs/002-mobile-app/spec.md): a detection counts when its score is at or above the model's threshold (0.48 for the default model), not "when the model is confident".
+**Check yourself** (slide 62's debrief): is the spec ready to build from? Every requirement has a number where it needs one, and every question clarify asked has an answer. Name one question clarify asked that your Exercise 0 prompt never answered, one gap it missed, and one requirement that needed a number. Compare with the counting rule in [`specs/002-mobile-app/spec.md`](../specs/002-mobile-app/spec.md) (FR-002 and FR-006): a detection counts when its score is at or above the model's own threshold, an inclusive rule with a number (0.48 for the default model, from its manifest), not "when the model is confident".
 
 ### Going further: the whole Spec Kit flow on the desktop app (about 45 minutes)
 
@@ -179,6 +179,13 @@ Stop here. `/speckit-implement` and `/speckit-converge` would build the app, whi
 
 #### Step 4. Compare with ours
 
+First commit your run, so Git can compare it with `main`:
+
+```bash
+git add -A
+git commit -m "My Spec Kit run"
+```
+
 Your files are under a folder such as `specs/001-desktop-app/` (Spec Kit picks the name): Spec Kit numbers features from 001, and your branch has no others. Ours is `specs/003-desktop-app/` on `main`, because `main` also holds the specs for the model (001) and the phone app (002). Compare them:
 
 ```bash
@@ -198,7 +205,7 @@ Questions to answer for yourself:
 
 **Done when:** you have a constitution, a spec with no `[NEEDS CLARIFICATION]` left, a plan whose Constitution Check passes (or is justified), a task list, and your answers to the questions above.
 
-**Clean up:** `git switch main`, then `git branch -D my-speckit-run`.
+**Clean up:** `git switch main`, then `git branch -D my-speckit-run`. If you made the `rice-pest-detector-main` copy, remove it with `git worktree remove ../rice-pest-detector-main`. If Spec Kit or your agent created a feature branch of its own (for example `001-desktop-app`), delete it the same way.
 
 ## Module 4. Guard (slides 63–71, about 15 minutes)
 
@@ -224,7 +231,7 @@ The model-training case study shows how the detector was trained. Here you start
 2. **Choose a GPU.** Runtime → Change runtime type → **T4 GPU**. The notebook stops early if no GPU is attached.
 3. **Leave the settings as they are.** The notebook runs the published recipe unchanged: 40 epochs, which took 6.2 hours on a T4 for the published run. Keep the browser tab open; a free Colab session can end before that, and Run all then picks up where it stopped (step 4).
 
-   *Short on time?* The published run's best checkpoint came at epoch 1 (counting from 0). You can change `epochs=40` to a smaller number in the cell that starts `from rice_pest_detector.train import`, but then it is your own experiment: the learning-rate schedule spreads over the epochs you choose, so your numbers will differ from the published run's.
+   *Short on time?* The published run's best checkpoint came at epoch 1 (counting from 0). You can change `epochs=40` to a smaller number in the training cell (the second to last, the one that contains `epochs=40`), but then it is your own experiment: the learning-rate schedule spreads over the epochs you choose, so your numbers will differ from the published run's.
 4. **Run it.** Runtime → Run all, and accept the Google Drive prompt. The notebook installs its packages, downloads the dataset from Zenodo and checks every image (about 20 minutes), then trains (about 9 minutes per epoch on a T4). If Colab disconnects, choose Run all again: training resumes from Drive.
 5. **The last cell stops on purpose.** It refuses to evaluate on the test photos (`THRESHOLD = None`): in this project the test split is looked at only under rules written down in advance (constitution Principle IV). The run is finished when the training cell prints the path of `best.pt`.
 6. **Release the GPU.** Runtime → Disconnect and delete runtime, so the run stops using your Colab quota.
@@ -254,7 +261,7 @@ Agents are good at reading code you did not write, and turning it into a spec is
 
 **Check its work** against what the repository says:
 
-- **The cells:** the README, "Training notebooks", draws all 24 of them, from mounting Drive to the locked test cell.
+- **The cells:** the README, "Training notebooks", draws them, from mounting Drive to the locked test cell.
 - **How it is made:** `tools/build_notebook.py`, with `--check` (README, "Training on Colab"). If your agent says the notebook was written by hand, it is wrong.
 - **Disconnects:** "How the notebook is built, and why" above, and `load_checkpoint` and `check_experiment` in `src/rice_pest_detector/train.py`.
 - **Its spec:** compare with requirements FR-007 to FR-009 in [`specs/001-model-training/spec.md`](../specs/001-model-training/spec.md) and with [`contracts/notebook-generator.md`](../specs/001-model-training/contracts/notebook-generator.md). What did your agent miss, and what did it invent?
@@ -273,7 +280,7 @@ Not needed for the session. Install Flutter, Android Studio and an emulator firs
 flutter run --no-enable-impeller -d emulator-5554
 ```
 
-The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.\tools\run_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (`PATH` or `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. More detail, including device tests, is in the README, "Demo app (Android)".
+The `--no-enable-impeller` flag avoids a hang on emulators without a graphics card. Or let a script do the starting, waiting and running: `.\tools\run_emulator.ps1` (Windows PowerShell) or `tools/run_emulator.sh` (macOS, Linux). It finds the Android SDK (`ANDROID_HOME`) and Flutter (on `PATH`; the PowerShell script also checks `FLUTTER_ROOT`), starts the first emulator (or `-Avd <name>` / `--avd <name>`), waits for it to boot and runs the app. Add `-Fresh` / `--fresh` to clear the app's data first, so you can try the model download from the start. More detail, including device tests, is in the README, "Demo app (Android)".
 
 **The model.** The trained weights are not part of this repository; they are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector). A fresh install opens with "No model is installed yet", and counting is off until the model is downloaded. The app's home screen offers **Download the model**: the app fetches r50-v5 (about 172 MB) from Kaggle, checks its size and SHA-256 and then counts, with the notice "Demo: real model weights … not validated in the field".
 
