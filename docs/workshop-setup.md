@@ -270,7 +270,13 @@ The `--no-enable-impeller` flag avoids a hang on emulators without a graphics ca
 
 ## Getting help
 
-There is no facilitator, so ask in the open, where the answer helps the next person too:
+**Ask your agent first.** Open it in the cloned `rice-pest-detector` folder and send, for example:
+
+> I'm following docs/workshop-setup.md, Module 3, Exercise 2. This command failed: `<command>`, with this output: `<error>`. Read that step and docs/setup.md, explain the likely cause, and propose a fix. Check the tool's own documentation instead of relying on memory, and do not run anything until I approve it.
+
+Read its explanation before you approve any command, especially an install or a settings change: an agent can be confidently wrong about a tool that changed after its training (the knowledge-cutoff slide in Module 2). Remove keys, tokens and personal details from anything you paste.
+
+If your agent cannot solve it, ask in the open, where the answer helps the next person too, and say what the agent tried:
 
 - **A question about the workshop, an exercise or a step on this page:** post it in the [Q&A category of Discussions](https://github.com/kurtvalcorza/rice-pest-detector/discussions/categories/q-a). Search there first; someone may have asked already.
 - **Something in the repository is broken or wrong** (a command fails, a link is dead, a test fails): open an issue with the **Bug report** form, as [CONTRIBUTING.md](../CONTRIBUTING.md) describes.
