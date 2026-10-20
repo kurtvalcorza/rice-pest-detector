@@ -2,7 +2,7 @@
 
 This page takes you through the *Coding with AI Agents* workshop on your own, in the same order as the session: six modules, three exercises, and a longer Spec Kit exercise to finish. Allow about three hours, in as many sittings as you like. There is no facilitator, so every exercise has a way to check your work and an answer to compare with.
 
-**The slides.** Open `docs/presentations/coding-with-ai-agents-2h.html` from your clone in a web browser (GitHub shows the file's source, not the slides). Move with the arrow keys, and press **N** to show each slide's notes: the "About this slide" part says what the speaker said. Each module below gives its slide numbers. The "Presenting" part of the notes was for the speaker; skip it.
+**The slides.** Open `docs/presentations/coding-with-ai-agents-2h.html` from your clone in a web browser (GitHub shows the file's source, not the slides). Move with the arrow keys, and press **N** to show each slide's notes: the "About this slide" part says what the speaker said. Each module below gives its slide numbers, which count only the slides shown by default (press **E** to show two hidden ones). The "Presenting" part of the notes was for the speaker; skip it.
 
 **What you need:** Git and this repository, an AI coding agent, an empty practice folder, and `uv` with Spec Kit for Module 3. Module 0 sets them up.
 
@@ -80,36 +80,35 @@ Read slides 9–18: why the one-shot prompt fails, the agent loop, `AGENTS.md`, 
 
 **Check yourself:** which decisions did your prompt leave to the agent? Typical gaps are the platform (phone, web or desktop), where the photos come from, what the model is and where it runs, what counts as "done", and what the app must never do (here: give spray or treatment advice).
 
-## Module 2. Context (slides 19–35, about 40 minutes)
+## Module 2. Context (slides 19–33, about 40 minutes)
 
 Read slides 19–33: an agent is a model plus a *harness*, context windows and why long sessions cost more, skills, hooks, sub-agents and MCP. The examples are real: `.claude/skills/`, `.claude/agents/` and `.claude/hooks/` in this repository.
 
-### Exercise 1: conduct, do not one-shot (slide 34, 10 minutes)
+### Exercise 1 (optional): one prompt, different harnesses (about 15 minutes)
 
-In your practice folder, with your agent:
+Slide 20 says an agent is a model plus a harness. Here you see what the harness changes. Skip this exercise if you have only one agent, or go straight to Module 3.
 
-1. Take your Exercise 0 prompt.
-2. Ask your agent for a plan first, and no code yet.
-3. Read the plan: what did it assume? Correct one thing.
-4. Approve one step only, and watch what it runs.
-5. Stop it if it leaves the plan.
+1. Make one empty folder per harness inside your practice folder, for example `try-a/` and `try-b/`, each with `git init`.
+2. In each folder, open a different harness: two different agents, or the same agent's editor extension and its command-line tool ([setup.md, An AI coding agent](setup.md#an-ai-coding-agent)). Start a fresh session in each.
+3. Send each one your Exercise 0 prompt, word for word. Approve nothing that installs software or runs outside its folder; stop each one after its first answer or its first few steps.
+4. Compare what you got: `git status` in each folder, and the replies side by side.
 
-**Check yourself** (slide 35's debrief): name one assumption in the plan you corrected, a moment you would have stopped it, and something it never asked you.
+**Check yourself:** for each harness, did it plan first or start writing code? Which questions did it ask you, and which choices did it make on its own (platform, libraries, where the photos come from)? Which commands did it ask permission for? Did it read any project files before it started?
 
 <details>
 <summary>What good answers look like</summary>
 
-- **An assumption you corrected:** for example, it planned a web app when you meant a phone app, assumed it could train a model on the spot, or invented a data source.
-- **A moment to stop it:** it installed packages or created files outside the step you approved, or started on step two.
-- **What it never asked:** usually who the users are, what counts as done, how accurate the counts must be, and what it must never do. Those gaps are what a written spec closes, which is Module 3.
+- **Different harnesses, different behaviour, same prompt.** One may ask questions and plan; another may start creating files straight away. Even the same model can behave differently in another harness (slides 20–22), and even the same harness gives two answers to the same prompt (slide 26).
+- **Permissions differ.** Harnesses ask before different actions: some before every command, some only before edits outside the folder. That is a setting you control (Module 4).
+- **What none of them asked:** usually who the users are, what counts as done, how accurate the counts must be, and what the app must never do. A one-shot prompt leaves those to whichever harness you happen to use; a written spec closes them, which is Module 3.
 
 </details>
 
-## Module 3. Specify (slides 36–62, about 45 minutes)
+## Module 3. Specify (slides 34–60, about 45 minutes)
 
-**Spec-driven development (SDD)** means writing the spec first and having the agent build from it. Read slides 36–59: what a spec is, the anatomy of a real one, acceptance criteria, and ten SDD frameworks compared. They differ mainly in how long the spec stays current after the code is written, and in which of their rules are enforced by code rather than by prompts. The real specs are in this repository: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) and [`specs/`](../specs/), for the model (001), the phone app (002) and a desktop app (003).
+**Spec-driven development (SDD)** means writing the spec first and having the agent build from it. Read slides 34–57: what a spec is, the anatomy of a real one, acceptance criteria, and ten SDD frameworks compared. They differ mainly in how long the spec stays current after the code is written, and in which of their rules are enforced by code rather than by prompts. The real specs are in this repository: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) and [`specs/`](../specs/), for the model (001), the phone app (002) and a desktop app (003).
 
-### Exercise 2: Spec Kit (slides 60–61, 15 minutes)
+### Exercise 2: Spec Kit (slides 58–59, 15 minutes)
 
 In a new folder, on an idea of your own (your Exercise 0 app is fine):
 
@@ -127,7 +126,7 @@ Your agent's key is in Spec Kit's [integrations list](https://github.github.io/s
 
 Read the `spec.md` it wrote.
 
-**Check yourself** (slide 62's debrief): is the spec ready to build from? Every requirement has a number where it needs one, and every question clarify asked has an answer. Name one question clarify asked that your Exercise 0 prompt never answered, one gap it missed, and one requirement that needed a number. Compare with the counting rule in [`specs/002-mobile-app/spec.md`](../specs/002-mobile-app/spec.md) (FR-002 and FR-006): a detection counts when its score is at or above the model's own threshold, an inclusive rule with a number (0.48 for the default model, from its manifest), not "when the model is confident".
+**Check yourself** (slide 60's debrief): is the spec ready to build from? Every requirement has a number where it needs one, and every question clarify asked has an answer. Name one question clarify asked that your Exercise 0 prompt never answered, one gap it missed, and one requirement that needed a number. Compare with the counting rule in [`specs/002-mobile-app/spec.md`](../specs/002-mobile-app/spec.md) (FR-002 and FR-006): a detection counts when its score is at or above the model's own threshold, an inclusive rule with a number (0.48 for the default model, from its manifest), not "when the model is confident".
 
 ### Going further: the whole Spec Kit flow on the desktop app (about 45 minutes)
 
@@ -207,15 +206,15 @@ Questions to answer for yourself:
 
 **Clean up:** `git switch main`, then `git branch -D my-speckit-run`. If you made the `rice-pest-detector-main` copy, remove it with `git worktree remove ../rice-pest-detector-main`. If Spec Kit or your agent created a feature branch of its own (for example `001-desktop-app`), delete it the same way.
 
-## Module 4. Guard (slides 63–71, about 15 minutes)
+## Module 4. Guard (slides 61–69, about 15 minutes)
 
-Read slides 63–71: the agent acts with your permissions, prompt injection (including through files you ask it to review), the "lethal trifecta", secrets and sandboxes.
+Read slides 61–69: the agent acts with your permissions, prompt injection (including through files you ask it to review), the "lethal trifecta", secrets and sandboxes.
 
-**Do it:** open your agent's settings and check the six safe defaults on slide 71 against them: approvals on; network off unless the task needs it; no secrets in the repository; edits scoped to the folders the task needs; every command reviewed before it runs; every new dependency checked. Which one would be hardest to keep in your own work, and what would make it easier?
+**Do it:** open your agent's settings and check the six safe defaults on slide 69 against them: approvals on; network off unless the task needs it; no secrets in the repository; edits scoped to the folders the task needs; every command reviewed before it runs; every new dependency checked. Which one would be hardest to keep in your own work, and what would make it easier?
 
-## Module 5. Share (slides 72–83, about 20 minutes)
+## Module 5. Share (slides 70–81, about 20 minutes)
 
-Read slides 72–83: how an agent built the real app, licences, the model behind it, and how teams use agents. Then go deeper:
+Read slides 70–81: how an agent built the real app, licences, the model behind it, and how teams use agents. Then go deeper:
 
 - **Training the model:** `docs/presentations/model-training.html`, and [`specs/001-model-training/`](../specs/001-model-training/).
 - **Building the app:** `docs/presentations/demo-app-process.html`, and [`specs/002-mobile-app/`](../specs/002-mobile-app/).
