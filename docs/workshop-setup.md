@@ -107,7 +107,7 @@ In your practice folder, with your agent:
 
 ## Module 3. Specify (slides 36–62, about 45 minutes)
 
-Read slides 36–59: what a spec is, the anatomy of a real one, acceptance criteria, and ten spec-driven frameworks compared. The real specs are in this repository: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) and [`specs/`](../specs/), for the model (001), the phone app (002) and a desktop app (003).
+**Spec-driven development (SDD)** means writing the spec first and having the agent build from it. Read slides 36–59: what a spec is, the anatomy of a real one, acceptance criteria, and ten SDD frameworks compared. They differ mainly in how long the spec stays current after the code is written, and in which of their rules are enforced by code rather than by prompts. The real specs are in this repository: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) and [`specs/`](../specs/), for the model (001), the phone app (002) and a desktop app (003).
 
 ### Exercise 2: Spec Kit (slides 60–61, 15 minutes)
 
@@ -320,9 +320,14 @@ Never post personal or confidential material, keys or tokens, even when asking f
 | Prompt injection | Text the agent reads (in a file, web page or issue) that tries to give it instructions you did not give. |
 | Spec | A written description of what to build and why, with requirements you can test, before any code. |
 | Constitution | In Spec Kit, the project's ground rules; every spec, plan and task list is checked against it. |
+| SDD (spec-driven development) | Writing the spec first and having the agent build from it. Spec Kit is one SDD toolkit; Module 3 compares ten. |
 | Spec Kit | GitHub's open-source toolkit for spec-driven development: constitution, specify, clarify, plan, tasks, implement. |
 | Validation and test photos | Photos held back from training. Validation photos are used to choose the model and the threshold; test photos are kept for a final, rule-bound check. |
 | Threshold | The score at or above which a detection is counted: 0.48 for the default model. |
 | mAP50 | Mean average precision at 50% box overlap: how well the detector finds and ranks the insects, from 0 to 1. |
 | Count accuracy | The share of photos where both species are counted close enough: within 1 when the true count is under 10, otherwise within 10%. The project's headline measure. |
 | ONNX | A portable file format for trained models, used to run the model in the app and on a laptop. |
+| GPU, T4 | A graphics processor, which trains and runs models far faster than a CPU. The T4 is the GPU model Colab and Kaggle offer on their free tiers; the training notebooks expect one. |
+| CLI | Command-line interface: a program you run by typing commands in a terminal, such as `git`, `specify`, `claude` or `colab`. |
+| CI | Continuous integration: checks that run automatically on every change pushed to the repository. Here, GitHub runs the tests and the `--check` commands. |
+| SHA-256 | A fingerprint of a file's exact bytes. If even one byte differs, the fingerprint differs, so it proves a download or a model file is the expected one. |
