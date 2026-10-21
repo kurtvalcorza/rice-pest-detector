@@ -1,0 +1,49 @@
+{
+ "variant": "dfine-l-kaggle",
+ "notebook_sha256": "12861774f2bf8ace0d8408377881f7980d97cd59f3fe7c688f54ec41309cf0ab",
+ "cell_sources_sha256": "262841d8e4ed88c099e56ef4c3345078e46d152a1f4d440c99398967aa1b98f2",
+ "embedded": {
+  "src/rice_pest_detector/__init__.py": "ad2a8e84b83c9043fe992aed2daeedf5b7a55c3552d3573fb328c70e15a73f2b",
+  "src/rice_pest_detector/dedup.py": "618ae02dbca94cc39bb33f67ef9ba56465d00249b469a9a4a1bae2ec0824f2bb",
+  "src/rice_pest_detector/families.py": "97a00ff6adfd99fb3ebbad2339ea33a49097783e38bd065d5dec89ed6908ed4a",
+  "src/rice_pest_detector/fetch.py": "f67fd9ac042c198b7e54e3ffa556785757875470fb5e989c68fc209d4aca2820",
+  "src/rice_pest_detector/infer.py": "2629db3c848450b96bb931b4082c4a2a32dc5df6dcb6202dc5ddf67b64d0d261",
+  "src/rice_pest_detector/labels.py": "2cd57832457cb02b7714d5b4a1e478fa4e8a9fc72cc648a5ff06a3b1f2d20864",
+  "src/rice_pest_detector/manifest.py": "8986ddb2e3caa9929d57092fa3023516af02ac246f1604bda47b2fb1738e65ad",
+  "src/rice_pest_detector/metrics.py": "79c74c5b1fcc2da29fc54177bee533c0d22ff65cb31b0170eb932e8381e6062e",
+  "src/rice_pest_detector/split.py": "22050bf1536ab2de29cebdd6cb17cae6fe9e3f1c9bc1c80883e2118a4129db48",
+  "src/rice_pest_detector/train.py": "f741827839e815bf1847843e1798444ae83740c246f57260f87cf03fbb3e5cd2",
+  "tools/export_onnx.py": "e384068f3cc806524b583b7cae305ca9ac5464adbf4d71e9162494b70f99c085",
+  "tools/kaggle_driver.py": "fd3718db66a1faf192ddc8d4b11cebc5bc3810b8bc29e33297227feec0262983",
+  "notebooks/kaggle/requirements-kaggle.lock.txt": "c1321d4b0f8cb14b61e03a29fb534ea5b2774813646b271f395763c321f4080d",
+  "data/annotations_test.json": "d602a8d86ff63ef4ece1dfa20d9a7b5307d3b4066b37f8245b84045f54bcce6e",
+  "data/annotations_train.json": "3b032f97eeff5dc5d67a055cca4cc4d31594b38f2d50f9b2edd73be00b87431b",
+  "data/annotations_val.json": "088a2717399a70a8bf767db40c0ef09a51c75536bb90abce903d9b8e813b23c6",
+  "data/exclusions.json": "43bd5c510543a149a5da078e8b3a2f64d2519507b94d8b58bedc4a8231adcb3d",
+  "data/split_manifest.json": "87e8536e88d637516185fc20a500e0da35443676489f6589d5dc0457e2d1ea8f"
+ },
+ "lock": {
+  "path": "notebooks/kaggle/requirements-kaggle.lock.txt",
+  "sha256": "c1321d4b0f8cb14b61e03a29fb534ea5b2774813646b271f395763c321f4080d",
+  "uv": "0.12.15",
+  "python": "3.12.12",
+  "platform": "x86_64-manylinux_2_28"
+ },
+ "generator": {
+  "tools/build_notebook.py": "797f10733ad322671fd8b8e94e117c03af3427c7",
+  "tools/kaggle_cells.py": "c17812e49feaa981160c75ad90be9f4a4c0207ac"
+ },
+ "model": {
+  "base_model": "ustc-community/dfine-large-coco",
+  "revision": "aa8f8211545e4cff5adf52ea512f9ac74a9824ec",
+  "manifest": "models/rice-pest-dfine-l.manifest.json",
+  "threshold": 0.5,
+  "input_size": 640
+ },
+ "kaggle": {
+  "id": "kurtvalcorza/rice-pest-detector-train-d-fine-l",
+  "is_private": true,
+  "accelerator": "NvidiaTeslaT4",
+  "enable_internet": true
+ }
+}

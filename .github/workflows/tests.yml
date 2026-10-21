@@ -39,6 +39,11 @@ jobs:
       - name: Run pytest
         run: python -m pytest -q
 
+      # Every committed notebook (five Colab, three Kaggle editions with their metadata and declaration) must
+      # match a fresh build from the generator, each with its variant's own base-model revision.
+      - name: Check the generated notebooks
+        run: python tools/build_notebook.py --check-all
+
       # The app's golden fixtures must match a fresh build from the Python reference (Pillow is pinned
       # because resize output differs between versions).
       - name: Check the app's golden fixtures

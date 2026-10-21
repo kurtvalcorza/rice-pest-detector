@@ -8,7 +8,7 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 > **⚠️ Notice.** For research, training and evaluation only. Not validated for production,
 > clinical, diagnostic or safety-critical use, and not a field pest-surveillance or pest-alert system.
 > Running the training notebook downloads third-party model weights and datasets under their own
-> licenses (see [docs/model-card.md](docs/model-card.md) and [data/README.md](data/README.md)) and uses compute on your own Colab account.
+> licenses (see [docs/model-card.md](docs/model-card.md) and [data/README.md](data/README.md)) and uses compute on your own Colab or Kaggle account.
 > The Android app's counts are experimental estimates: they are not agronomic advice, must not be the
 > basis for any pest-management or spraying decision, and should be reviewed by an agricultural
 > technician. Installing the app or a model on a device is at your own risk.
@@ -24,7 +24,7 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 
 - **Specs.** [Spec Kit](https://github.com/github/spec-kit) specs for the project: a [constitution](.specify/memory/constitution.md) and one folder per feature in [specs/](specs/): the model (001), the phone app (002) and a planned desktop app (003), each with its spec, plan and task list. A self-paced exercise walks you through Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html) on the desktop app ([docs/workshop-setup.md](docs/workshop-setup.md), Module 3, "Going further").
 - **Agent configuration.** The `AGENTS.md` briefing, a skill, a read-only sub-agent and a Stop hook that keeps the agent working until the tests pass (`.claude/`).
-- **A model, trained and judged by rules fixed in advance.** Colab training notebooks, evaluation, calibration and ONNX export, with every result and its provenance in [docs/evaluation-record.md](docs/evaluation-record.md).
+- **A model, trained and judged by rules fixed in advance.** Colab and Kaggle training notebooks, evaluation, calibration and ONNX export, with every result and its provenance in [docs/evaluation-record.md](docs/evaluation-record.md).
 - **A demonstration app.** A Flutter Android app (`app/`) built milestone by milestone, test-first, that counts both species on a trap photo and can switch between and compare models. It shows how to put a model behind an app; it is not a tool for farmers and is not validated for any pest-management decision.
 - **The story in slides.** The session deck and case studies on how the model was trained and the app was built ([docs/presentations/](docs/presentations/)).
 
@@ -51,6 +51,7 @@ On a work or school laptop, installs may be blocked: ask your IT team first, or 
 - [Quick start](#quick-start)
 - [Data pipeline](#data-pipeline)
 - [Training on Colab](#training-on-colab)
+- [Training on Kaggle](#training-on-kaggle)
 - [Evaluation](#evaluation)
 - [Export to ONNX and parity](#export-to-onnx-and-parity)
 - [Choosing a demo threshold](#choosing-a-demo-threshold)
@@ -379,6 +380,30 @@ The notebooks are **generated**, never hand-edited (see [Training notebooks](#tr
 
 ---
 
+## Training on Kaggle
+
+The same recipe also runs on Kaggle, as three **reference notebooks**: each one retrains a published model with the full 40-epoch recipe, then evaluates, exports and checks it in the notebook. They are not short tutorials. Each notebook attaches the model it retrains from [Kaggle Models](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector), so the model page lists the notebook that trains it.
+
+| Model | Notebook on Kaggle | Source in this repository | Status |
+| :-- | :-- | :-- | :-- |
+| r50-v5 (demo model) | [Rice pest detector: train RT-DETR r50](https://www.kaggle.com/code/kurtvalcorza/rice-pest-detector-train-rt-detr-r50) | [`notebooks/kaggle/rice-pest-detector-train-rt-detr-r50/`](notebooks/kaggle/rice-pest-detector-train-rt-detr-r50/) | Public, run verified |
+| RF-DETR-M | [Rice pest detector: train RF-DETR-M](https://www.kaggle.com/code/kurtvalcorza/rice-pest-detector-train-rf-detr-m) | [`notebooks/kaggle/rice-pest-detector-train-rf-detr-m/`](notebooks/kaggle/rice-pest-detector-train-rf-detr-m/) | Public, run verified |
+| D-FINE-L | not public yet | [`notebooks/kaggle/rice-pest-detector-train-d-fine-l/`](notebooks/kaggle/rice-pest-detector-train-d-fine-l/) | Not yet run on Kaggle |
+
+**What they need.**
+
+- A phone-verified Kaggle account (Kaggle requires it for GPU and Internet).
+- Accelerator **GPU T4 x2** (one T4 is used) and **Internet on**.
+- Time and quota: about 7 hours for r50-v5 (6.8 h measured on Kaggle), 6.5 for RF-DETR-M (5.7 h measured) and 8.5 for D-FINE-L, from your weekly Kaggle GPU quota. A Kaggle session ends after 12 hours.
+
+**Which version to read.** The latest version of each public notebook only adds the model link and tags; it was saved without running, so it shows no outputs. The verified run, with every output, is version 2 for r50-v5 and version 1 for RF-DETR-M: open **Version** on the notebook page to see it. The code is the same.
+
+Open a notebook, choose **Copy & Edit**, then **Run all**; no cell needs editing. Each notebook builds its own Python environment from a hash-locked package list ([`notebooks/kaggle/requirements-kaggle.lock.txt`](notebooks/kaggle/requirements-kaggle.lock.txt)), downloads the images from Zenodo and checks every file. If a session ends early, attach the earlier run's output and set `RESUME_FROM`.
+
+Like the Colab notebooks, the Kaggle notebooks are generated by `tools/build_notebook.py` (variants `r50v5-kaggle`, `rfdetr-m-kaggle` and `dfine-l-kaggle`) and checked by `--check-all` in CI. Each Kaggle run is checked independently by `tools/verify_kaggle_run.py`, which recomputes its numbers and compares them with [docs/evaluation-record.md](docs/evaluation-record.md); verdicts and publication receipts are in [docs/kaggle-runs/LEDGER.md](docs/kaggle-runs/LEDGER.md).
+
+---
+
 ## Evaluation
 
 Every result, with the command and file it came from, is in [docs/evaluation-record.md](docs/evaluation-record.md).
@@ -558,9 +583,13 @@ rice-pest-detector/
 ├── src/rice_pest_detector/   # package: families, labels, dedup, split, manifest, fetch,
 │                             #   metrics, infer (contract), train
 ├── data/                     # split manifest + COCO annotations (no images)
-├── notebooks/                # 5 training notebooks, generated by tools/build_notebook.py
+├── notebooks/                # 5 Colab training notebooks, generated by tools/build_notebook.py
+│   └── kaggle/               # 3 Kaggle editions (+ kernel-metadata, declaration, shared lock)
 ├── tools/
 │   ├── build_notebook.py         # notebook generator (+ --check)
+│   ├── kaggle_cells.py / kaggle_driver.py  # Kaggle editions: cell text and stage runner
+│   ├── verify_kaggle_run.py      # independent check of a Kaggle run; publication receipts
+│   ├── leak_check.py             # scan notebooks and outputs for private details
 │   ├── nn_leakage_check.py       # cross-split nearest-neighbour report
 │   ├── export_onnx.py            # checkpoint -> ONNX + parity
 │   ├── choose_demo_threshold.py  # validation-only threshold sweep
@@ -574,6 +603,7 @@ rice-pest-detector/
 ├── docs/
 │   ├── inference-contract.md
 │   ├── evaluation-record.md  # every result, with provenance
+│   ├── kaggle-runs/          # Kaggle run ledger, verifications and receipts
 │   ├── model-card.md         # index of the model cards
 │   ├── model-cards/          # one card per model (r50-v5, rf-detr-m, d-fine-l)
 │   ├── setup.md  workshop-setup.md

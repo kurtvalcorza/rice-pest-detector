@@ -170,6 +170,57 @@ def test_rfdetr_variant_trains_and_tests_at_576(tmp_path: Path):
     assert "size=cfg.input_size" not in next(c.source for c in other.cells if c.get("id") == "test-eval")
 
 
+COLAB_SHA256 = {  # recorded 2026-10-20 before spec 010 (baseline in docs/kaggle-runs/LEDGER.md)
+    "train_colab.ipynb": "22bde1f00eed5dd831f935cf2ce49e6c94ad95f2875d4178c66bde220cb15f5f",
+    "train_colab_r50.ipynb": "d16847486d7b827b6635314f4c03dde266bced47759c13746511d38353bf160e",
+    "train_colab_r50v5.ipynb": "99f6711dea50eece1a4fc16393070914bac1ddf5684b01bc1fa64aa761b7c98c",
+    "train_colab_dfine-l.ipynb": "663ba2052e67f7ea6a5a1b438f261d3a1ce49d038cc45b1476cd784bc58295df",
+    "train_colab_rfdetr-m.ipynb": "267b287d2a71cd7a779a3463c8cb594707c6a4e5519c3bdfaa87d978d0f0880d",
+}
+
+
+def test_every_variant_records_its_revision_and_colab_notebooks_build_unchanged(tmp_path: Path):
+    import tools.build_notebook as bn
+
+    assert all(re.fullmatch(r"[0-9a-f]{40}", v["revision"]) for v in bn.VARIANTS.values())
+    for variant in bn.COLAB_VARIANTS:
+        target = bn.committed_path(variant)
+        assert hashlib.sha256(target.read_bytes()).hexdigest() == COLAB_SHA256[target.name]
+        fresh = build(tmp_path / target.name, variant=variant)  # revision from the variant table
+        assert fresh.read_bytes() == target.read_bytes(), variant
+
+
+def test_check_all_checks_every_committed_notebook_and_fails_on_any_difference(monkeypatch, capsys):
+    import tools.build_notebook as bn
+
+    seen = []
+    monkeypatch.setattr(bn, "check", lambda variant, revision=None: seen.append(variant) or [])
+    assert bn.check_all() == 0
+    assert seen == [*bn.COLAB_VARIANTS, *bn.KAGGLE_VARIANTS] and len(seen) == 8
+    assert "8 of 8 notebooks match" in capsys.readouterr().out
+    monkeypatch.setattr(bn, "check", lambda variant, revision=None: ["x.ipynb"] if variant == "dfine-l-kaggle" else [])
+    assert bn.check_all() == 1
+
+
+def test_check_fails_on_a_one_byte_change(tmp_path: Path, monkeypatch):
+    import tools.build_notebook as bn
+
+    for variant in ("r50v5", "r50v5-kaggle"):
+        original = bn.committed_path(variant)
+        assert bn.check(variant) == []  # the committed files match a fresh build with the variant's own revision
+        copy = tmp_path / variant / original.name
+        copy.parent.mkdir()
+        for name in (original.name, "kernel-metadata.json", "declaration.json"):
+            if (original.parent / name).is_file():
+                (copy.parent / name).write_bytes((original.parent / name).read_bytes())
+        data = bytearray(copy.read_bytes())
+        data[-2] ^= 1
+        copy.write_bytes(bytes(data))
+        monkeypatch.setattr(bn, "committed_path", lambda v, _c=copy: _c)
+        assert bn.check(variant) == [original.name]
+        monkeypatch.undo()
+
+
 def test_new_variants_carry_the_dataset_credit_and_run_notebooks_stay_unchanged(tmp_path: Path, monkeypatch):
     import json
 

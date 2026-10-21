@@ -1,0 +1,11 @@
+{
+ "ref": "kurtvalcorza/rice-pest-detector-train-rt-detr-r50",
+ "authorized_by": "owner, 2026-10-21 (route: Share → Public in the Kaggle interface)",
+ "public_version": 2,
+ "verified_run": "docs/kaggle-runs/r50v5/r50v5-v2-verification.json (VERIFIED)",
+ "anonymous_page_http": 200,
+ "anonymous_api_http": 200,
+ "anonymous_api_is_private": false,
+ "new_version_created": false,
+ "metadata_updated": "not yet: generator variant public=False; kernel-metadata.json is_private true"
+}

@@ -1,0 +1,22 @@
+{
+ "id": "kurtvalcorza/rice-pest-detector-train-rt-detr-r50",
+ "title": "Rice pest detector: train RT-DETR r50",
+ "code_file": "train_kaggle_r50v5.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": false,
+ "enable_gpu": true,
+ "enable_tpu": false,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": [],
+ "model_sources": [
+  "kurtvalcorza/rice-pest-detector/onnx/r50-v5/3"
+ ],
+ "keywords": [
+  "agriculture",
+  "deep-learning",
+  "object-detection"
+ ]
+}

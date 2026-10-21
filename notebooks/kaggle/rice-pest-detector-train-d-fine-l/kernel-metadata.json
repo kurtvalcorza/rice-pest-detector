@@ -1,0 +1,22 @@
+{
+ "id": "kurtvalcorza/rice-pest-detector-train-d-fine-l",
+ "title": "Rice pest detector: train D-FINE-L",
+ "code_file": "train_kaggle_dfine-l.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_tpu": false,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": [],
+ "model_sources": [
+  "kurtvalcorza/rice-pest-detector/onnx/d-fine-l/3"
+ ],
+ "keywords": [
+  "agriculture",
+  "deep-learning",
+  "object-detection"
+ ]
+}

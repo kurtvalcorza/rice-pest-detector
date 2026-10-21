@@ -1,0 +1,78 @@
+{
+ "variant": "rfdetr-m-kaggle",
+ "kernel": "kurtvalcorza/rice-pest-detector-train-rf-detr-m",
+ "kernel_version": 1,
+ "code_commit": "debb28d",
+ "source": {
+  "declared": "780d5fec729e8d67c627218587d6a7e0b79f8dfe773c7d46cbc17c3731d168c5",
+  "observed": "780d5fec729e8d67c627218587d6a7e0b79f8dfe773c7d46cbc17c3731d168c5",
+  "match": true
+ },
+ "errors_in_executed_notebook": 0,
+ "lock": {
+  "declared": "c1321d4b0f8cb14b61e03a29fb534ea5b2774813646b271f395763c321f4080d",
+  "observed": "c1321d4b0f8cb14b61e03a29fb534ea5b2774813646b271f395763c321f4080d",
+  "match": true
+ },
+ "gpu": "Tesla T4",
+ "artifacts": {
+  "best.pt": "match",
+  "model.onnx": "match"
+ },
+ "recomputed_equal": true,
+ "comparisons": [
+  {
+   "metric": "best_val_map50_species",
+   "kaggle": 0.9332318335949061,
+   "recorded": 0.933,
+   "tolerance": 0.02,
+   "verdict": "WITHIN"
+  },
+  {
+   "metric": "map50_four_class",
+   "kaggle": 0.8408208035738389,
+   "recorded": 0.837,
+   "tolerance": 0.03,
+   "verdict": "WITHIN"
+  },
+  {
+   "metric": "count_accuracy",
+   "kaggle": 0.83399209486166,
+   "recorded": 0.846,
+   "tolerance": 0.04,
+   "verdict": "WITHIN"
+  },
+  {
+   "metric": "wsb30_mae",
+   "kaggle": 8.666666666666666,
+   "recorded": 9.56,
+   "tolerance": 2.0,
+   "verdict": "WITHIN"
+  },
+  {
+   "metric": "onnx_bytes",
+   "kaggle": 121956743,
+   "recorded": 121956743,
+   "tolerance": "\u00b11%",
+   "verdict": "WITHIN"
+  },
+  {
+   "metric": "count_accuracy_no_detection_baseline",
+   "kaggle": 0.4743083003952569,
+   "recorded": 0.474,
+   "tolerance": "exact to 3 places",
+   "verdict": "WITHIN"
+  },
+  {
+   "metric": "best_epoch",
+   "kaggle": 8,
+   "recorded": 3,
+   "tolerance": "recorded, not compared",
+   "verdict": "RECORDED"
+  }
+ ],
+ "local_onnx_check": "SKIPPED (no images)",
+ "training_seconds": 20643.7,
+ "verdict": "VERIFIED",
+ "findings": []
+}

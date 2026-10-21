@@ -1,0 +1,12 @@
+# Direct pins for the Kaggle editions' isolated environment (Python 3.12, Linux x86_64).
+# Compile the lock with uv 0.12.15:
+#   uv pip compile notebooks/kaggle/requirements-kaggle.in --python-version 3.12 --python-platform x86_64-manylinux_2_28 --generate-hashes --only-binary :all: -o notebooks/kaggle/requirements-kaggle.lock.txt
+# numpy and pillow are pinned to the versions that built data/ and the app fixtures.
+numpy==2.5.4
+pillow==12.3.0
+torch==2.14.1
+transformers==5.20.1
+pycocotools==2.0.11
+scipy==1.18.1
+onnx==1.23.2
+onnxruntime==1.31.0
