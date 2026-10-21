@@ -108,6 +108,23 @@ Slide 20 says an agent is a model plus a harness. Here you see what the harness 
 
 **Spec-driven development (SDD)** means writing the spec first and having the agent build from it. Read slides 34–57: what a spec is, the anatomy of a real one, acceptance criteria, and ten SDD frameworks compared. They differ mainly in how long the spec stays current after the code is written, and in which of their rules are enforced by code rather than by prompts. The real specs are in this repository: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) and [`specs/`](../specs/), for the model (001), the phone app (002) and a desktop app (003).
 
+The loop below is the core of SDD. You review each document before the agent moves on, and you edit it until you are happy with it; code comes last.
+
+```mermaid
+flowchart LR
+    P["Prompt:<br/>what you want"] --> R["Requirements<br/>(the spec)"]
+    R --> H1{"Happy with<br/>them?"}
+    H1 -- "no" --> E1["Edit"] --> R
+    H1 -- "yes" --> D["Design<br/>(the plan)"]
+    D --> H2{"Happy with<br/>it?"}
+    H2 -- "no" --> E2["Edit"] --> D
+    H2 -- "yes" --> I["Implement"]
+```
+
+*Diagram adapted from IBM Technology, [Spec-Driven Development: AI Assisted Coding Explained](https://www.youtube.com/watch?v=mViFYTwWvcM) (28 Feb 2026).*
+
+In Spec Kit, the steps map to its commands: `/speckit-specify` and `/speckit-clarify` write and settle the requirements (`spec.md`), `/speckit-plan` writes the design (`plan.md`), and `/speckit-tasks` and `/speckit-implement` build it. Exercise 2 stops at the first check: is the spec right?
+
 ### Exercise 2: Spec Kit (slides 58–59, 15 minutes)
 
 In a new folder, on an idea of your own (your Exercise 0 app is fine):
