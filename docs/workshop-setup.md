@@ -288,6 +288,17 @@ To start runs from a terminal or let an agent drive Colab, see [setup.md, Colab 
 
 **After training.** Choosing a counting threshold, exporting to ONNX and checking parity with PyTorch run on your computer with the Python tools ([setup.md, Python tools and tests](setup.md#python-tools-and-tests)); the steps are in the README, "Evaluation", "Export to ONNX and parity" and "Choosing a demo threshold". An exported model can be imported into the demo app from Settings, where it is marked "Demo model, not validated".
 
+### Before you go: a short survey (slide 82, optional)
+
+To train and share the model in this course you used several separate services: GPU time on Colab or Kaggle, the dataset on Zenodo, the published models on Kaggle, and the code on GitHub.
+
+We are studying whether a national AI-as-a-Service platform would be useful to researchers, developers and students. If you would like to take part, the survey is at [aiaas-market-study-st8x.vercel.app](https://aiaas-market-study-st8x.vercel.app/).
+
+- It takes about 12 minutes.
+- Taking part is voluntary, and a low rating is as useful as a high one.
+- Read the consent notice on the first page before you start.
+- Do not enter passwords, access keys or other people's personal data.
+
 ## Optional: run the demo app on an emulator
 
 Not needed for the session. Install Flutter, Android Studio and an emulator first: [setup.md, Demo app](setup.md#demo-app-optional) (allow one to two hours the first time). Then start the emulator and, from the repository's `app/` folder:
