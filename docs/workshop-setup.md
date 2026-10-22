@@ -237,17 +237,18 @@ Read slides 70–82: how an agent built the real app, licences, the model behind
 - **Building the app:** `docs/presentations/demo-app-process.html`, and [`specs/002-mobile-app/`](../specs/002-mobile-app/).
 - **Agent harnesses and context engineering:** `docs/presentations/harness-context-engineering.html`.
 
-**Safety of what you ship (slide 78).** Module 4 was about keeping the agent from harming you; this is about not harming other people with what you build. Five practices from the research literature, and how this project meets them:
+**Safety of what you ship (slide 78).** Module 4 was about keeping the agent from harming you; this is about not harming other people with what you build. Six practices from the research literature, and how this project meets them, gaps included:
 
-| Practice | In this project |
-| :-- | :-- |
-| Say what it is for ([Mitchell et al., 2019](https://doi.org/10.1145/3287560.3287596)) | The [model card](model-cards/r50-v5.md) and use notice: a teaching demo, not for farmers |
-| Fix the rules before the results ([Kapoor and Narayanan, 2023](https://doi.org/10.1016/j.patter.2023.100804)) | Quality gates set before training; test photos used twice in the whole project, both recorded in the [evaluation record](evaluation-record.md) |
-| Expect failure on new data ([Mohanty et al., 2016](https://doi.org/10.3389/fpls.2016.01419)) | Trained on light-trap photos only; not yet tested on phone photos in the field |
-| Keep a person in the loop ([Parasuraman and Manzey, 2010](https://doi.org/10.1177/0018720810376055)) | The app flags low scores and trays of more than 30 insects for review |
-| Say what is still open ([NIST AI RMF 1.0](https://doi.org/10.6028/NIST.AI.100-1)) | No monitoring after release, no independent review, data protection not yet reviewed |
+| Practice | What the literature says | This project |
+| :-- | :-- | :-- |
+| **1. Say what it is for, and what it is not for** | Ship each model with a model card: intended use, uses to avoid, and results under the conditions that matter ([Mitchell et al., 2019](https://doi.org/10.1145/3287560.3287596)). Document the dataset as well ([Gebru et al., 2021](https://doi.org/10.1145/3458723)). | Done: the [model card](model-cards/r50-v5.md), the use notice, the "Demo" label in the app, and the data credited. |
+| **2. Fix the rules before you see results** | Data leakage and reused test sets are a main cause of inflated machine-learning results ([Kapoor and Narayanan, 2023](https://doi.org/10.1016/j.patter.2023.100804)). Analyses chosen after seeing the data make the holdout unreliable ([Dwork et al., 2015](https://doi.org/10.1126/science.aaa9375)). REFORMS turns this into a 32-question reporting checklist ([Kapoor et al., 2024](https://doi.org/10.1126/sciadv.adk3452)). | Done: quality gates set before training. The test photos were used twice in the whole project, both recorded in the [evaluation record](evaluation-record.md). |
+| **3. Expect it to fail on data it has not seen** | Models learn shortcuts that break outside their training conditions ([Geirhos et al., 2020](https://doi.org/10.1038/s42256-020-00257-z)). In agriculture, a plant-disease model scored 99.35% on its own held-out photos but just above 31% on photos taken under different conditions ([Mohanty et al., 2016](https://doi.org/10.3389/fpls.2016.01419)). | Stated, not solved: trained on light-trap photos only, with no check for unfamiliar inputs. Field validation on phone photos is still open. |
+| **4. Keep a person in the loop, and design against over-trust** | People over-rely on automated aids; this complacency is predictable and has to be designed against ([Parasuraman and Manzey, 2010](https://doi.org/10.1177/0018720810376055)). | Partly done: the app flags photos with low scores or more than 30 insects for a person to review. The model card says the flag can miss doubtful counts on photos unlike the validation set. |
+| **5. Manage risk over the whole life of the system** | Govern, map, measure and manage risk ([NIST AI RMF 1.0](https://doi.org/10.6028/NIST.AI.100-1)); test for production readiness ([Breck et al., 2017](https://doi.org/10.1109/BigData.2017.8258038)); audit internally at every stage ([Raji et al., 2020](https://doi.org/10.1145/3351095.3372873)). | Gaps: no monitoring after release and no independent review. The data-protection and wording reviews are still open. |
+| **6. Treat text the system reads as untrusted** | Indirect prompt injection can take over applications built on large language models ([Greshake et al., 2023](https://doi.org/10.1145/3605764.3623985)). | Covered in Module 4 (slides 61–69). |
 
-The plant-disease study is the warning in one number: a model that scored 99.35% on its own test photos fell to just above 31% on photos taken in other conditions.
+The open items in rows 3 and 5 are part of the lesson: they are why the app says "Demo".
 
 **The five takeaways:** conduct the agent, do not one-shot it; write the spec before the code; put the rules that matter in hooks, tests and CI; treat text from outside as untrusted; an agent drafts, a person decides and stays accountable.
 
