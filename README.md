@@ -23,7 +23,7 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 **Who it is for.** Participants in the *Coding with AI Agents* workshop, and anyone learning to build software with AI coding agents. The repository is a worked example of the whole path, from a written spec to a tested, documented result:
 
 - **Specs.** [Spec Kit](https://github.com/github/spec-kit) specs for the project: a [constitution](.specify/memory/constitution.md) and one folder per feature in [specs/](specs/): the model (001), the phone app (002) and a planned desktop app (003), each with its spec, plan and task list. A self-paced exercise walks you through Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html) on the desktop app ([docs/workshop-setup.md](docs/workshop-setup.md), Module 3, "Going further").
-- **Agent configuration.** The `AGENTS.md` briefing, a skill, a read-only sub-agent and a Stop hook that keeps the agent working until the tests pass (`.claude/`).
+- **Agent configuration.** The `AGENTS.md` briefing, a skill, a read-only sub-agent and a Stop hook that sends the agent back once when the app's tests fail (`.claude/`).
 - **A model, trained and judged by rules fixed in advance.** Colab and Kaggle training notebooks, evaluation, calibration and ONNX export, with every result and its provenance in [docs/evaluation-record.md](docs/evaluation-record.md).
 - **A demonstration app.** A Flutter Android app (`app/`) built milestone by milestone, test-first, that counts both species on a trap photo and can switch between and compare models. It shows how to put a model behind an app; it is not a tool for farmers and is not validated for any pest-management decision.
 - **The story in slides.** The session deck and case studies on how the model was trained and the app was built ([docs/presentations/](docs/presentations/)).
@@ -567,7 +567,7 @@ The debug APK is about 184 MB, mostly ONNX Runtime's native libraries for every 
 
 | Suite | Command | Count | Covers |
 | :-- | :-- | --: | :-- |
-| Python | `.\.venv\Scripts\python -m pytest` | 142 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
+| Python | `.\.venv\Scripts\python -m pytest` | 202 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
 | Dart (PC) | `flutter test` in `app/` | 140 | contract parity, decoding, counting, history, model store and registry, model import and download checks, localisation, screens (including the no-model state, settings and compare) |
 | Dart (device) | `flutter drive … --no-enable-impeller` | 1 | the real app starting with no model installed (note: `flutter drive` uninstalls the app afterwards, which also removes a demo model) |
 

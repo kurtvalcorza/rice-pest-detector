@@ -1,6 +1,6 @@
 # Coding with AI Agents: the workshop, at your own pace
 
-This page takes you through the *Coding with AI Agents* workshop on your own, in the same order as the session: six modules, three exercises, and a longer Spec Kit exercise to finish. Allow about three hours, in as many sittings as you like. There is no facilitator, so every exercise has a way to check your work and an answer to compare with.
+This page takes you through the *Coding with AI Agents* workshop on your own, in the same order as the session: six modules, three exercises, and a longer Spec Kit exercise to finish. Allow about three hours for the six modules and their exercises, and about 45 minutes more for the longer Spec Kit exercise, in as many sittings as you like. Training the model yourself (Module 5) is optional and takes hours more, mostly waiting. There is no facilitator, so every exercise has a way to check your work and an answer to compare with.
 
 **The slides.** Open `docs/presentations/coding-with-ai-agents-2h.html` from your clone in a web browser (GitHub shows the file's source, not the slides). Move with the arrow keys, and press **N** to show each slide's notes: the "About this slide" part says what the speaker said. Each module below gives its slide numbers, which count only the slides shown by default (press **E** to show two hidden ones). The "Presenting" part of the notes was for the speaker; skip it.
 
@@ -16,8 +16,8 @@ The repository holds the whole project, but you only need a few files for this w
 | :-- | :-- | :-- |
 | [`docs/presentations/coding-with-ai-agents-2h.html`](presentations/coding-with-ai-agents-2h.html) | The session deck, with speaker notes (press N) | Every module |
 | [`docs/setup.md`](setup.md) | What to install, by task, with the commands for each system | Module 0 |
-| [`AGENTS.md`](../AGENTS.md) | The briefing any agent reads first in this repository: what the project is and its rules | Modules 0 and 1 |
-| [`.claude/settings.json`](../.claude/settings.json), [`.claude/hooks/require_green_tests.py`](../.claude/hooks/require_green_tests.py) | A Stop hook: the agent cannot say it is done while the app's tests fail | Module 2 |
+| [`AGENTS.md`](../AGENTS.md) | The briefing for agents working in this repository: what the project is and its rules. Codex reads it directly and Claude Code through `CLAUDE.md`, which imports it; with other agents, check that it was loaded or ask the agent to read it | Modules 0 and 1 |
+| [`.claude/settings.json`](../.claude/settings.json), [`.claude/hooks/require_green_tests.py`](../.claude/hooks/require_green_tests.py) | A Stop hook: it runs the app's tests (`flutter test`) and blocks the agent's first attempt to finish while they fail. It lets the agent stop if Flutter is not installed, if the tests still fail after it has blocked once, or if it is switched off (`RICE_PEST_STOP_HOOK=off`), so passing tests stay your responsibility | Module 2 |
 | [`.claude/skills/refactor-safely/SKILL.md`](../.claude/skills/refactor-safely/SKILL.md) | A skill: reusable instructions for a behaviour-preserving refactor | Module 2 |
 | [`.claude/agents/find-callers.md`](../.claude/agents/find-callers.md) | A read-only sub-agent that lists every use of a setting | Module 2 |
 | [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) | The project's Spec Kit constitution: the rules every spec and plan is checked against | Module 3 |
@@ -64,7 +64,7 @@ cd agents-practice
 git init
 ```
 
-With Git, every change the agent makes shows up in `git diff` and can be undone with `git restore .`.
+With Git you can see and undo what the agent did. `git status` lists changed and new files; `git diff` shows the changes to files Git already tracks; `git restore .` undoes those changes. Files the agent creates are untracked until you add them: `git diff` does not show them and `git restore .` does not remove them, so check `git status` and delete them yourself (`git clean -n` lists them, `git clean -f` removes them).
 
 ### Exercise 0: one prompt (slide 8, 5 minutes)
 
@@ -221,7 +221,7 @@ Questions to answer for yourself:
 
 **Done when:** you have a constitution, a spec with no `[NEEDS CLARIFICATION]` left, a plan whose Constitution Check passes (or is justified), a task list, and your answers to the questions above.
 
-**Clean up:** `git switch main`, then `git branch -D my-speckit-run`. If you made the `rice-pest-detector-main` copy, remove it with `git worktree remove ../rice-pest-detector-main`. If Spec Kit or your agent created a feature branch of its own (for example `001-desktop-app`), delete it the same way.
+**Clean up:** if you made the `rice-pest-detector-main` copy, remove it first with `git worktree remove ../rice-pest-detector-main` (Git cannot switch to `main` while that copy has it checked out). Then `git switch main` and `git branch -D my-speckit-run`. If Spec Kit or your agent created a feature branch of its own (for example `001-desktop-app`), delete it the same way.
 
 ## Module 4. Guard (slides 61–69, about 15 minutes)
 
@@ -355,7 +355,7 @@ If you would like to take part, the survey is at [aiaas-market-study-st8x.vercel
 | Agent | An AI model that can act: read files, run commands and edit code, in a loop, with your approval. *Agent = model + harness* (Module 2). |
 | Harness | The program around the model that gives it tools, context and permissions: the extension or command-line tool you install. |
 | Context window | Everything the model can see at once: your messages, the files it read, the tool output. It is limited, and the model remembers nothing between sessions unless it is written down. |
-| `AGENTS.md` | A file in a repository that briefs any agent that reads it: what the project is and the rules to follow. |
+| `AGENTS.md` | A file in a repository that briefs coding agents: what the project is and the rules to follow. Agents that support it read it; check, rather than assume, that yours did. |
 | Skill, hook, sub-agent | Ways to extend an agent: a skill is reusable instructions, a hook runs a check automatically (this repository's Stop hook runs the tests), a sub-agent is a helper with a narrower job. |
 | MCP | Model Context Protocol: a standard way to connect an agent to outside tools and data, such as Colab or Kaggle. |
 | One-shot prompt | Asking for a whole result in one prompt, instead of planning and building step by step. |

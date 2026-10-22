@@ -19,5 +19,5 @@ If you are asked to set this repository up for the workshop, follow `docs/worksh
 ## Working on the code
 
 - Python: run `python -m pytest` before saying a change is done.
-- App: run `flutter test` in `app/`. A Stop hook (`.claude/hooks/require_green_tests.py`) blocks finishing while it fails.
+- App: run `flutter test` in `app/`. A Stop hook (`.claude/hooks/require_green_tests.py`) blocks the first attempt to finish while it fails; it allows the stop if Flutter is missing, after one block, or when `RICE_PEST_STOP_HOOK=off`, so the tests passing is still yours to confirm.
 - Never commit model weights, `.env` files or credentials.
