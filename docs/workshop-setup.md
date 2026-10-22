@@ -229,13 +229,25 @@ Read slides 61–69: the agent acts with your permissions, prompt injection (inc
 
 **Do it:** open your agent's settings and check the six safe defaults on slide 69 against them: approvals on; network off unless the task needs it; no secrets in the repository; edits scoped to the folders the task needs; every command reviewed before it runs; every new dependency checked. Which one would be hardest to keep in your own work, and what would make it easier?
 
-## Module 5. Share (slides 70–81, about 20 minutes)
+## Module 5. Share (slides 70–82, about 20 minutes)
 
-Read slides 70–81: how an agent built the real app, licences, the model behind it, and how teams use agents. Then go deeper:
+Read slides 70–82: how an agent built the real app, licences, the model behind it, the safety of what you ship, and how teams use agents. Then go deeper:
 
 - **Training the model:** `docs/presentations/model-training.html`, and [`specs/001-model-training/`](../specs/001-model-training/).
 - **Building the app:** `docs/presentations/demo-app-process.html`, and [`specs/002-mobile-app/`](../specs/002-mobile-app/).
 - **Agent harnesses and context engineering:** `docs/presentations/harness-context-engineering.html`.
+
+**Safety of what you ship (slide 78).** Module 4 was about keeping the agent from harming you; this is about not harming other people with what you build. Five practices from the research literature, and how this project meets them:
+
+| Practice | In this project |
+| :-- | :-- |
+| Say what it is for ([Mitchell et al., 2019](https://doi.org/10.1145/3287560.3287596)) | The [model card](model-cards/r50-v5.md) and use notice: a teaching demo, not for farmers |
+| Fix the rules before the results ([Kapoor and Narayanan, 2023](https://doi.org/10.1016/j.patter.2023.100804)) | Quality gates set before training; test photos used twice in the whole project, both recorded in the [evaluation record](evaluation-record.md) |
+| Expect failure on new data ([Mohanty et al., 2016](https://doi.org/10.3389/fpls.2016.01419)) | Trained on light-trap photos only; not yet tested on phone photos in the field |
+| Keep a person in the loop ([Parasuraman and Manzey, 2010](https://doi.org/10.1177/0018720810376055)) | The app flags low scores and trays of more than 30 insects for review |
+| Say what is still open ([NIST AI RMF 1.0](https://doi.org/10.6028/NIST.AI.100-1)) | No monitoring after release, no independent review, data protection not yet reviewed |
+
+The plant-disease study is the warning in one number: a model that scored 99.35% on its own test photos fell to just above 31% on photos taken in other conditions.
 
 **The five takeaways:** conduct the agent, do not one-shot it; write the spec before the code; put the rules that matter in hooks, tests and CI; treat text from outside as untrusted; an agent drafts, a person decides and stays accountable.
 
@@ -322,7 +334,7 @@ If your agent cannot solve it, ask in the open, where the answer helps the next 
 
 Never post personal or confidential material, keys or tokens, even when asking for help.
 
-## Before you go: a short survey (slide 82, optional)
+## Before you go: a short survey (slide 83, optional)
 
 To train and share the model in this course you used several separate services: GPU time on Colab or Kaggle, the dataset on Zenodo, the published models on Kaggle, and the code on GitHub.
 
