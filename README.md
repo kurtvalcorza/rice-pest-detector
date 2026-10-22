@@ -8,7 +8,7 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 > **⚠️ Notice.** For research, training and evaluation only. Not validated for production,
 > clinical, diagnostic or safety-critical use, and not a field pest-surveillance or pest-alert system.
 > Running the training notebook downloads third-party model weights and datasets under their own
-> licenses (see [docs/model-card.md](docs/model-card.md) and [data/README.md](data/README.md)) and uses compute on your own Colab or Kaggle account.
+> licences (see [docs/model-card.md](docs/model-card.md) and [data/README.md](data/README.md)) and uses compute on your own Colab or Kaggle account.
 > The Android app's counts are experimental estimates: they are not agronomic advice, must not be the
 > basis for any pest-management or spraying decision, and should be reviewed by an agricultural
 > technician. Installing the app or a model on a device is at your own risk.
@@ -73,7 +73,7 @@ Three models were trained in the second round ("wave 2"), all on Colab T4s for 4
 
 Each was fine-tuned from a COCO-pretrained base model on Hugging Face (Apache-2.0). Each model has two badges: Hugging Face opens the base model it was fine-tuned from, at the exact revision used; Kaggle opens the fine-tuned ONNX weights published from this project.
 
-**Trained weights.** All three fine-tuned models are published on Kaggle as ONNX files (Apache-2.0, dataset credited), one variation each: [r50-v5](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/r50-v5), [rf-detr-m](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/rf-detr-m) and [d-fine-l](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/d-fine-l). Each variation holds `model.onnx`, `manifest.json` and its model card (`README.md`). They are a teaching demo: not validated in the field, not an official tool and not for farmers.
+**Trained weights.** All three fine-tuned models are published on Kaggle as ONNX files (Apache-2.0, dataset credited), one variation each: [r50-v5](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/r50-v5), [rf-detr-m](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/rf-detr-m) and [d-fine-l](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/d-fine-l). Each variation holds `model.onnx`, `manifest.json` and its model card (`README.md`). The training checkpoints they were exported from are published beside them as PyTorch variations (`best.pt`; loading needs this repository's code and transformers 5.20.1). They are a teaching demo: not validated in the field, not an official tool and not for farmers.
 
 - **r50-v5: RT-DETR, ResNet-50-vd backbone.** [![Hugging Face: PekingU/rtdetr_r50vd](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-PekingU%2Frtdetr__r50vd-ffd21e)](https://huggingface.co/PekingU/rtdetr_r50vd/tree/df939e661d8c52e80608d1ec566561aabd25a4e7) [![Kaggle: r50-v5 ONNX weights](https://img.shields.io/badge/Kaggle-Open%20model-20BEFF?logo=kaggle&logoColor=white)](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector/Onnx/r50-v5)
   RT-DETR (Real-Time DEtection TRansformer) is an end-to-end transformer detector that needs no non-maximum suppression; this variant pairs it with a ResNet-50-vd convolutional backbone. It is the demo model. Paper: [DETRs Beat YOLOs on Real-time Object Detection](https://arxiv.org/abs/2304.08069).

@@ -231,7 +231,7 @@ Read slides 61–69: the agent acts with your permissions, prompt injection (inc
 
 ## Module 5. Share (slides 70–82, about 20 minutes)
 
-Read slides 70–82: how an agent built the real app, licences, the model behind it, the safety of what you ship, and how teams use agents. Then go deeper:
+Read slides 70–82: how an agent built the real app, licences, the model behind it, the safety of what you ship and how teams use agents. Then go deeper:
 
 - **Training the model:** `docs/presentations/model-training.html`, and [`specs/001-model-training/`](../specs/001-model-training/).
 - **Building the app:** `docs/presentations/demo-app-process.html`, and [`specs/002-mobile-app/`](../specs/002-mobile-app/).
@@ -241,7 +241,7 @@ Read slides 70–82: how an agent built the real app, licences, the model behind
 
 | Practice | What the literature says | This project |
 | :-- | :-- | :-- |
-| **1. Say what it is for, and what it is not for** | Ship each model with a model card: intended use, uses to avoid, and results under the conditions that matter ([Mitchell et al., 2019](https://doi.org/10.1145/3287560.3287596)). Document the dataset as well ([Gebru et al., 2021](https://doi.org/10.1145/3458723)). | Done: the [model card](model-cards/r50-v5.md), the use notice, the "Demo" label in the app, and the data credited. |
+| **1. Say what it is for, and what it is not for** | Ship each model with a model card: intended use, uses to avoid and results under the conditions that matter ([Mitchell et al., 2019](https://doi.org/10.1145/3287560.3287596)). Document the dataset as well ([Gebru et al., 2021](https://doi.org/10.1145/3458723)). | Done: the [model card](model-cards/r50-v5.md), the use notice, the "Demo" label in the app, and the data credited. |
 | **2. Fix the rules before you see results** | Data leakage and reused test sets are a main cause of inflated machine-learning results ([Kapoor and Narayanan, 2023](https://doi.org/10.1016/j.patter.2023.100804)). Analyses chosen after seeing the data make the holdout unreliable ([Dwork et al., 2015](https://doi.org/10.1126/science.aaa9375)). REFORMS turns this into a 32-question reporting checklist ([Kapoor et al., 2024](https://doi.org/10.1126/sciadv.adk3452)). | Done: quality gates set before training. The test photos were used twice in the whole project, both recorded in the [evaluation record](evaluation-record.md). |
 | **3. Expect it to fail on data it has not seen** | Models learn shortcuts that break outside their training conditions ([Geirhos et al., 2020](https://doi.org/10.1038/s42256-020-00257-z)). In agriculture, a plant-disease model scored 99.35% on its own held-out photos but just above 31% on photos taken under different conditions ([Mohanty et al., 2016](https://doi.org/10.3389/fpls.2016.01419)). | Stated, not solved: trained on light-trap photos only, with no check for unfamiliar inputs. Field validation on phone photos is still open. |
 | **4. Keep a person in the loop, and design against over-trust** | People over-rely on automated aids; this complacency is predictable and has to be designed against ([Parasuraman and Manzey, 2010](https://doi.org/10.1177/0018720810376055)). | Partly done: the app flags photos with low scores or more than 30 insects for a person to review. The model card says the flag can miss doubtful counts on photos unlike the validation set. |
@@ -337,7 +337,7 @@ Never post personal or confidential material, keys or tokens, even when asking f
 
 ## Before you go: a short survey (slide 83, optional)
 
-To train and share the model in this course you used several separate services: GPU time on Colab or Kaggle, the dataset on Zenodo, the published models on Kaggle, and the code on GitHub.
+To train and share the model in this course you used several separate services: GPU time on Colab or Kaggle, the dataset on Zenodo, the published models on Kaggle and the code on GitHub.
 
 We are studying whether a national AI-as-a-Service platform could bring these together for researchers, developers and students in the Philippines. As proposed, it would offer a searchable repository of documented datasets and models, with hosted inference and controlled fine-tuning planned. It is a proposal, not yet an available service: capacity, support and pricing are not decided.
 

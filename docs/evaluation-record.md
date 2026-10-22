@@ -393,3 +393,23 @@ All three meet the three model gates on test. The test results agree with the va
 Data: `runs/run-dfine-l/parity_val10_t050_rerun.json`, `runs/run-dfine-l/parity_val10_t048_rerun.json`.
 
 **Owner decision (2026-10-18): waiver.** Because the kept detections, classes and boxes match at the counting threshold, and only scores differ (by at most 2.95e-3, which does not change any count), the owner waived the 1e-3 score tolerance for D-FINE-L as a teaching-demo comparison model. It stays on Kaggle and in the app's download list, with its "Not validated" tag. The tolerance itself is unchanged for any future model.
+
+## Kaggle editions (2026-10-20 to 2026-10-22): reproduction runs, validation only
+
+Each model was retrained once from its Kaggle edition (`notebooks/kaggle/`), the full 40-epoch recipe on a Kaggle Tesla T4, in an environment built from the hash-locked package list `notebooks/kaggle/requirements-kaggle.lock.txt` (SHA-256 `c1321d4b…`: Python 3.12.12, torch 2.14.1 with CUDA 13, transformers 5.20.1). `tools/verify_kaggle_run.py` then checked each run independently: the notebook source and the lock match the build declaration, the GPU was a T4, the numbers recomputed with `metrics.py` from `val_detections.json` equal the printed ones and each is within the tolerance fixed in the spec before the first run. The test split was not used (the test cell is off by default). The run log, with the evidence for each row, is `docs/kaggle-runs/LEDGER.md`.
+
+| Measure (validation) | Tolerance | r50-v5: Kaggle / recorded | RF-DETR-M: Kaggle / recorded | D-FINE-L: Kaggle / recorded |
+| :-- | :-- | :-- | :-- | :-- |
+| Species mAP50, best checkpoint | ±0.02 | 0.935 / 0.937 | 0.933 / 0.933 | 0.933 / 0.940 |
+| Four-class mAP50 | ±0.03 | 0.859 / 0.861 | 0.841 / 0.837 | 0.851 / 0.848 |
+| Count accuracy | ±0.04 | 0.810 / 0.834 | 0.834 / 0.846 | 0.814 / 0.822 |
+| White stemborer error, trays with 30+ | ±2.0 | 8.61 / 8.67 | 8.67 / 9.56 | 8.28 / 8.56 |
+| ONNX size (bytes) | ±1% | 171,744,970 / same | 121,956,743 / same | 125,213,572 / same |
+| Best epoch (counting from 0) | recorded only | 3 / 1 | 8 / 3 | 6 / 3 |
+| Kaggle version, code commit | | 2, `debb28d` | 1, `debb28d` | 1, `7a2d240` |
+| Training time | | 6.8 h | 5.7 h | 6.9 h |
+| Verdict | | VERIFIED | VERIFIED | VERIFIED |
+
+**Reading it.** All three runs reproduce the recorded figures within tolerance. Count accuracy is lower on Kaggle for all three (by 0.008 to 0.024), and the best checkpoint came from a later epoch each time: GPU training is not bit-for-bit repeatable, so a rerun picks a different checkpoint. The published models are unchanged; these runs show the recipe reproduces them, not that they were replaced.
+
+**Deviations, owner-accepted (spec 010).** The editions run the full 40-epoch recipe, so they are reference notebooks rather than release-grade tutorials. The Linux lock-coverage check (T036) was skipped by owner decision; the three Kaggle runs built the environment from the lock and stand in for it. The local ONNX re-check against the validation images was skipped for all three (no images in the verification environment); each run's own fresh-process reload check passed in the notebook (10 photos; largest score difference 2.2e-6, 2.9e-5 and 1.8e-5. D-FINE-L ran under its 18 Oct score waiver, but stayed inside the 1e-3 tolerance on Kaggle).

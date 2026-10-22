@@ -16,6 +16,10 @@ Append-only record of the Kaggle editions' verification runs and publication rec
 
 **Verdicts.** `VERIFIED`: the run's source and lock match the declaration, the GPU was a T4, the recomputed numbers equal the printed ones and each is within its tolerance of the evaluation record (or the owner has ruled on it). `DIFFERS`: everything matches but a number is outside its tolerance; the owner rules and the run is not repeated. `FAILED`: a source, lock, GPU, output, hash or recomputation check failed. `PUBLIC`: the owner made the edition public and an anonymous check saw it. `SAVED (no run)`: a new version saved without running (Kaggle Quick Save) to change metadata such as the model link or tags; the verified run stays in the version history.
 
+**Checking a run from this repository.** The Code commit column names the commit that built the notebook in the project's working repository, whose history is not public. To check a run from here, compute `tools.build_notebook.cell_sources_sha256` of that Kaggle version's notebook (`kaggle kernels pull`) and compare it with the Source hash column; the verification files hold the full hashes.
+
+**Final gate (2026-10-22).** Fresh clone of public `main` at `2559a08`, clean Python 3.12 environment from `requirements.txt` with CPU torch: `python -m pytest -q` exit 0, 201 passed, 1 skipped (baseline above: 141 passed, 1 skipped); `tools/build_notebook.py --check-all` 8 of 8; the five Colab notebooks' SHA-256 unchanged from the baseline; leak check 0 hits.
+
 | Date (UTC) | Edition | Kaggle version | Code commit | Source hash | GPU | Time | Verdict | Evidence |
 | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
 | 2026-10-21 | r50v5-kaggle | 2 | debb28d | 4e9658084386… | Tesla T4 | 6.8 h | VERIFIED | r50v5/r50v5-v2-verification.json |
