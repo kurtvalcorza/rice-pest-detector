@@ -339,7 +339,9 @@ Never post personal or confidential material, keys or tokens, even when asking f
 
 To train and share the model in this course you used several separate services: GPU time on Colab or Kaggle, the dataset on Zenodo, the published models on Kaggle, and the code on GitHub.
 
-We are studying whether a national AI-as-a-Service platform would be useful to researchers, developers and students. If you would like to take part, the survey is at [aiaas-market-study-st8x.vercel.app](https://aiaas-market-study-st8x.vercel.app/).
+We are studying whether a national AI-as-a-Service platform could bring these together for researchers, developers and students in the Philippines. As proposed, it would offer a searchable repository of documented datasets and models, with hosted inference and controlled fine-tuning planned. It is a proposal, not yet an available service: capacity, support and pricing are not decided.
+
+If you would like to take part, the survey is at [aiaas-market-study-st8x.vercel.app](https://aiaas-market-study-st8x.vercel.app/).
 
 - It takes about 12 minutes.
 - Taking part is voluntary, and a low rating is as useful as a high one.
