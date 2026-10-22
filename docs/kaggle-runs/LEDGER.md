@@ -25,3 +25,5 @@ Append-only record of the Kaggle editions' verification runs and publication rec
 | 2026-10-21 | r50v5-kaggle | 3 | 7a2d240 | 0710e8e53f77… | - | - | SAVED (no run) | model link; Kaggle dropped 4 of 5 tags, see version 4 |
 | 2026-10-21 | rfdetr-m-kaggle | 2 | 7a2d240 | abbce7ebe9c1… | - | - | SAVED (no run) | model link and tags |
 | 2026-10-21 | r50v5-kaggle | 4 | 7a2d240 | 0710e8e53f77… | - | - | SAVED (no run) | model link and tags |
+| 2026-10-22 | dfine-l-kaggle | 1 | 7a2d240 | 262841d8e4ed… | Tesla T4 | 6.9 h | VERIFIED | dfine-l/dfine-l-v1-verification.json |
+| 2026-10-22 | dfine-l-kaggle | 1 | 7a2d240 | 262841d8e4ed… | - | - | PUBLIC | dfine-l/receipt.json |

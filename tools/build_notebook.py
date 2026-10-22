@@ -203,7 +203,7 @@ KAGGLE_VARIANTS = {
                        "title": "Rice pest detector: train D-FINE-L",
                        "colab_time": ("about 7.7 h on a Colab T4 (estimated: the resumed part of run D-FINE-L took "
                                       "25,617 s for epochs 3 to 39, 17 Oct 2026)"), "quota_hours": "8.5",
-                       "recorded_date": "17 Oct 2026", "score_tolerance_enforced": False, "public": False,
+                       "recorded_date": "17 Oct 2026", "score_tolerance_enforced": False, "public": True,
                        "kaggle_model": "d-fine-l"},
 }
 for _name, _k in KAGGLE_VARIANTS.items():

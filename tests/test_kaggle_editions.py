@@ -121,7 +121,7 @@ def test_kernel_metadata_follows_the_contract(built):
                         "keywords": bn.KAGGLE_KEYWORDS}
         assert len(meta["title"]) < 40
         assert re.sub(r"[^a-z0-9]+", "-", meta["title"].lower()).strip("-") == meta["id"].split("/")[1]
-    for public in ("r50v5-kaggle", "rfdetr-m-kaggle"):  # public since 21 Oct 2026; a push must not make them private
+    for public in ("r50v5-kaggle", "rfdetr-m-kaggle", "dfine-l-kaggle"):  # public since 21-22 Oct 2026; a push must not make them private
         assert bn.VARIANTS[public]["public"]
 
 

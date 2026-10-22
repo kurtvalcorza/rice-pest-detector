@@ -388,15 +388,15 @@ The same recipe also runs on Kaggle, as three **reference notebooks**: each one 
 | :-- | :-- | :-- | :-- |
 | r50-v5 (demo model) | [Rice pest detector: train RT-DETR r50](https://www.kaggle.com/code/kurtvalcorza/rice-pest-detector-train-rt-detr-r50) | [`notebooks/kaggle/rice-pest-detector-train-rt-detr-r50/`](notebooks/kaggle/rice-pest-detector-train-rt-detr-r50/) | Public, run verified |
 | RF-DETR-M | [Rice pest detector: train RF-DETR-M](https://www.kaggle.com/code/kurtvalcorza/rice-pest-detector-train-rf-detr-m) | [`notebooks/kaggle/rice-pest-detector-train-rf-detr-m/`](notebooks/kaggle/rice-pest-detector-train-rf-detr-m/) | Public, run verified |
-| D-FINE-L | not public yet | [`notebooks/kaggle/rice-pest-detector-train-d-fine-l/`](notebooks/kaggle/rice-pest-detector-train-d-fine-l/) | Not yet run on Kaggle |
+| D-FINE-L | [Rice pest detector: train D-FINE-L](https://www.kaggle.com/code/kurtvalcorza/rice-pest-detector-train-d-fine-l) | [`notebooks/kaggle/rice-pest-detector-train-d-fine-l/`](notebooks/kaggle/rice-pest-detector-train-d-fine-l/) | Public, run verified |
 
 **What they need.**
 
 - A phone-verified Kaggle account (Kaggle requires it for GPU and Internet).
 - Accelerator **GPU T4 x2** (one T4 is used) and **Internet on**.
-- Time and quota: about 7 hours for r50-v5 (6.8 h measured on Kaggle), 6.5 for RF-DETR-M (5.7 h measured) and 8.5 for D-FINE-L, from your weekly Kaggle GPU quota. A Kaggle session ends after 12 hours.
+- Time and quota: about 7 hours for r50-v5 (6.8 h measured on Kaggle), 6.5 for RF-DETR-M (5.7 h measured) and 8.5 for D-FINE-L (6.9 h measured), from your weekly Kaggle GPU quota. A Kaggle session ends after 12 hours.
 
-**Which version to read.** The latest version of each public notebook only adds the model link and tags; it was saved without running, so it shows no outputs. The verified run, with every output, is version 2 for r50-v5 and version 1 for RF-DETR-M: open **Version** on the notebook page to see it. The code is the same.
+**Which version to read.** For r50-v5 and RF-DETR-M, the latest version only adds the model link and tags; it was saved without running, so it shows no outputs. Their verified runs, with every output, are version 2 (r50-v5) and version 1 (RF-DETR-M): open **Version** on the notebook page to see them. The code is the same. For D-FINE-L, the latest version is the verified run.
 
 Open a notebook, choose **Copy & Edit**, then **Run all**; no cell needs editing. Each notebook builds its own Python environment from a hash-locked package list ([`notebooks/kaggle/requirements-kaggle.lock.txt`](notebooks/kaggle/requirements-kaggle.lock.txt)), downloads the images from Zenodo and checks every file. If a session ends early, attach the earlier run's output and set `RESUME_FROM`.
 
