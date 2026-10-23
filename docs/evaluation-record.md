@@ -413,3 +413,14 @@ Each model was retrained once from its Kaggle edition (`notebooks/kaggle/`), the
 **Reading it.** All three runs reproduce the recorded figures within tolerance. Count accuracy is lower on Kaggle for all three (by 0.008 to 0.024), and the best checkpoint came from a later epoch each time: GPU training is not bit-for-bit repeatable, so a rerun picks a different checkpoint. The published models are unchanged; these runs show the recipe reproduces them, not that they were replaced.
 
 **Deviations, owner-accepted (spec 010).** The editions run the full 40-epoch recipe, so they are reference notebooks rather than release-grade tutorials. The Linux lock-coverage check (T036) was skipped by owner decision; the three Kaggle runs built the environment from the lock and stand in for it. The local ONNX re-check against the validation images was skipped for all three (no images in the verification environment); each run's own fresh-process reload check passed in the notebook (10 photos; largest score difference 2.2e-6, 2.9e-5 and 1.8e-5. D-FINE-L ran under its 18 Oct score waiver, but stayed inside the 1e-3 tolerance on Kaggle).
+
+## Pillow 13.0.0 (2026-10-23): model inputs unchanged
+
+Pillow moved from 12.3.0 to 13.0.0 (spec 011). Pillow 13 runs its two bilinear passes in a different order (vertical first) when the height shrinks by more than twice as many pixels as the width; the order changes the 8-bit rounding by at most 1 level. Checked on the full dataset archive (Zenodo, size, MD5 and SHA-256 verified), in clean environments with each Pillow version:
+
+| Check | Pillow 12.3.0 | Pillow 13.0.0 |
+| :-- | :-- | :-- |
+| `data/` rebuilt with `rice_pest_detector.manifest` (5 files) | byte-identical to the committed files | byte-identical |
+| `infer.preprocess` on all 5,453 images (train, validation and test), at 640 and 576 | reference | 10,906 of 10,906 tensors byte-identical |
+
+Training (`train.py`) and evaluation use the same `preprocess`, so no model input changes: the published models, their evaluation and the three Kaggle reproduction runs are unaffected. The dataset's photos are all shapes that keep the horizontal-first order. The difference shows only in the app's synthetic resize fixtures for tall shapes (1080 x 1920 and 1000 x 4000): those fixtures were regenerated and the app's Dart resampler now follows Pillow 13's order (the contract test fails with the old order).

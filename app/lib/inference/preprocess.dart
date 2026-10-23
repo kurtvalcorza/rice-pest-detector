@@ -96,57 +96,73 @@ _Coeffs _precompute(int inSize, int outSize) {
 
 int _clip8(int v) => math.max(0, math.min(255, v >> _precisionBits));
 
-/// Pillow Image.resize(size, BILINEAR) for an RGB image.
+/// Pillow Image.resize(size, BILINEAR) for an RGB image (Pillow 13.0).
+///
+/// Two passes, each rounded to 8 bits. Like Pillow 13, the vertical pass runs first when the height
+/// shrinks by more than twice as many pixels as the width; otherwise the horizontal pass runs first.
+/// The order changes the rounding, so it must match Pillow's for the output to be byte-identical.
 RgbImage resizeBilinear(RgbImage img, int outW, int outH) {
   if (outW == img.width && outH == img.height) {
     return RgbImage(outW, outH, Uint8List.fromList(img.pixels));
   }
+  final shrinkH = img.height - outH, shrinkW = img.width - outW;
+  final verticalFirst = shrinkH > 0 && shrinkH > shrinkW * 2;
   var cur = img;
-  final half = 1 << (_precisionBits - 1);
-  if (outW != cur.width) {
-    final c = _precompute(cur.width, outW);
-    final out = Uint8List(outW * cur.height * 3);
-    for (var y = 0; y < cur.height; y++) {
-      final row = y * cur.width * 3;
-      for (var xx = 0; xx < outW; xx++) {
-        final xmin = c.bounds[xx * 2], n = c.bounds[xx * 2 + 1], k = xx * c.ksize;
-        var s0 = half, s1 = half, s2 = half;
-        for (var x = 0; x < n; x++) {
-          final p = row + (x + xmin) * 3, w = c.kk[k + x];
-          s0 += cur.pixels[p] * w;
-          s1 += cur.pixels[p + 1] * w;
-          s2 += cur.pixels[p + 2] * w;
-        }
-        final o = (y * outW + xx) * 3;
-        out[o] = _clip8(s0);
-        out[o + 1] = _clip8(s1);
-        out[o + 2] = _clip8(s2);
-      }
-    }
-    cur = RgbImage(outW, cur.height, out);
-  }
-  if (outH != cur.height) {
-    final c = _precompute(cur.height, outH);
-    final out = Uint8List(cur.width * outH * 3);
-    for (var yy = 0; yy < outH; yy++) {
-      final ymin = c.bounds[yy * 2], n = c.bounds[yy * 2 + 1], k = yy * c.ksize;
-      for (var x = 0; x < cur.width; x++) {
-        var s0 = half, s1 = half, s2 = half;
-        for (var y = 0; y < n; y++) {
-          final p = ((y + ymin) * cur.width + x) * 3, w = c.kk[k + y];
-          s0 += cur.pixels[p] * w;
-          s1 += cur.pixels[p + 1] * w;
-          s2 += cur.pixels[p + 2] * w;
-        }
-        final o = (yy * cur.width + x) * 3;
-        out[o] = _clip8(s0);
-        out[o + 1] = _clip8(s1);
-        out[o + 2] = _clip8(s2);
-      }
-    }
-    cur = RgbImage(cur.width, outH, out);
+  if (verticalFirst) {
+    if (outH != cur.height) cur = _resizeVertical(cur, outH);
+    if (outW != cur.width) cur = _resizeHorizontal(cur, outW);
+  } else {
+    if (outW != cur.width) cur = _resizeHorizontal(cur, outW);
+    if (outH != cur.height) cur = _resizeVertical(cur, outH);
   }
   return cur;
+}
+
+RgbImage _resizeHorizontal(RgbImage cur, int outW) {
+  final half = 1 << (_precisionBits - 1);
+  final c = _precompute(cur.width, outW);
+  final out = Uint8List(outW * cur.height * 3);
+  for (var y = 0; y < cur.height; y++) {
+    final row = y * cur.width * 3;
+    for (var xx = 0; xx < outW; xx++) {
+      final xmin = c.bounds[xx * 2], n = c.bounds[xx * 2 + 1], k = xx * c.ksize;
+      var s0 = half, s1 = half, s2 = half;
+      for (var x = 0; x < n; x++) {
+        final p = row + (x + xmin) * 3, w = c.kk[k + x];
+        s0 += cur.pixels[p] * w;
+        s1 += cur.pixels[p + 1] * w;
+        s2 += cur.pixels[p + 2] * w;
+      }
+      final o = (y * outW + xx) * 3;
+      out[o] = _clip8(s0);
+      out[o + 1] = _clip8(s1);
+      out[o + 2] = _clip8(s2);
+    }
+  }
+  return RgbImage(outW, cur.height, out);
+}
+
+RgbImage _resizeVertical(RgbImage cur, int outH) {
+  final half = 1 << (_precisionBits - 1);
+  final c = _precompute(cur.height, outH);
+  final out = Uint8List(cur.width * outH * 3);
+  for (var yy = 0; yy < outH; yy++) {
+    final ymin = c.bounds[yy * 2], n = c.bounds[yy * 2 + 1], k = yy * c.ksize;
+    for (var x = 0; x < cur.width; x++) {
+      var s0 = half, s1 = half, s2 = half;
+      for (var y = 0; y < n; y++) {
+        final p = ((y + ymin) * cur.width + x) * 3, w = c.kk[k + y];
+        s0 += cur.pixels[p] * w;
+        s1 += cur.pixels[p + 1] * w;
+        s2 += cur.pixels[p + 2] * w;
+      }
+      final o = (yy * cur.width + x) * 3;
+      out[o] = _clip8(s0);
+      out[o + 1] = _clip8(s1);
+      out[o + 2] = _clip8(s2);
+    }
+  }
+  return RgbImage(cur.width, outH, out);
 }
 
 /// NCHW float32 (1, 3, H, W) scaled to [0, 1]; no mean/std normalisation.
@@ -161,8 +177,8 @@ Float32List toTensor(RgbImage img) {
   return t;
 }
 
-/// Smallest photo side accepted. Below about 10 px wide, Pillow 12.3 orders its resize passes
-/// differently from this port; no camera produces such images, so they are rejected outright.
+/// Smallest photo side accepted. Below about 10 px wide, Pillow's resize was seen to differ from this
+/// port (Pillow 12.3); no camera produces such images, so they are rejected outright.
 const int minSide = 32;
 
 class PhotoTooSmall implements Exception {

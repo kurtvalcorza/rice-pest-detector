@@ -83,7 +83,7 @@
   }
  ],
  "pattern": "(x*7 + y*13 + c*101 + (x*y) % 31) % 256",
- "pillow_version": "12.3.0",
+ "pillow_version": "13.0.0",
  "postprocess_cases": [
   {
    "expected": [
@@ -11393,7 +11393,7 @@
   },
   {
    "height": 1920,
-   "resized_sha256": "f39d32f9c0280c472a0c240c1eb6dfede0b826a3f37c81bd1db09c4b7aef1b40",
+   "resized_sha256": "5df373128757ed7e93fceb42e92c6898017462e91b69822d25ef8e7556fbf8d0",
    "samples": [
     [
      0,
@@ -11447,8 +11447,8 @@
     [
      300,
      1,
-     32,
-     132,
+     31,
+     131,
      186
     ]
    ],
@@ -11645,7 +11645,7 @@
   },
   {
    "height": 4000,
-   "resized_sha256": "0ab468c50c9e1a791a008272b0504b8248f8ff9d4fae08499badd149b9d7ba3f",
+   "resized_sha256": "d4198de555d6aaaff3bc276af174609845381a222b72ad04f6c1cab25489ed8b",
    "samples": [
     [
      0,
@@ -11673,14 +11673,14 @@
      639,
      69,
      170,
-     105
+     106
     ],
     [
      320,
      320,
      111,
      179,
-     66
+     67
     ],
     [
      17,

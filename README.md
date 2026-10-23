@@ -396,7 +396,7 @@ The same recipe also runs on Kaggle, as three **reference notebooks**: each one 
 - Accelerator **GPU T4 x2** (one T4 is used) and **Internet on**.
 - Time and quota: about 7 hours for r50-v5 (6.8 h measured on Kaggle), 6.5 for RF-DETR-M (5.7 h measured) and 8.5 for D-FINE-L (6.9 h measured), from your weekly Kaggle GPU quota. A Kaggle session ends after 12 hours.
 
-**Which version to read.** For r50-v5 and RF-DETR-M, the latest version only adds the model link and tags; it was saved without running, so it shows no outputs. Their verified runs, with every output, are version 2 (r50-v5) and version 1 (RF-DETR-M): open **Version** on the notebook page to see them. The code is the same. For D-FINE-L, the latest version is the verified run.
+**Which version to read.** For r50-v5 and RF-DETR-M, the latest version only adds the model link and tags; it was saved without running, so it shows no outputs. Their verified runs, with every output, are version 2 (r50-v5) and version 1 (RF-DETR-M): open **Version** on the notebook page to see them. The code is the same. For D-FINE-L, the latest version is the verified run. The notebooks on Kaggle lock Pillow 12.3.0; the editions in this repository lock 13.0.0 since 23 Oct 2026, which leaves every model input unchanged (see the run log).
 
 Open a notebook, choose **Copy & Edit**, then **Run all**; no cell needs editing. Each notebook builds its own Python environment from a hash-locked package list ([`notebooks/kaggle/requirements-kaggle.lock.txt`](notebooks/kaggle/requirements-kaggle.lock.txt)), downloads the images from Zenodo and checks every file. If a session ends early, attach the earlier run's output and set `RESUME_FROM`.
 
@@ -518,7 +518,7 @@ Settings → **Model** lists every installed model with its architecture, input 
 ### How parity with Python is kept
 
 - **Golden fixtures.** `tools/export_app_fixtures.py` writes `app/test/fixtures/contract_fixtures.json` from the Python reference: EXIF orientations 1–8, the 640×640 resize of eight shapes (up to 4032×3024 phone photos), and post-processing cases. No photos are stored. The test images are deterministic patterns that the Dart tests rebuild from the same formula.
-- **Resize.** A Dart port of Pillow 12.3's bilinear resampler (fixed-point, horizontal pass first) is **byte-identical** to Python on every fixture shape. Pillow orders its passes differently for inputs under about 10 px wide, so the app rejects photos smaller than 32 px a side.
+- **Resize.** A Dart port of Pillow 13.0's bilinear resampler (fixed-point; horizontal pass first, except that the vertical pass goes first when the height shrinks by more than twice as many pixels as the width, as in Pillow 13) is **byte-identical** to Python on every fixture shape. Pillow orders its passes differently for inputs under about 10 px wide, so the app rejects photos smaller than 32 px a side.
 - **Decoding.** The `image` package applies EXIF rotation to JPEGs itself; `decode_test.dart` checks it matches Pillow for all eight orientations. JPEG decoders differ by a level or two per pixel, so real-photo parity is detection-level (spec tolerance), not byte-level.
 - **On device.** No automated test runs ONNX Runtime on the device any more (the bundled test model that made this cheap was removed on 2026-10-16). The demo model was exercised by hand on the emulator; real-photo parity between ONNX and PyTorch is checked on the PC by `tools/export_onnx.py`.
 

@@ -10,7 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 KAGGLE = ROOT / "notebooks" / "kaggle"
 LOCK = KAGGLE / "requirements-kaggle.lock.txt"
-PINS = {"torch": "2.14.1", "transformers": "5.20.1", "numpy": "2.5.4", "pillow": "12.3.0", "pycocotools": "2.0.11",
+PINS = {"torch": "2.14.1", "transformers": "5.20.1", "numpy": "2.5.4", "pillow": "13.0.0", "pycocotools": "2.0.11",
         "scipy": "1.18.1", "onnx": "1.23.2", "onnxruntime": "1.31.0"}
 # import name -> distribution name, where they differ
 DIST_OF = {"PIL": "pillow", "yaml": "pyyaml", "google": "protobuf"}

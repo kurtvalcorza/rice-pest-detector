@@ -43,7 +43,7 @@ The human-readable contract is `docs/inference-contract.md`; the reference imple
 
 - `tools/export_app_fixtures.py` writes `app/test/fixtures/contract_fixtures.json`: the contract constants, all 8 EXIF orientations, the Pillow-bilinear resize of 8 input shapes to 640 (SHA-256 of the whole output plus 8 sample pixels), and three postprocess cases, each with one logit of exactly 0 (score 0.5) kept at threshold 0.5. Test images are formulas, not photos: `(x·7 + y·13 + c·101 + (x·y) mod 31) mod 256`.
 - `app/tool/export_resize_fixtures.py` writes `app/test/fixtures/resize_fixtures.json`: the same resize at other declared input sizes (576 for RF-DETR-M).
-- Both have `--check`, and CI runs both. Pillow is pinned to 12.3.0 because Pillow 13.0 resizes some shapes differently (`docs/decisions.md`).
+- Both have `--check`, and CI runs both. Pillow is pinned to 13.0.0 (until 2026-10-23, 12.3.0). Pillow 13 runs the vertical pass first when the height shrinks by more than twice as many pixels as the width, and the app's resampler follows the same rule (`docs/decisions.md`).
 - Inputs under about 10 px wide make Pillow deviate by one level, so clients reject photos under 32 px a side.
 
 ## Tests

@@ -1,7 +1,7 @@
 {
  "variant": "dfine-l-kaggle",
- "notebook_sha256": "12861774f2bf8ace0d8408377881f7980d97cd59f3fe7c688f54ec41309cf0ab",
- "cell_sources_sha256": "262841d8e4ed88c099e56ef4c3345078e46d152a1f4d440c99398967aa1b98f2",
+ "notebook_sha256": "1c4a6d4d4eb8a68b161267fc26169ff75013d132190794fa27e38ba435ad5455",
+ "cell_sources_sha256": "626180839f368a79d291b49eccd6a65269687e725855ae4727a12dcb6d5f2e61",
  "embedded": {
   "src/rice_pest_detector/__init__.py": "ad2a8e84b83c9043fe992aed2daeedf5b7a55c3552d3573fb328c70e15a73f2b",
   "src/rice_pest_detector/dedup.py": "618ae02dbca94cc39bb33f67ef9ba56465d00249b469a9a4a1bae2ec0824f2bb",
@@ -15,7 +15,7 @@
   "src/rice_pest_detector/train.py": "f741827839e815bf1847843e1798444ae83740c246f57260f87cf03fbb3e5cd2",
   "tools/export_onnx.py": "e384068f3cc806524b583b7cae305ca9ac5464adbf4d71e9162494b70f99c085",
   "tools/kaggle_driver.py": "fd3718db66a1faf192ddc8d4b11cebc5bc3810b8bc29e33297227feec0262983",
-  "notebooks/kaggle/requirements-kaggle.lock.txt": "c1321d4b0f8cb14b61e03a29fb534ea5b2774813646b271f395763c321f4080d",
+  "notebooks/kaggle/requirements-kaggle.lock.txt": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
   "data/annotations_test.json": "d602a8d86ff63ef4ece1dfa20d9a7b5307d3b4066b37f8245b84045f54bcce6e",
   "data/annotations_train.json": "3b032f97eeff5dc5d67a055cca4cc4d31594b38f2d50f9b2edd73be00b87431b",
   "data/annotations_val.json": "088a2717399a70a8bf767db40c0ef09a51c75536bb90abce903d9b8e813b23c6",
@@ -24,7 +24,7 @@
  },
  "lock": {
   "path": "notebooks/kaggle/requirements-kaggle.lock.txt",
-  "sha256": "c1321d4b0f8cb14b61e03a29fb534ea5b2774813646b271f395763c321f4080d",
+  "sha256": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
   "uv": "0.12.15",
   "python": "3.12.12",
   "platform": "x86_64-manylinux_2_28"

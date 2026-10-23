@@ -18,6 +18,8 @@ Append-only record of the Kaggle editions' verification runs and publication rec
 
 **Checking a run from this repository.** The Code commit column names the commit that built the notebook in the project's working repository, whose history is not public. To check a run from here, compute `tools.build_notebook.cell_sources_sha256` of that Kaggle version's notebook (`kaggle kernels pull`) and compare it with the Source hash column; the verification files hold the full hashes.
 
+**Pillow 13.0.0 (2026-10-23).** From this date the repository's editions lock Pillow 13.0.0 (spec 011), so their source hashes differ from the runs below. The public Kaggle notebooks stay at their verified versions, which lock Pillow 12.3.0. No re-run is needed: under both versions every dataset image gives a byte-identical model input (evaluation record, "Pillow 13.0.0").
+
 **Final gate (2026-10-22).** Fresh clone of public `main` at `2559a08`, clean Python 3.12 environment from `requirements.txt` with CPU torch: `python -m pytest -q` exit 0, 201 passed, 1 skipped (baseline above: 141 passed, 1 skipped); `tools/build_notebook.py --check-all` 8 of 8; the five Colab notebooks' SHA-256 unchanged from the baseline; leak check 0 hits.
 
 | Date (UTC) | Edition | Kaggle version | Code commit | Source hash | GPU | Time | Verdict | Evidence |
