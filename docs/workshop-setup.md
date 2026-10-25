@@ -82,7 +82,28 @@ Read slides 9–18: why the one-shot prompt fails, the agent loop, `AGENTS.md`, 
 
 ## Module 2. Context (slides 19–33, about 45 minutes)
 
-Read slides 19–33: an agent is a model plus a *harness*, context windows and why long sessions cost more, then five ways to shape what an agent does (slide 28):
+Read slides 19–33: an agent is a model plus a *harness*, context windows and why long sessions cost more, then five ways to shape what an agent does (slide 28). Your intent goes in at the top; you check what comes out at the bottom:
+
+```mermaid
+flowchart TB
+    intent["Your intent: the task, its limits, what counts as done"]
+    subgraph asks["Asks"]
+        instr["Instructions: AGENTS.md"]
+        skills["Skills: SKILL.md"]
+        deleg["Delegation: a sub-agent"]
+    end
+    subgraph reaches["Reaches"]
+        tools["Tools: built-in tools, MCP servers"]
+    end
+    subgraph checks["Checks"]
+        controls["Controls: hooks, tests, permissions"]
+    end
+    verify["Then you check: git diff, the tests, your review"]
+    intent --> asks & reaches & checks
+    asks & reaches & checks --> verify
+```
+
+Each one, with its example in this repository:
 
 | Way | What it is | In this repository |
 | :-- | :-- | :-- |
