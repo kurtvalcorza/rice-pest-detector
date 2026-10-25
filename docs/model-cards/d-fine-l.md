@@ -289,8 +289,9 @@ The Apache-2.0 licence of the upstream weights permits broad use and adds no use
 | Item | Value |
 | :-- | :-- |
 | ONNX file | `rice-pest-dfine-l.onnx` |
-| Size | 125,213,572 bytes (125.2 MB) |
-| SHA-256 | `c823f5d8f55b851d139b99f77dcc7b5fc54dc63e84b7516a5abdc59c8ef95e67` |
+| Size | 125,611,873 bytes (125.6 MB) |
+| SHA-256 | `3cf578df735d12269bde78bc9e7765fdf016f410585c3eb46e939c6e0e46b9cf` |
+| Kaggle version | 4 (2026-10-25). Version 3 (`c823f5d8…`, 125,213,572 bytes) computed its encoder position embedding in float64, which the app's ONNX Runtime 1.28 cannot load; version 4 stores that embedding as precomputed constants and is otherwise the same graph. Outputs are identical (see the evaluation record, "D-FINE-L ONNX version 4") |
 | Opset | 17 |
 | Manifest | [`models/rice-pest-dfine-l.manifest.json`](../../models/rice-pest-dfine-l.manifest.json) |
 | Source checkpoint | `best.pt`, SHA-256 beginning `758e2d12`, epoch 3 (counting from 0); not distributed |

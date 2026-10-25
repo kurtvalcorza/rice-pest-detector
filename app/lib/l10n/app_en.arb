@@ -217,5 +217,17 @@
   "downloadErrorNetwork": "The download failed. Check the connection and try again. Nothing was installed.",
   "downloadErrorSize": "The downloaded file is not the expected size. Nothing was installed.",
   "downloadErrorChecksum": "The downloaded file does not match its checksum. Nothing was installed.",
-  "downloadErrorCheck": "The downloaded model failed its checks. Nothing was installed."
+  "downloadErrorCheck": "The downloaded model failed its checks. Nothing was installed.",
+  "errorWithDetail": "{message}\nDetails: {detail}",
+  "@errorWithDetail": {
+    "description": "A failed check's message followed by its technical reason, e.g. an ONNX Runtime error.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }

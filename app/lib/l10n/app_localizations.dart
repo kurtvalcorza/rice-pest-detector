@@ -572,6 +572,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The downloaded model failed its checks. Nothing was installed.'**
   String get downloadErrorCheck;
+
+  /// A failed check's message followed by its technical reason, e.g. an ONNX Runtime error.
+  ///
+  /// In en, this message translates to:
+  /// **'{message}\nDetails: {detail}'**
+  String errorWithDetail(String message, String detail);
 }
 
 class _AppLocalizationsDelegate

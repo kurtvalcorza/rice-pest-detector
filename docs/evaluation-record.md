@@ -424,3 +424,36 @@ Pillow moved from 12.3.0 to 13.0.0 (spec 011). Pillow 13 runs its two bilinear p
 | `infer.preprocess` on all 5,453 images (train, validation and test), at 640 and 576 | reference | 10,906 of 10,906 tensors byte-identical |
 
 Training (`train.py`) and evaluation use the same `preprocess`, so no model input changes: the published models, their evaluation and the three Kaggle reproduction runs are unaffected. The dataset's photos are all shapes that keep the horizontal-first order. The difference shows only in the app's synthetic resize fixtures for tall shapes (1080 x 1920 and 1000 x 4000): those fixtures were regenerated and the app's Dart resampler now follows Pillow 13's order (the contract test fails with the old order).
+
+## D-FINE-L ONNX version 4 (2026-10-25): loads on the app's runtime
+
+**Problem.** Downloading D-FINE-L in the app failed with "The downloaded model failed its checks". Size and
+checksum passed; the ONNX session never opened. The app runs models on the ONNX Runtime that `flutter_onnxruntime`
+1.9.0 bundles, 1.28.0, which has no float64 kernel for `Cos` (and `Sin`). The exported graph computes the encoder
+position embedding (`aifi.0/position_embedding`: 2 Einsum, 2 Sin, 2 Cos) in float64. This repository's tests use
+ONNX Runtime 1.31, which has those kernels, so every check here passed. r50-v5 and RF-DETR-M have no float64 tensors
+and load on 1.28.
+
+**Fix.** At the fixed 640 × 640 input the float64 part depends on the input only through its shape, so it is a
+constant. `python -m tools.app_runtime fold` computes it once and stores the result as initializers (5 tensors);
+nothing else in the graph changes. The result, `3cf578df…` (125,611,873 bytes), is Kaggle version 4 of the
+`d-fine-l` ONNX variation, and the app catalogue points at it. Version 3 stays on Kaggle.
+
+**Checks.**
+
+| Check | Result |
+| :-- | :-- |
+| Version 4 opens and runs on ONNX Runtime 1.28.0 (the app's) | yes; outputs `[1,300,4]`, finite |
+| Version 3 vs version 4 on the 253 validation photos, ONNX Runtime 1.31.0 | largest output difference 0.0 (logits), 0.0 (boxes) |
+| Count accuracy at 0.50, version 3 / version 4 | 0.822 / 0.822 |
+| Version 4 on ONNX Runtime 1.28.0 vs 1.31.0, validation photos | identical species counts on 253 of 253 photos at 0.50 and at 0.48; top-20 scores within 0.0048 |
+| r50-v5 on 1.28.0 vs 1.31.0, the same photos (reference) | identical species counts on 253 of 253 at 0.48; top-20 scores within 0.0013 |
+
+The validation photos came from the pinned Zenodo archive (bytes, MD5 and SHA-256 checked). The test split was not
+read. The numbers are in [`kaggle-runs/dfine-l/onnx-v4-app-runtime.json`](kaggle-runs/dfine-l/onnx-v4-app-runtime.json).
+
+**Guard.** `tools/app_runtime.py check` lists anything the app's runtime would refuse (today: float64 tensors), and
+`tests/test_app_runtime.py` ties that runtime version to the `flutter_onnxruntime` version in `app/pubspec.lock`, so
+a plugin upgrade has to restate it. `tools/export_onnx.py` itself is unchanged, because the verified Kaggle notebooks
+carry a byte copy of it; the fold is a separate step between export and publication.
+

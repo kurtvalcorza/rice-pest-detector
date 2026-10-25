@@ -31,7 +31,7 @@ The three published manifests in the repository:
 | :-- | :-- | --: | --: | --: | --: | --: |
 | `r50-v5` | r50-v5 | 640 | 0.48 | 0.64 | 171,744,970 | 0.834 |
 | `rfdetr-m` | RF-DETR-M | 576 | 0.48 | 0.63 | 121,956,743 | 0.846 |
-| `dfine-l` | D-FINE-L | 640 | 0.50 | 0.68 | 125,213,572 | 0.822 |
+| `dfine-l` | D-FINE-L | 640 | 0.50 | 0.68 | 125,611,873 | 0.822 |
 
 Validation figures are on the validation split; their provenance is `docs/evaluation-record.md`, "Wave 2".
 

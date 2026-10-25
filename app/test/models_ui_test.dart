@@ -284,8 +284,8 @@ void main() {
     const messages = {
       ImportFailure.manifestInvalid: 'The manifest file is not valid. Nothing was imported.',
       ImportFailure.sizeMismatch: 'The model file is not the size its manifest gives. Nothing was imported.',
-      ImportFailure.shapeMismatch: 'The model\'s inputs or outputs do not fit this app. Nothing was imported.',
-      ImportFailure.selfTestFailed: 'The model failed its self-test. Nothing was imported.',
+      ImportFailure.shapeMismatch: 'The model\'s inputs or outputs do not fit this app. Nothing was imported.\nDetails: x',
+      ImportFailure.selfTestFailed: 'The model failed its self-test. Nothing was imported.\nDetails: x',
       ImportFailure.alreadyInstalled: 'A model with this id is already installed. Nothing was imported.',
       ImportFailure.unreadable: 'The files could not be read. Nothing was imported.',
     };

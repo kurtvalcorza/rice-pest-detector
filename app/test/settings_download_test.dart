@@ -148,9 +148,9 @@ void main() {
           'The downloaded file is not the expected size. Nothing was installed.',
       ModelImportFailed(ImportFailure.checksumMismatch, 'x'):
           'The downloaded file does not match its checksum. Nothing was installed.',
-      ModelImportFailed(ImportFailure.shapeMismatch, 'x'): 'The downloaded model failed its checks. Nothing was installed.',
+      ModelImportFailed(ImportFailure.shapeMismatch, 'x'): 'The downloaded model failed its checks. Nothing was installed.\nDetails: x',
       ModelImportFailed(ImportFailure.selfTestFailed, 'x'):
-          'The downloaded model failed its checks. Nothing was installed.',
+          'The downloaded model failed its checks. Nothing was installed.\nDetails: x',
       StateError('anything else'): 'The downloaded model failed its checks. Nothing was installed.',
     };
     for (final e in messages.entries) {

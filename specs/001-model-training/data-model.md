@@ -77,7 +77,7 @@ The strict description of a published model, copied verbatim into the app's cata
 | :-- | --: | --: | --: | --: | --: |
 | `r50-v5` (default) | 640 | 0.48 | 0.64 | 171,744,970 | 0.834 |
 | `rfdetr-m` | 576 | 0.48 | 0.63 | 121,956,743 | 0.846 |
-| `dfine-l` | 640 | 0.50 | 0.68 | 125,213,572 | 0.822 |
+| `dfine-l` | 640 | 0.50 | 0.68 | 125,611,873 | 0.822 |
 
 ## States
 

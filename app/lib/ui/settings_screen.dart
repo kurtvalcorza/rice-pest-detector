@@ -61,6 +61,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _say(ScaffoldMessengerState messenger, String text) =>
       messenger..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(text)));
 
+  /// A failed model check's message plus its reason (e.g. the ONNX Runtime error), so a failure on a phone
+  /// can be diagnosed from a screenshot. Long reasons are cut.
+  static String _withDetail(AppLocalizations l, String message, ModelImportFailed e) {
+    final detail = e.detail.trim();
+    if (detail.isEmpty) return message;
+    return l.errorWithDetail(message, detail.length <= 200 ? detail : '${detail.substring(0, 199)}…');
+  }
+
   Future<void> _use(InstalledModel m) async {
     final catalog = s.models;
     if (catalog == null || m.id == _activeId) return;
@@ -134,8 +142,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ImportFailure.manifestInvalid => l.importErrorManifest,
         ImportFailure.sizeMismatch => l.importErrorSize,
         ImportFailure.checksumMismatch => l.importErrorChecksum,
-        ImportFailure.shapeMismatch => l.importErrorShape,
-        ImportFailure.selfTestFailed => l.importErrorSelfTest,
+        ImportFailure.shapeMismatch => _withDetail(l, l.importErrorShape, e),
+        ImportFailure.selfTestFailed => _withDetail(l, l.importErrorSelfTest, e),
         ImportFailure.alreadyInstalled => l.importErrorExists,
         ImportFailure.unreadable => l.importErrorFile,
       });
@@ -185,7 +193,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ImportFailure.sizeMismatch => l.downloadErrorSize,
         ImportFailure.checksumMismatch => l.downloadErrorChecksum,
         ImportFailure.alreadyInstalled => l.importErrorExists,
-        _ => l.downloadErrorCheck,
+        _ => _withDetail(l, l.downloadErrorCheck, e),
       });
     } catch (_) {
       _say(messenger, l.downloadErrorCheck);

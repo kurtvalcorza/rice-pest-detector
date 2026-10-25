@@ -307,4 +307,9 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get downloadErrorCheck =>
       'Hindi pumasa ang na-download na modelo sa pagsusuri. Walang na-install.';
+
+  @override
+  String errorWithDetail(String message, String detail) {
+    return '$message\nDetalye: $detail';
+  }
 }

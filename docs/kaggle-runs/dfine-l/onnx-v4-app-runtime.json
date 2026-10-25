@@ -1,0 +1,50 @@
+{
+ "date": "2026-10-25",
+ "version_3": {
+  "sha256": "c823f5d8f55b851d139b99f77dcc7b5fc54dc63e84b7516a5abdc59c8ef95e67",
+  "bytes": 125213572,
+  "loads_on_app_runtime_1_28": false,
+  "error": "NOT_IMPLEMENTED: Could not find an implementation for Cos(7) node with name '/model/model/encoder/aifi.0/position_embedding/Cos'"
+ },
+ "version_4": {
+  "sha256": "3cf578df735d12269bde78bc9e7765fdf016f410585c3eb46e939c6e0e46b9cf",
+  "bytes": 125611873,
+  "loads_on_app_runtime_1_28": true,
+  "folded_tensors": 5,
+  "tool": "python -m tools.app_runtime fold"
+ },
+ "validation_parity_v3_vs_v4_ort_1_31": {
+  "images": 253,
+  "max_abs_diff_logits": 0.0,
+  "max_abs_diff_boxes": 0.0,
+  "runtime": "1.31.0",
+  "count_accuracy_orig_0.48": 0.8181818181818182,
+  "count_accuracy_folded_0.48": 0.8181818181818182,
+  "count_accuracy_orig_0.50": 0.8221343873517787,
+  "count_accuracy_folded_0.50": 0.8221343873517787,
+  "kept_identical_at_0.50": true
+ },
+ "app_runtime_vs_repo_runtime": {
+  "dfine-l_v4": {
+   "identical_species_counts_0_50": "253/253",
+   "identical_species_counts_0_48": "253/253",
+   "count_accuracy_0_50": [
+    0.8221,
+    0.8221
+   ],
+   "max_top20_score_diff": 0.0048
+  },
+  "r50-v5": {
+   "identical_species_counts_0_48": "253/253",
+   "count_accuracy_0_48": [
+    0.8379,
+    0.8379
+   ],
+   "max_top20_score_diff": 0.0013
+  }
+ },
+ "runtimes": {
+  "app": "onnxruntime-android 1.28.0 via flutter_onnxruntime 1.9.0 (checked with onnxruntime 1.28.0 for Windows x64)",
+  "repo": "onnxruntime 1.31.0"
+ }
+}

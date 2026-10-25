@@ -306,4 +306,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get downloadErrorCheck =>
       'The downloaded model failed its checks. Nothing was installed.';
+
+  @override
+  String errorWithDetail(String message, String detail) {
+    return '$message\nDetails: $detail';
+  }
 }

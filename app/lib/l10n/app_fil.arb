@@ -75,5 +75,6 @@
   "downloadErrorNetwork": "Hindi natapos ang pag-download. Suriin ang koneksyon at subukan muli. Walang na-install.",
   "downloadErrorSize": "Hindi tugma ang laki ng na-download na file sa inaasahan. Walang na-install.",
   "downloadErrorChecksum": "Hindi tugma ang na-download na file sa checksum nito. Walang na-install.",
-  "downloadErrorCheck": "Hindi pumasa ang na-download na modelo sa pagsusuri. Walang na-install."
+  "downloadErrorCheck": "Hindi pumasa ang na-download na modelo sa pagsusuri. Walang na-install.",
+  "errorWithDetail": "{message}\nDetalye: {detail}"
 }

@@ -53,7 +53,7 @@
       }
     },
     {
-      "url": "https://www.kaggle.com/api/v1/models/kurtvalcorza/rice-pest-detector/onnx/d-fine-l/3/download/model.onnx",
+      "url": "https://www.kaggle.com/api/v1/models/kurtvalcorza/rice-pest-detector/onnx/d-fine-l/4/download/model.onnx",
       "manifest": {
         "id": "dfine-l",
         "label": "D-FINE-L",
@@ -63,8 +63,8 @@
         "input_size": 640,
         "threshold": 0.5,
         "review_below": 0.68,
-        "sha256": "c823f5d8f55b851d139b99f77dcc7b5fc54dc63e84b7516a5abdc59c8ef95e67",
-        "bytes": 125213572,
+        "sha256": "3cf578df735d12269bde78bc9e7765fdf016f410585c3eb46e939c6e0e46b9cf",
+        "bytes": 125611873,
         "outputs": [
           "logits",
           "pred_boxes"

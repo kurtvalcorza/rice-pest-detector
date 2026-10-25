@@ -30,7 +30,7 @@ Unknown or missing fields are rejected, at the top level and inside `validation`
 | :-- | --: | --: | --: | :-- | :-- |
 | `r50-v5` | 0.48 | 0.64 | 640 | `dc3927ae` | none |
 | `rfdetr-m` | 0.48 | 0.63 | 576 | `07161f11` | none |
-| `dfine-l` | 0.50 | 0.68 | 640 | `c823f5d8` | the parity score waiver |
+| `dfine-l` | 0.50 | 0.68 | 640 | `3cf578df` | the parity score waiver |
 
 The default model is r50-v5, identified in the app by its SHA-256 and in `app/assets/model_pin.json` (`"kind": "demo"`, threshold 0.48, the Kaggle version 3 URL).
 
