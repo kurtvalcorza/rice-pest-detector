@@ -452,6 +452,8 @@ nothing else in the graph changes. The result, `3cf578df…` (125,611,873 bytes)
 The validation photos came from the pinned Zenodo archive (bytes, MD5 and SHA-256 checked). The test split was not
 read. The numbers are in [`kaggle-runs/dfine-l/onnx-v4-app-runtime.json`](kaggle-runs/dfine-l/onnx-v4-app-runtime.json).
 
+**Open observation (not investigated, owner 2026-10-25).** In the reference row, r50-v5 counted 212 of 253 validation photos within tolerance at 0.48 (0.838) on both runtimes, against 211 of 253 (0.834) recorded for r50-v5 in its manifest and card. The one-photo difference was not traced; the recorded 0.834 is unchanged.
+
 **Guard.** `tools/app_runtime.py check` lists anything the app's runtime would refuse (today: float64 tensors), and
 `tests/test_app_runtime.py` ties that runtime version to the `flutter_onnxruntime` version in `app/pubspec.lock`, so
 a plugin upgrade has to restate it. `tools/export_onnx.py` itself is unchanged, because the verified Kaggle notebooks
