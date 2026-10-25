@@ -2,7 +2,7 @@
 
 This page takes you through the *Coding with AI Agents* workshop on your own, in the same order as the session: six modules, three exercises, and a longer Spec Kit exercise to finish. Allow about three hours for the six modules and their exercises, and about 45 minutes more for the longer Spec Kit exercise, in as many sittings as you like. Training the model yourself (Module 5) is optional and takes hours more, mostly waiting. There is no facilitator, so every exercise has a way to check your work and an answer to compare with.
 
-**The slides.** Open `docs/presentations/coding-with-ai-agents-2h.html` from your clone in a web browser (GitHub shows the file's source, not the slides). Move with the arrow keys, and press **N** to show each slide's notes: the "About this slide" part says what the speaker said. Each module below gives its slide numbers, which count only the slides shown by default (press **E** to show two hidden ones). The "Presenting" part of the notes was for the speaker; skip it.
+**The slides.** Open `docs/presentations/coding-with-ai-agents-2h.html` from your clone in a web browser (GitHub shows the file's source, not the slides). Move with the arrow keys, and press **N** to show each slide's notes: the "About this slide" part says what the speaker said. Each module below gives its slide numbers, which count only the slides shown by default (press **E** to show four hidden ones). The "Presenting" part of the notes was for the speaker; skip it.
 
 **What you need:** Git and this repository, an AI coding agent, an empty practice folder, and `uv` with Spec Kit for Module 3. Module 0 sets them up.
 
@@ -80,29 +80,132 @@ Read slides 9–18: why the one-shot prompt fails, the agent loop, `AGENTS.md`, 
 
 **Check yourself:** which decisions did your prompt leave to the agent? Typical gaps are the platform (phone, web or desktop), where the photos come from, what the model is and where it runs, what counts as "done", and what the app must never do (here: give spray or treatment advice).
 
-## Module 2. Context (slides 19–33, about 40 minutes)
+## Module 2. Context (slides 19–33, about 45 minutes)
 
-Read slides 19–33: an agent is a model plus a *harness*, context windows and why long sessions cost more, skills, hooks, sub-agents and MCP. The examples are real: `.claude/skills/`, `.claude/agents/` and `.claude/hooks/` in this repository.
+Read slides 19–33: an agent is a model plus a *harness*, context windows and why long sessions cost more, then five ways to shape what an agent does (slide 28):
 
-### Exercise 1 (optional): one prompt, different harnesses (about 15 minutes)
+| Way | What it is | In this repository |
+| :-- | :-- | :-- |
+| Instructions | A file the agent reads when a session starts: what the project is, its rules | [`AGENTS.md`](../AGENTS.md) |
+| Skills | A procedure the agent loads when a task matches its description | [`.claude/skills/refactor-safely/SKILL.md`](../.claude/skills/refactor-safely/SKILL.md), mirrored in `.agents/skills/` |
+| Tools | What the agent can reach: its built-in tools, plus any MCP servers you connect | none added; MCP is on slide 30 |
+| Controls | Hooks, tests and permissions: they run whatever the model decides | [`.claude/hooks/require_green_tests.py`](../.claude/hooks/require_green_tests.py), the Stop hook |
+| Delegation | A narrower job given to a sub-agent with its own context window | [`.claude/agents/find-callers.md`](../.claude/agents/find-callers.md) |
 
-Slide 20 says an agent is a model plus a harness. Here you see what the harness changes. Skip this exercise if you have only one agent, or go straight to Module 3.
+The line that matters is on slide 31: **instructions and skills are requests, which the model may skip; controls check.** Exercise 1 shows both.
 
-1. Make one empty folder per harness inside your practice folder, for example `try-a/` and `try-b/`, each with `git init`.
-2. In each folder, open a different harness: two different agents, or the same agent's editor extension and its command-line tool ([setup.md, An AI coding agent](setup.md#an-ai-coding-agent)). Start a fresh session in each.
-3. Send each one your Exercise 0 prompt, word for word. Approve nothing that installs software or runs outside its folder; stop each one after its first answer or its first few steps.
-4. Compare what you got: `git status` in each folder, and the replies side by side.
+### Exercise 1: brief your agent and give it a skill (about 20 minutes)
 
-**Check yourself:** for each harness, did it plan first or start writing code? Which questions did it ask you, and which choices did it make on its own (platform, libraries, where the photos come from)? Which commands did it ask permission for? Did it read any project files before it started?
+You write the instructions and a skill for a small project, check that your agent read them, and judge what it did against them. Any agent works; the steps say where agents differ.
+
+**Set up.** In your practice folder, make a project and give it two files:
+
+```bash
+mkdir brief
+cd brief
+git init
+```
+
+`prices.py`:
+
+```python
+def total_price(items):
+    total = 0
+    for name, price, qty in items:
+        total = total + price * qty
+    if total > 100:
+        total = total - total * 0.1
+    return round(total, 2)
+
+
+def member_price(items):
+    total = 0
+    for name, price, qty in items:
+        total = total + price * qty
+    if total > 100:
+        total = total - total * 0.1
+    total = total - total * 0.05
+    return round(total, 2)
+```
+
+`test_prices.py`:
+
+```python
+import unittest
+
+from prices import member_price, total_price
+
+
+class TestPrices(unittest.TestCase):
+    def test_small_order_has_no_discount(self):
+        self.assertEqual(total_price([("rice", 50, 1)]), 50)
+
+    def test_order_over_100_gets_10_percent_off(self):
+        self.assertEqual(total_price([("rice", 60, 2)]), 108.0)
+
+    def test_members_get_5_percent_more(self):
+        self.assertEqual(member_price([("rice", 60, 2)]), 102.6)
+
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+Run the tests (`python -m unittest`; on some systems `python3`) and check that all three pass. Then commit, so that `git diff` later shows only what the agent changed: `git add .` and `git commit -m "Starting point"`.
+
+1. **Write the instructions.** Create `AGENTS.md` in `brief/`:
+
+   ```markdown
+   # Rules for agents in this folder
+
+   - Read a file before you change it.
+   - Propose a plan and wait for my approval before you edit any file.
+   - Do not install anything or add dependencies.
+   - Run `python -m unittest` before and after every change.
+   - When you finish, say how you checked your work.
+   ```
+
+   Claude Code reads `CLAUDE.md`, not `AGENTS.md`. If you use it, also create a `CLAUDE.md` whose only line is `@AGENTS.md`, which imports the file, as this repository does.
+
+2. **Check that it was read.** Start a fresh session in `brief/` and ask: *"What rules apply in this folder? Do not change anything."* If it cannot list your five rules, it did not load the file. Ask it to read `AGENTS.md`, and note that your agent needs that.
+
+3. **Add the skill.** Copy this repository's [`.agents/skills/refactor-safely/SKILL.md`](../.agents/skills/refactor-safely/SKILL.md) to `brief/.agents/skills/refactor-safely/SKILL.md`. Claude Code looks in `.claude/skills/` instead, so with Claude Code put the copy in `brief/.claude/skills/refactor-safely/`. The skill was written for this repository, so edit it: remove what does not exist in `brief/` (the Flutter test command, the `find-callers` sub-agent and the sentence about the Stop hook) and keep the steps that still apply. Commit the instructions and the skill.
+
+4. **Ask for a refactor.** In a fresh session: *"`total_price` and `member_price` repeat the same code. Refactor `prices.py` so the repetition goes, without changing what either function returns."* Do not name the skill: see whether the agent finds it. Read its plan before you approve it.
+
+5. **Judge the result.** Run `git status`, `git diff` and the tests yourself.
+
+**Check yourself:** Did the agent propose a plan and wait? Did it run the tests before it changed anything, as both your `AGENTS.md` and the skill ask? Did it use the skill, and how can you tell? Did it add or install anything? Name one rule it followed and one it skipped. What belongs in `AGENTS.md` and what in a skill?
 
 <details>
 <summary>What good answers look like</summary>
 
-- **Different harnesses, different behaviour, same prompt.** One may ask questions and plan; another may start creating files straight away. Even the same model can behave differently in another harness (slides 20–22), and even the same harness gives two answers to the same prompt (slide 26).
-- **Permissions differ.** Harnesses ask before different actions: some before every command, some only before edits outside the folder. That is a setting you control (Module 4).
-- **What none of them asked:** usually who the users are, what counts as done, how accurate the counts must be, and what the app must never do. A one-shot prompt leaves those to whichever harness you happen to use; a written spec closes them, which is Module 3.
+- **A good refactor** changes only `prices.py`, keeps both function names, and the three tests still pass. One version moves the shared part into a helper:
+
+  ```python
+  def _discounted_subtotal(items):
+      total = sum(price * qty for _name, price, qty in items)
+      if total > 100:
+          total = total - total * 0.1
+      return total
+
+
+  def total_price(items):
+      return round(_discounted_subtotal(items), 2)
+
+
+  def member_price(items):
+      total = _discounted_subtotal(items)
+      return round(total - total * 0.05, 2)
+  ```
+
+- **Loading differs by agent.** Most agents that support `AGENTS.md` read it when a session starts; Claude Code reads it only through the `CLAUDE.md` import. Some agents load a skill on their own when its description matches the task; others use it only when you name it. If yours did not, ask again with *"Use the refactor-safely skill"*. The Agent Skills format fixes the folder and the file, but leaves when a skill loads to each agent (see the glossary).
+- **Requests and controls.** Your `AGENTS.md` and the skill both ask the agent to run the tests; nothing makes it do so. If it skipped them, that is slide 31. This repository backs the same rule with a control: the Stop hook in [`.claude/settings.json`](../.claude/settings.json) runs `flutter test` and blocks the agent's first attempt to finish while the tests fail. Give the rules that matter a test or a hook; check the rest yourself, with `git diff` and the tests.
+- **Where things belong.** `AGENTS.md` holds the rules for every task in the folder; a skill holds the procedure for one kind of task, loaded only when needed.
 
 </details>
+
+**Going further (optional, about 10 minutes): the same briefing in a second harness.** Slide 20 says an agent is a model plus a harness. If you have a second agent, or the same agent's editor extension and its command-line tool ([setup.md, An AI coding agent](setup.md#an-ai-coding-agent)), undo the refactor (`git restore .`; check `git status` for new files), open `brief/` in the other harness, and repeat steps 2 and 4. Compare: did it find `AGENTS.md` and the skill without help? Did it plan first? Which commands did it ask permission for? The files were the same; whatever differs comes from the harness (slides 20–21), and even the same harness can answer the same prompt differently (slide 25).
 
 ## Module 3. Specify (slides 34–60, about 45 minutes)
 
@@ -358,6 +461,9 @@ If you would like to take part, the survey is at [aiaas-market-study-st8x.vercel
 | `AGENTS.md` | A file in a repository that briefs coding agents: what the project is and the rules to follow. Agents that support it read it; check, rather than assume, that yours did. |
 | Skill, hook, sub-agent | Ways to extend an agent: a skill is reusable instructions, a hook runs a check automatically (this repository's Stop hook runs the tests), a sub-agent is a helper with a narrower job. |
 | MCP | Model Context Protocol: a standard way to connect an agent to outside tools and data, such as Colab or Kaggle. |
+| Agent Skills | An open format for skills: a folder holding a `SKILL.md` file, whose name and description tell the agent when to load it. It fixes the folder and the file, not when a skill loads; each agent decides that. |
+| ACP | Agent Client Protocol: a community standard for connecting a code editor to a coding agent, so one editor can work with several agents. |
+| A2A | Agent2Agent protocol: a standard for agents in different systems to send each other tasks and messages. Not the same as a sub-agent, which runs inside one agent's harness. |
 | One-shot prompt | Asking for a whole result in one prompt, instead of planning and building step by step. |
 | Prompt injection | Text the agent reads (in a file, web page or issue) that tries to give it instructions you did not give. |
 | Spec | A written description of what to build and why, with requirements you can test, before any code. |
