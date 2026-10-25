@@ -39,7 +39,7 @@ Read slides 1–7: what the workshop covers, how it was made with AI, and why fr
 
 ### Install what you need
 
-Follow [setup.md](setup.md) for [Git](setup.md#git), [an AI coding agent](setup.md#an-ai-coding-agent) and [`uv` and Spec Kit](setup.md#uv-and-spec-kit), then clone this repository. Python, Flutter and the training tools are not needed. To see what you already have, [setup.md](setup.md#let-your-agent-check-what-is-installed) has a prompt that asks your agent to check, without installing anything.
+Follow [setup.md](setup.md) for [Git](setup.md#git), [an AI coding agent](setup.md#an-ai-coding-agent) and [`uv` and Spec Kit](setup.md#uv-and-spec-kit), then clone this repository. You do not need to install Python, Flutter or the training tools: Exercise 1 runs its small Python tests through `uv`, which fetches a Python of its own if you have none. To see what you already have, [setup.md](setup.md#let-your-agent-check-what-is-installed) has a prompt that asks your agent to check, without installing anything.
 
 ### Set up your agent safely
 
@@ -137,13 +137,25 @@ from prices import member_price, total_price
 
 
 class TestPrices(unittest.TestCase):
+    def test_empty_order_costs_nothing(self):
+        self.assertEqual(total_price([]), 0)
+
     def test_small_order_has_no_discount(self):
         self.assertEqual(total_price([("rice", 50, 1)]), 50)
+
+    def test_exactly_100_has_no_discount(self):
+        self.assertEqual(total_price([("rice", 100, 1)]), 100)
 
     def test_order_over_100_gets_10_percent_off(self):
         self.assertEqual(total_price([("rice", 60, 2)]), 108.0)
 
-    def test_members_get_5_percent_more(self):
+    def test_several_items_add_up_before_the_discount(self):
+        self.assertEqual(total_price([("rice", 40, 2), ("salt", 30, 1)]), 99.0)
+
+    def test_members_get_5_percent_off_a_small_order(self):
+        self.assertEqual(member_price([("rice", 50, 1)]), 47.5)
+
+    def test_members_get_5_percent_more_over_100(self):
         self.assertEqual(member_price([("rice", 60, 2)]), 102.6)
 
 
@@ -151,7 +163,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-Run the tests (`python -m unittest`; on some systems `python3`) and check that all three pass. Then commit, so that `git diff` later shows only what the agent changed: `git add .` and `git commit -m "Starting point"`.
+Run the tests with `uv run --no-project python -m unittest` and check that all seven pass (`uv` runs them on its own Python; if you already use Python, `python -m unittest` does the same). Then commit, so that `git diff` later shows only what the agent changed: first create a file `.gitignore` containing the line `__pycache__/` (the folder Python creates when it runs the tests), then `git add .` and `git commit -m "Starting point"`. If Git asks who you are, this is your first commit on this computer: run `git config --global user.name "Your Name"` and `git config --global user.email "you@example.com"` (any address works for local practice), then commit again.
 
 1. **Write the instructions.** Create `AGENTS.md` in `brief/`:
 
@@ -161,26 +173,26 @@ Run the tests (`python -m unittest`; on some systems `python3`) and check that a
    - Read a file before you change it.
    - Propose a plan and wait for my approval before you edit any file.
    - Do not install anything or add dependencies.
-   - Run `python -m unittest` before and after every change.
+   - Run `uv run --no-project python -m unittest` before and after every change.
    - When you finish, say how you checked your work.
    ```
 
-   Claude Code reads `CLAUDE.md`, not `AGENTS.md`. If you use it, also create a `CLAUDE.md` whose only line is `@AGENTS.md`, which imports the file, as this repository does.
+   Agents differ in which file they read. Recent Claude Code versions read `AGENTS.md` directly (checked with 2.1.310); older ones read only `CLAUDE.md`. If step 2 shows your agent missed the rules, create a `CLAUDE.md` whose only line is `@AGENTS.md`, which imports the file, as this repository does.
 
 2. **Check that it was read.** Start a fresh session in `brief/` and ask: *"What rules apply in this folder? Do not change anything."* If it cannot list your five rules, it did not load the file. Ask it to read `AGENTS.md`, and note that your agent needs that.
 
-3. **Add the skill.** Copy this repository's [`.agents/skills/refactor-safely/SKILL.md`](../.agents/skills/refactor-safely/SKILL.md) to `brief/.agents/skills/refactor-safely/SKILL.md`. Claude Code looks in `.claude/skills/` instead, so with Claude Code put the copy in `brief/.claude/skills/refactor-safely/`. The skill was written for this repository, so edit it: remove what does not exist in `brief/` (the Flutter test command, the `find-callers` sub-agent and the sentence about the Stop hook) and keep the steps that still apply. Commit the instructions and the skill.
+3. **Add the skill.** Copy this repository's [`.agents/skills/refactor-safely/SKILL.md`](../.agents/skills/refactor-safely/SKILL.md) to `brief/.agents/skills/refactor-safely/SKILL.md`. Claude Code looks in `.claude/skills/` instead, so with Claude Code put the copy in `brief/.claude/skills/refactor-safely/`. The skill was written for this repository, so fit it to `brief/`: in its first step, replace the test commands (`flutter test` in `app/`, or `pytest`) with `uv run --no-project python -m unittest`, the command in your `AGENTS.md`; remove what does not exist in `brief/` (the `find-callers` sub-agent and the sentence about the Stop hook); keep the steps that still apply. A skill you borrow usually needs this kind of fitting. Commit the instructions and the skill.
 
 4. **Ask for a refactor.** In a fresh session: *"`total_price` and `member_price` repeat the same code. Refactor `prices.py` so the repetition goes, without changing what either function returns."* Do not name the skill: see whether the agent finds it. Read its plan before you approve it.
 
 5. **Judge the result.** Run `git status`, `git diff` and the tests yourself.
 
-**Check yourself:** Did the agent propose a plan and wait? Did it run the tests before it changed anything, as both your `AGENTS.md` and the skill ask? Did it use the skill, and how can you tell? Did it add or install anything? Name one rule it followed and one it skipped. What belongs in `AGENTS.md` and what in a skill?
+**Check yourself:** Did the agent propose a plan and wait? Did it run the tests before it changed anything, as both your `AGENTS.md` and the skill ask? Did it use the skill, and what is your evidence? Did it add or install anything? Name one rule it followed and one it skipped. What belongs in `AGENTS.md` and what in a skill?
 
 <details>
 <summary>What good answers look like</summary>
 
-- **A good refactor** changes only `prices.py`, keeps both function names, and the three tests still pass. One version moves the shared part into a helper:
+- **A good refactor** changes only `prices.py`, keeps both function names, and the seven tests still pass. One version moves the shared part into a helper:
 
   ```python
   def _discounted_subtotal(items):
@@ -199,7 +211,9 @@ Run the tests (`python -m unittest`; on some systems `python3`) and check that a
       return round(total - total * 0.05, 2)
   ```
 
-- **Loading differs by agent.** Most agents that support `AGENTS.md` read it when a session starts; Claude Code reads it only through the `CLAUDE.md` import. Some agents load a skill on their own when its description matches the task; others use it only when you name it. If yours did not, ask again with *"Use the refactor-safely skill"*. The Agent Skills format fixes the folder and the file, but leaves when a skill loads to each agent (see the glossary).
+- **Passing tests are evidence, not proof.** A refactor that writes `total >= 100` instead of `total > 100` passes the first, obvious tests; only `test_exactly_100_has_no_discount` catches it. Tests show the behaviour they check, nothing more, so read the diff as well.
+- **Three kinds of evidence that the skill was used.** The agent *saying* it used the skill is its own report. Its activity log or trace *showing* it opened `SKILL.md` shows the skill was read. The diff and the tests *matching* the skill's steps show the work complied, which can also happen without the skill. Only the second shows the skill was loaded; only the third shows the result is right.
+- **Loading differs by agent.** Most agents that support `AGENTS.md` read it when a session starts; older Claude Code versions read it only through a `CLAUDE.md` import. Some agents load a skill on their own when its description matches the task; others use it only when you name it. If yours did not, ask again with *"Use the refactor-safely skill"*. The Agent Skills format fixes the folder and the file, but leaves when a skill loads to each agent (see the glossary).
 - **Requests and controls.** Your `AGENTS.md` and the skill both ask the agent to run the tests; nothing makes it do so. If it skipped them, that is slide 31. This repository backs the same rule with a control: the Stop hook in [`.claude/settings.json`](../.claude/settings.json) runs `flutter test` and blocks the agent's first attempt to finish while the tests fail. Give the rules that matter a test or a hook; check the rest yourself, with `git diff` and the tests.
 - **Where things belong.** `AGENTS.md` holds the rules for every task in the folder; a skill holds the procedure for one kind of task, loaded only when needed.
 
@@ -254,7 +268,7 @@ Here you run every step of Spec Kit's [quickstart](https://github.github.io/spec
 
 #### Step 1. Start from a clean branch
 
-This repository already contains our Spec Kit run, so remove it on a branch of your own first. Your answers then cannot copy ours, and `main` keeps ours for the comparison at the end:
+This repository already contains our Spec Kit run, so remove it on a branch of your own first. Your answers then cannot copy ours, and `main` keeps ours for the comparison at the end. Start with `git status` showing nothing to commit: `git rm` deletes the files from your folder as well as from Git, on this branch only. If anything goes wrong, `git switch main` brings every file back.
 
 ```bash
 git switch -c my-speckit-run
@@ -324,7 +338,7 @@ Questions to answer for yourself:
 
 **Done when:** you have a constitution, a spec with no `[NEEDS CLARIFICATION]` left, a plan whose Constitution Check passes (or is justified), a task list, and your answers to the questions above.
 
-**Clean up:** if you made the `rice-pest-detector-main` copy, remove it first with `git worktree remove ../rice-pest-detector-main` (Git cannot switch to `main` while that copy has it checked out). Then `git switch main` and `git branch -D my-speckit-run`. If Spec Kit or your agent created a feature branch of its own (for example `001-desktop-app`), delete it the same way.
+**Clean up:** if you made the `rice-pest-detector-main` copy, remove it first with `git worktree remove ../rice-pest-detector-main` (Git cannot switch to `main` while that copy has it checked out). Then `git switch main` and `git branch -D my-speckit-run`. `-D` deletes the branch even if it was never merged, so first copy anything from it you want to keep. If Spec Kit or your agent created a feature branch of its own (for example `001-desktop-app`), delete it the same way.
 
 ## Module 4. Guard (slides 61–69, about 15 minutes)
 
