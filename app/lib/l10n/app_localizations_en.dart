@@ -85,6 +85,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This photo is too small. Take a closer photo of the trap.';
 
   @override
+  String get photoTooLarge =>
+      'This photo is too large to count. Choose a photo of 50 megapixels or less.';
+
+  @override
   String get photoUnreadable => 'This file could not be opened as a photo.';
 
   @override

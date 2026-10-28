@@ -153,7 +153,7 @@ class ModelStore {
     final client = this.client ?? http.Client();
     try {
       try {
-        await fetchToFile(client, Uri.parse(pin.url), _part);
+        await fetchToFile(client, Uri.parse(pin.url), _part, maxBytes: pin.bytes);
       } catch (_) {
         await _discardPart();
         rethrow;

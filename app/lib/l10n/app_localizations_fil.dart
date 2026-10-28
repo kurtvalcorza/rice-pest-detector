@@ -85,6 +85,10 @@ class AppLocalizationsFil extends AppLocalizations {
       'Masyadong maliit ang litrato. Kunan nang mas malapit ang bitag.';
 
   @override
+  String get photoTooLarge =>
+      'Masyadong malaki ang litrato para bilangin. Pumili ng litratong 50 megapixel o mas maliit.';
+
+  @override
   String get photoUnreadable => 'Hindi mabuksan ang file bilang litrato.';
 
   @override
