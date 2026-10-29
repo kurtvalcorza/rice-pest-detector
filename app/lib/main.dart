@@ -34,7 +34,10 @@ Future<void> main() async {
   final store = ModelStore(Directory(sub('model')));
   final demoStore = ModelStore(Directory(sub('demo')));
   final demoMeta = File(sub('demo${Platform.pathSeparator}demo.json'));
-  final registry = ModelRegistry(Directory(sub('models')));
+  // The published models Settings offers for download (fetched only when the user taps Download).
+  final published = parsePublishedModels(await rootBundle.loadString(modelCatalogAsset));
+  final registry = ModelRegistry(Directory(sub('models')),
+      trusted: {for (final p in published) if (p.manifest.validated) p.manifest.sha256});
   final history = HistoryStore(Directory(sub('history')));
   final photos = ImagePickerSource(Directory(sub('photos')));
   final sharer = SharePlusSharer();
@@ -45,8 +48,6 @@ Future<void> main() async {
     if (d is OnnxDetector) await d.close();
   }
 
-  // The published models Settings offers for download (fetched only when the user taps Download).
-  final published = parsePublishedModels(await rootBundle.loadString(modelCatalogAsset));
   final catalog = LocalModelCatalog(
       registry: registry, pin: pin, store: store, demoStore: demoStore, demoMeta: demoMeta, load: load,
       unload: unload, check: (path, manifest) => checkModel(OnnxProbe(), path, manifest), published: published);

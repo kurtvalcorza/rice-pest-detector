@@ -196,4 +196,33 @@ void main() {
           source: ModelSource.registry),
     ]).map((m) => m.id), ['z', 'b', 'a']);
   });
+
+  test('ids that name the registry\'s own files are rejected', () async {
+    for (final id in ['active.json', 'active.json.tmp']) {
+      final (model, man) = files(manifest: manifestFor(payload, id: id));
+      await expectLater(registry().importModel(model: model, manifest: man, check: passes),
+          throwsA(isA<ModelImportFailed>().having((e) => e.reason, 'reason', ImportFailure.manifestInvalid)));
+    }
+    expect(leftovers(), isEmpty);
+    await registry().setActive(defaultModelId);
+    expect(await registry().activeId(), defaultModelId);
+  });
+
+  test('only the default model\'s own file may use its name', () async {
+    for (final m in [manifestFor(payload, id: defaultModelId), {...manifestFor(payload), 'label': ' R50-v5 '}]) {
+      final (model, man) = files(manifest: m);
+      await expectLater(registry().importModel(model: model, manifest: man, check: passes),
+          throwsA(isA<ModelImportFailed>().having((e) => e.reason, 'reason', ImportFailure.manifestInvalid)));
+    }
+    expect(await registry().list(), isEmpty);
+  });
+
+  test('a manifest\'s "validated" counts only for a SHA-256 the app trusts', () async {
+    final (model, man) = files(manifest: {...manifestFor(payload), 'validated': true});
+    final imported = await registry().importModel(model: model, manifest: man, check: passes);
+    expect(imported.validated, isFalse);
+    expect((await registry().list()).single.validated, isFalse);
+    final trusting = ModelRegistry(registry().root, trusted: {sha256.convert(payload).toString()});
+    expect((await trusting.list()).single.validated, isTrue);
+  });
 }

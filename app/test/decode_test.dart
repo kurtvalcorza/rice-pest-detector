@@ -66,4 +66,55 @@ void main() {
   test('unreadable bytes raise PhotoUnreadable', () {
     expect(() => decodePhoto([1, 2, 3]), throwsA(isA<PhotoUnreadable>()));
   });
+
+  test('a photo declaring more than maxPhotoPixels is refused before it is decoded', () {
+    // A real 1x1 PNG whose header claims 8000x8000; decoding it would need hundreds of MB.
+    final png = Uint8List.fromList(img.encodePng(img.Image(width: 1, height: 1)));
+    final header = ByteData.sublistView(png, 16, 24)..setUint32(0, 8000)..setUint32(4, 8000);
+    ByteData.sublistView(png, 29, 33).setUint32(0, _crc32(png.sublist(12, 29)));
+    expect(header.getUint32(0), 8000);
+    expect(() => decodePhoto(png),
+        throwsA(isA<PhotoTooLarge>().having((e) => [e.width, e.height], 'size', [8000, 8000])));
+  });
+
+  test('an image whose header gives no size is refused without decoding what it wraps', () {
+    // An ICO holding one PNG: the ICO header reports 0x0, whatever the PNG inside declares.
+    final png = img.encodePng(img.Image(width: 1, height: 1));
+    final ico = ByteData(22)
+      ..setUint16(2, 1, Endian.little) // icon
+      ..setUint16(4, 1, Endian.little) // one image
+      ..setUint16(10, 1, Endian.little)
+      ..setUint16(12, 32, Endian.little)
+      ..setUint32(14, png.length, Endian.little)
+      ..setUint32(18, 22, Endian.little);
+    final data = [...ico.buffer.asUint8List(), ...png];
+    expect(img.findDecoderForData(Uint8List.fromList(data))!.startDecode(Uint8List.fromList(data))!.width, 0);
+    expect(() => decodePhoto(data), throwsA(isA<PhotoUnreadable>()));
+  });
+
+  test('only the first frame of an animated image is decoded', () {
+    final anim = img.Image(width: 40, height: 30)..clear(img.ColorRgb8(250, 0, 0));
+    anim.addFrame(img.Image(width: 40, height: 30)..clear(img.ColorRgb8(0, 0, 250)));
+    final gif = img.encodeGif(anim);
+    expect(img.decodeImage(gif)!.numFrames, 2);
+    // A pixel budget that fits one frame but not two: decoding every frame would throw.
+    final budget = img.Decoder.defaultMaxPixels;
+    img.Decoder.defaultMaxPixels = 40 * 30 + 1;
+    addTearDown(() => img.Decoder.defaultMaxPixels = budget);
+    final first = decodePhoto(gif).image;
+    expect([first.width, first.height], [40, 30]);
+    expect(first.pixels[0], greaterThan(200));
+    expect(first.pixels[2], lessThan(50));
+  });
+}
+
+int _crc32(List<int> bytes) {
+  var c = 0xffffffff;
+  for (final b in bytes) {
+    c ^= b;
+    for (var k = 0; k < 8; k++) {
+      c = c & 1 == 1 ? 0xedb88320 ^ (c >> 1) : c >> 1;
+    }
+  }
+  return c ^ 0xffffffff;
 }

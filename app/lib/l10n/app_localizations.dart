@@ -224,6 +224,12 @@ abstract class AppLocalizations {
   /// **'This photo is too small. Take a closer photo of the trap.'**
   String get photoTooSmall;
 
+  /// No description provided for @photoTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo is too large to count. Choose a photo of 50 megapixels or less.'**
+  String get photoTooLarge;
+
   /// No description provided for @photoUnreadable.
   ///
   /// In en, this message translates to:

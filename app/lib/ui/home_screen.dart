@@ -78,6 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
       await _reload();
     } on PhotoTooSmall {
       messenger.showSnackBar(SnackBar(content: Text(l.photoTooSmall)));
+    } on PhotoTooLarge {
+      messenger.showSnackBar(SnackBar(content: Text(l.photoTooLarge)));
     } on PhotoUnreadable {
       messenger.showSnackBar(SnackBar(content: Text(l.photoUnreadable)));
     } finally {

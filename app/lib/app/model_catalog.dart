@@ -70,7 +70,10 @@ class LocalModelCatalog implements ModelCatalog {
   }
 
   @override
-  Future<Detector> open(InstalledModel model) => load(model);
+  Future<Detector> open(InstalledModel model) async {
+    if (!await stillMatches(model)) throw ModelVerificationFailed('${model.id} no longer matches its SHA-256');
+    return load(model);
+  }
 
   @override
   Future<void> close(Detector detector) => unload(detector);

@@ -83,6 +83,9 @@ class _CompareScreenState extends State<CompareScreen> {
       } on PhotoTooSmall {
         messenger.showSnackBar(SnackBar(content: Text(l.photoTooSmall)));
         break;
+      } on PhotoTooLarge {
+        messenger.showSnackBar(SnackBar(content: Text(l.photoTooLarge)));
+        break;
       } on PhotoUnreadable {
         messenger.showSnackBar(SnackBar(content: Text(l.photoUnreadable)));
         break;

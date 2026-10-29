@@ -1,0 +1,12 @@
+diff --git a/src/rice_pest_detector/infer.py b/src/rice_pest_detector/infer.py
+index 10f184b..2199765 100644
+--- a/src/rice_pest_detector/infer.py
++++ b/src/rice_pest_detector/infer.py
+@@ -23,6 +23,7 @@ def preprocess(image: Image.Image, size: int = INPUT_SIZE) -> np.ndarray:
+     rgb = ImageOps.exif_transpose(image).convert("RGB")
+     resized = rgb.resize((size, size), Image.Resampling.BILINEAR)
+     array = np.asarray(resized, dtype=np.float32) / 255.0
++    array = (array - np.array([0.485, 0.456, 0.406], np.float32)) / np.array([0.229, 0.224, 0.225], np.float32)
+     return array.transpose(2, 0, 1)[np.newaxis].copy()
+ 
+ 

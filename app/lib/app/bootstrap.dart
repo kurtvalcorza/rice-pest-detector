@@ -44,14 +44,29 @@ Future<InstalledModel?> _pinned(ModelPin pin, ModelStore store) async {
 /// A developer's side-loaded demo model (demo/rice-pest.onnx + demo/demo.json), if it verifies.
 Future<InstalledModel?> _sideloaded(ModelStore demoStore, File demoMeta) async {
   if (!await demoMeta.exists()) return null;
-  final meta = jsonDecode(await demoMeta.readAsString()) as Map<String, dynamic>;
-  final local = ModelPin('local-demo', meta['sha256'] as String, (meta['bytes'] as num).toInt());
+  final ModelPin local;
+  final String label;
+  final double threshold;
+  try {
+    final meta = jsonDecode(await demoMeta.readAsString()) as Map<String, dynamic>;
+    local = ModelPin('local-demo', meta['sha256'] as String, (meta['bytes'] as num).toInt());
+    label = meta['label'] as String;
+    threshold = (meta['threshold'] as num).toDouble();
+  } on FormatException {
+    return null; // not JSON: ignored, so a bad hand-placed file cannot stop the app starting
+  } on TypeError {
+    return null;
+  }
   if (!await demoStore.isInstalled(local)) return null;
-  final label = meta['label'] as String;
   return InstalledModel(id: label, label: label, sha256: local.sha256, inputSize: inputSize,
-      threshold: (meta['threshold'] as num).toDouble(), reviewBelow: defaultReviewBelow,
-      path: demoStore.modelFile.path, source: ModelSource.sideloaded);
+      threshold: threshold, reviewBelow: defaultReviewBelow, path: demoStore.modelFile.path,
+      source: ModelSource.sideloaded);
 }
+
+/// The registry lists a model by a size-and-time stamp written when it was verified, so the file is
+/// hashed again before it is opened. (The pin and the side-loaded demo are hashed whenever they are listed.)
+Future<bool> stillMatches(InstalledModel m) async =>
+    m.source != ModelSource.registry || await fileSha256(File(m.path)) == m.sha256;
 
 /// Every installed model, registry first; a legacy entry whose id or file (SHA-256) is already listed is dropped,
 /// so a side-loaded copy of a downloaded model appears once.
@@ -83,11 +98,15 @@ Future<ModelChoice> chooseModel({
     return null;
   }
 
-  final chosen = pick((m) => m.id == activeId) ??
-      pick((m) => m.sha256 == defaultSha256) ??
-      pick((m) => m.source == ModelSource.pin) ??
-      pick((m) => m.source == ModelSource.sideloaded);
-  if (chosen == null) return ModelChoice(ModelMode.none, null, defaultThreshold, canDownload: pin.isSet);
-  final mode = chosen.published || chosen.validated ? ModelMode.published : ModelMode.demo;
-  return ModelChoice(mode, await load(chosen), chosen.threshold, active: chosen, reviewBelow: chosen.reviewBelow);
+  for (final chosen in [
+    pick((m) => m.id == activeId),
+    pick((m) => m.sha256 == defaultSha256),
+    pick((m) => m.source == ModelSource.pin),
+    pick((m) => m.source == ModelSource.sideloaded),
+  ]) {
+    if (chosen == null || !await stillMatches(chosen)) continue; // a changed file falls through to the next
+    final mode = chosen.published || chosen.validated ? ModelMode.published : ModelMode.demo;
+    return ModelChoice(mode, await load(chosen), chosen.threshold, active: chosen, reviewBelow: chosen.reviewBelow);
+  }
+  return ModelChoice(ModelMode.none, null, defaultThreshold, canDownload: pin.isSet);
 }

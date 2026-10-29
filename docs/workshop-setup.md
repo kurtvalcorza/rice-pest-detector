@@ -32,6 +32,7 @@ The repository holds the whole project, but you only need a few files for this w
 | [`docs/evaluation-record.md`](evaluation-record.md) | Every result, with its run, split and date | Module 5 |
 | [`docs/model-cards/`](model-cards/) | One card per published model: what it is for, how it was trained, its limits | Module 5 |
 | [`app/`](../app/) | The Flutter demo app: `lib/` is the code, `test/` its tests | Optional: run the demo app |
+| [`docs/workshop-advanced/`](workshop-advanced/README.md), [`workshop/advanced/`](../workshop/advanced/) | The optional advanced track: its pages, and the verifier, starter files and regression patch it uses | Optional: the advanced track |
 
 ## Module 0. Introduction and set-up (slides 1–8, about 30 minutes)
 
@@ -56,7 +57,7 @@ Read its plan before you approve anything, and read each command before it runs:
 
 ### Make a practice folder
 
-The exercises start from scratch, so keep them outside the cloned repository:
+The exercises start from scratch, so keep them outside the cloned repository. Make the folder next to your clone, in the same parent folder; the optional advanced track's commands expect it there (`../agents-practice`):
 
 ```bash
 mkdir agents-practice
@@ -438,6 +439,10 @@ This is Module 2 and Module 3 together: watch how much of its context window the
 To start runs from a terminal or let an agent drive Colab, see [setup.md, Colab CLI](setup.md#colab-cli-optional) and [MCP](setup.md#let-your-agent-work-with-colab-and-kaggle-mcp).
 
 **After training.** Choosing a counting threshold, exporting to ONNX and checking parity with PyTorch run on your computer with the Python tools ([setup.md, Python tools and tests](setup.md#python-tools-and-tests)); the steps are in the README, "Evaluation", "Export to ONNX and parity" and "Choosing a demo threshold". An exported model can be imported into the demo app from Settings, where it is marked "Demo model, not validated".
+
+### Going further: the advanced track (optional)
+
+After the six modules, an [optional advanced track](workshop-advanced/README.md) takes you from using a coding agent to engineering a controlled agent workflow on this repository's real inference code. [Module 6, "Engineer: protect the inference contract"](workshop-advanced/module-6-engineer.md) (about 45–60 minutes) is ready: you break the detector's preprocessing on purpose in a throwaway worktree, see which controls notice, and build a small verifier that says PASS only when the tests really ran and passed. Modules 7 (orchestrate) and 8 (automate) will follow; the whole track will take about 2.75–3.75 hours. It needs only Git, `uv` and your agent from Module 0, and changes nothing in the core course.
 
 ## Optional: run the demo app on an emulator
 

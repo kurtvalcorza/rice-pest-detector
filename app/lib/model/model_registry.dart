@@ -15,6 +15,8 @@ import 'model_manifest.dart';
 const String defaultModelId = 'r50-v5';
 const String defaultModelSha256 = 'dc3927ae0967f6553721e18eec826305cca66c7fb5c8cd1789a8187d74f069c1';
 
+Future<String> fileSha256(File f) async => (await sha256.bind(f.openRead()).first).toString();
+
 /// Where an installed model came from: imported into the registry, the pinned download, or a developer's
 /// side-loaded demo/demo.json.
 enum ModelSource { registry, pin, sideloaded }
@@ -40,6 +42,8 @@ class InstalledModel {
 
   /// Null for models without a manifest (the pin and demo.json).
   final ModelValidation? validation;
+
+  /// The manifest says validated and its SHA-256 is one the app ships as validated ([ModelRegistry.trusted]).
   final bool validated;
 
   /// A pinned model whose pin says "published" (passed the release gates).
@@ -72,8 +76,15 @@ List<InstalledModel> sortModels(Iterable<InstalledModel> models) => [...models].
   });
 
 class ModelRegistry {
-  ModelRegistry(this.root);
+  ModelRegistry(this.root, {this.trusted = const {}});
   final Directory root;
+
+  /// SHA-256s of the bundled catalogue's models whose manifest says validated. Any other manifest is
+  /// written by whoever supplied the file, so its "validated" is not believed.
+  final Set<String> trusted;
+
+  /// Names in [root] that are not model folders: a model with one of these ids would replace them.
+  static const _reservedIds = {'active.json', 'active.json.tmp'};
 
   /// Largest manifest read; anything bigger is not a manifest.
   static const _maxManifestBytes = 64 * 1024;
@@ -114,7 +125,7 @@ class ModelRegistry {
     final model = _model(d);
     if (!await model.exists() || await model.length() != manifest.bytes) return null;
     if (!await _stamped(d, manifest)) {
-      if (await _sha256(model) != manifest.sha256) return null;
+      if (await fileSha256(model) != manifest.sha256) return null;
       await _writeStamp(d, manifest, await model.lastModified());
     }
     return _installed(manifest, model.path);
@@ -133,12 +144,10 @@ class ModelRegistry {
   Future<void> _writeStamp(Directory d, ModelManifest m, DateTime modified) => _stamp(d)
       .writeAsString(jsonEncode({'sha256': m.sha256, 'bytes': m.bytes, 'modified': modified.millisecondsSinceEpoch}));
 
-  static InstalledModel _installed(ModelManifest m, String path) => InstalledModel(
+  InstalledModel _installed(ModelManifest m, String path) => InstalledModel(
       id: m.id, label: m.label, architecture: m.architecture, sha256: m.sha256, inputSize: m.inputSize,
       threshold: m.threshold, reviewBelow: m.reviewBelow, path: path, source: ModelSource.registry,
-      validation: m.validation, validated: m.validated);
-
-  static Future<String> _sha256(File f) async => (await sha256.bind(f.openRead()).first).toString();
+      validation: m.validation, validated: m.validated && trusted.contains(m.sha256));
 
   Future<String?> activeId() async {
     try {
@@ -208,6 +217,11 @@ class ModelRegistry {
   /// Places the model file into a staging folder with [place], verifies it, then moves the folder into
   /// place. Any failure deletes the staging folder.
   Future<InstalledModel> _install(ModelManifest m, Future<File> Function(File staged) place, ModelCheck check) async {
+    if (_reservedIds.contains(m.id)) throw ModelImportFailed(ImportFailure.manifestInvalid, 'id ${m.id} is reserved');
+    // Counts are recorded under the label, so only the default model's own file may use its name.
+    if (m.sha256 != defaultModelSha256 && (m.id == defaultModelId || m.label.trim().toLowerCase() == defaultModelId)) {
+      throw ModelImportFailed(ImportFailure.manifestInvalid, '$defaultModelId is the default model\'s name');
+    }
     final target = _dir(m.id);
     if (await target.exists()) throw ModelImportFailed(ImportFailure.alreadyInstalled, m.id);
 
@@ -224,7 +238,7 @@ class ModelRegistry {
       }
       final size = await staged.length();
       if (size != m.bytes) throw ModelImportFailed(ImportFailure.sizeMismatch, 'got $size bytes, expected ${m.bytes}');
-      final digest = await _sha256(staged);
+      final digest = await fileSha256(staged);
       if (digest != m.sha256) throw ModelImportFailed(ImportFailure.checksumMismatch, 'got $digest');
       try {
         await check(staged.path, m);

@@ -69,4 +69,17 @@ void main() {
     await expectLater(store.installFromFile(bad, pin), throwsA(isA<ModelVerificationFailed>()));
     expect(await store.isInstalled(pin), isTrue, reason: 'a failed install keeps the good model');
   });
+
+  test('a download that runs past the pinned size is stopped there', () async {
+    var sent = 0;
+    final store = ModelStore(dir, client: MockClient.streaming((_, _) async => http.StreamedResponse(
+        Stream.fromIterable(List.generate(1000, (_) => List<int>.filled(1024, 0))).map((c) {
+          sent += c.length;
+          return c;
+        }),
+        200)));
+    await expectLater(store.download(pin), throwsA(isA<ModelVerificationFailed>()));
+    expect(sent, lessThan(100 * 1024), reason: 'stops near the ${pin.bytes} pinned bytes, not after 1 MB');
+    expect(dir.listSync(), isEmpty);
+  });
 }

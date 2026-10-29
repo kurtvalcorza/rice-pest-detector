@@ -17,6 +17,19 @@ class PhotoUnreadable implements Exception {
   String toString() => 'This file is not a readable photo';
 }
 
+/// Photos with more pixels than this are refused before they are decoded: a small file can declare huge
+/// dimensions (a 435 KB PNG of 12000 x 12000 needs about 900 MB to decode). 50 MP still covers the
+/// high-resolution modes of phone cameras.
+const int maxPhotoPixels = 50 * 1000 * 1000;
+
+class PhotoTooLarge implements Exception {
+  PhotoTooLarge(this.width, this.height);
+  final int width;
+  final int height;
+  @override
+  String toString() => 'Photo is ${width}x$height, more than $maxPhotoPixels pixels';
+}
+
 class DecodedPhoto {
   DecodedPhoto(this.image, this.orientationTag);
 
@@ -29,7 +42,11 @@ class DecodedPhoto {
 
 DecodedPhoto decodePhoto(List<int> bytes) {
   final data = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
-  final decoded = img.decodeImage(data);
+  final info = img.findDecoderForData(data)?.startDecode(data);
+  // A header with no size (an ICO wrapper reports 0x0) cannot be checked against the limit.
+  if (info == null || info.width <= 0 || info.height <= 0) throw PhotoUnreadable();
+  if (info.width * info.height > maxPhotoPixels) throw PhotoTooLarge(info.width, info.height);
+  final decoded = img.decodeImage(data, frame: 0); // only the first frame: the limit is per frame
   if (decoded == null) throw PhotoUnreadable();
   final rgb = decoded.numChannels == 3 && decoded.format == img.Format.uint8 && !decoded.hasPalette
       ? decoded

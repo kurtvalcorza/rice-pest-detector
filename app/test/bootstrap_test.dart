@@ -109,10 +109,14 @@ void main() {
     expect(c.active!.isDefault, isFalse);
   });
 
-  test('a validated registry model runs in published mode', () async {
+  test('a validated registry model runs in published mode only when the app trusts its SHA-256', () async {
     await register('ok', [9], validated: true);
     await registry().setActive('ok');
-    expect((await choose()).mode, ModelMode.published);
+    expect((await choose()).mode, ModelMode.demo, reason: 'a manifest cannot vouch for itself');
+    final trusting = ModelRegistry(registry().root, trusted: {sha256.convert([9]).toString()});
+    final c = await chooseModel(pin: const ModelPin('', '', 0), store: store('model'), demoStore: store('demo'),
+        demoMeta: demoMeta(), registry: trusting, load: load);
+    expect(c.mode, ModelMode.published);
   });
 
   test('without an active choice, a non-default registry model is never picked on its own', () async {
@@ -170,5 +174,26 @@ void main() {
     final all = await installedModels(pin: const ModelPin('', '', 0), store: store('model'), demoStore: store('demo'),
         demoMeta: demoMeta(), registry: registry());
     expect(all.map((m) => m.id), ['r50-v5']);
+  });
+
+  test('a model whose file changed after it was verified is not opened; the next choice is', () async {
+    await register('rfdetr-m', [1, 2, 3, 4]);
+    await registry().setActive('rfdetr-m');
+    await install(store('model'));
+    expect((await choose()).active!.id, 'rfdetr-m');
+    final f = File('${registry().root.path}${sep}rfdetr-m${sep}model.onnx');
+    final modified = f.lastModifiedSync();
+    f.writeAsBytesSync([4, 3, 2, 1]); // same size, and the time put back, so the stamp still matches
+    f.setLastModifiedSync(modified);
+    final c = await choose(p: pin(label: 'pinned'));
+    expect(c.active!.source, ModelSource.pin);
+  });
+
+  test('a malformed demo.json is ignored rather than stopping start-up', () async {
+    await install(store('demo'));
+    for (final bad in ['{not json', '{"sha256": 1}', '[]']) {
+      demoMeta().writeAsStringSync(bad);
+      expect((await choose()).mode, ModelMode.none);
+    }
   });
 }
