@@ -107,7 +107,7 @@ If `specify --help` prints its commands, you are ready. This repository's Spec K
 specify init setup-check --integration <your-agent>
 ```
 
-Replace `<your-agent>` with your agent's key, for example `agy`, `claude`, `codex`, `copilot`, `cursor-agent`, `gemini` or `opencode` (the [full list](https://github.github.io/spec-kit/reference/integrations.html)). Open your agent in the new `setup-check` folder and type `/speckit-` in its chat: the Spec Kit commands should appear. Codex uses `$speckit-…` instead. Then delete the `setup-check` folder.
+Replace `<your-agent>` with your agent's key, for example `agy`, `claude`, `codex`, `copilot`, `cursor-agent` or `opencode` (the [full list](https://github.github.io/spec-kit/reference/integrations.html)). Open your agent in the new `setup-check` folder and type `/speckit-` in its chat: the Spec Kit commands should appear. Codex uses `$speckit-…` instead. Then delete the `setup-check` folder.
 
 ## Python tools and tests
 
@@ -183,7 +183,7 @@ The sign-in token is saved in `~/.config/colab-cli/token.json`; keep it private,
 
 Two MCP servers let a coding agent on your computer work with the notebooks and the published models. Both are optional; training works without them. The commands are shown for Claude Code, one of the agents the demos used; other clients are covered on each server's own page.
 
-**Colab MCP** ([googlecolab/colab-mcp](https://github.com/googlecolab/colab-mcp)) connects a local agent to a Colab session open in your browser, so the agent can add and run notebook cells there. It needs `uv` (see [uv and Spec Kit](#uv-and-spec-kit)) and a client that runs on your computer and supports tool-list change notifications: Claude Code, Gemini CLI and Windsurf are the ones its page names.
+**Colab MCP** ([googlecolab/colab-mcp](https://github.com/googlecolab/colab-mcp)) connects a local agent to a Colab session open in your browser, so the agent can add and run notebook cells there. It needs `uv` (see [uv and Spec Kit](#uv-and-spec-kit)) and a client that runs on your computer and supports tool-list change notifications: Claude Code, Gemini CLI and Windsurf are the ones its page names. Gemini CLI no longer signs in with a personal Google account (checked with 0.62.0, 31 October 2026); it sends those users to Antigravity.
 
 1. Add the server, for your user only (not to the repository):
 
