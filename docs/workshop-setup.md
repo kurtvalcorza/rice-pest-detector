@@ -120,7 +120,7 @@ The line that matters is on slide 31: **instructions and skills are requests, wh
 
 You write the instructions and a skill for a small project, check that your agent read them, and judge what it did against them. Any agent works; the steps say where agents differ.
 
-**Set up.** In your practice folder, make a project and give it two files:
+**Set up.** In your practice folder, make a project and give it two files. On Windows, keep the path short (for example `C:\practice\brief`): with a very long path, an agent's shell commands can fail with "The command line is too long".
 
 ```bash
 mkdir brief
@@ -199,13 +199,13 @@ Run the tests with `uv run --no-project python -m unittest` and check that all s
    - When you finish, say how you checked your work.
    ```
 
-   Agents differ in which file they read. Recent Claude Code versions read `AGENTS.md` directly (checked with 2.1.310); older ones read only `CLAUDE.md`. If step 2 shows your agent missed the rules, create a `CLAUDE.md` whose only line is `@AGENTS.md`, which imports the file, as this repository does.
+   Agents differ in which file they read. Recent Claude Code versions read `AGENTS.md` directly (checked with 2.1.310 and 2.1.312); older ones read only `CLAUDE.md`, and Gemini CLI reads `GEMINI.md` by default. If step 2 shows your agent missed the rules, create the file your agent does read (`CLAUDE.md` for Claude Code, `GEMINI.md` for Gemini CLI) with the single line `@AGENTS.md`, which imports the file, as this repository does.
 
 2. **Check that it was read.** Start a fresh session in `brief/` and ask: *"What rules apply in this folder? Do not change anything."* If it cannot list your five rules, it did not load the file. Ask it to read `AGENTS.md`, and note that your agent needs that.
 
-3. **Add the skill.** Copy this repository's [`.agents/skills/refactor-safely/SKILL.md`](../.agents/skills/refactor-safely/SKILL.md) to `brief/.agents/skills/refactor-safely/SKILL.md`. Claude Code looks in `.claude/skills/` instead, so with Claude Code put the copy in `brief/.claude/skills/refactor-safely/`. The skill was written for this repository, so fit it to `brief/`: in its first step, replace the test commands (`flutter test` in `app/`, or `pytest`) with `uv run --no-project python -m unittest`, the command in your `AGENTS.md`; remove what does not exist in `brief/` (the `find-callers` sub-agent and the sentence about the Stop hook); keep the steps that still apply. A skill you borrow usually needs this kind of fitting. Commit the instructions and the skill.
+3. **Add the skill.** Copy this repository's [`.agents/skills/refactor-safely/SKILL.md`](../.agents/skills/refactor-safely/SKILL.md) to `brief/.agents/skills/refactor-safely/SKILL.md`. Claude Code looks in `.claude/skills/` instead, so with Claude Code put the copy in `brief/.claude/skills/refactor-safely/`. The skill was written for this repository, so fit it to `brief/`: in its first step, replace the test commands (`flutter test` in `app/`, or `pytest`) with `uv run --no-project python -m unittest`, the command in your `AGENTS.md`; remove what does not exist in `brief/` (the `find-callers` sub-agent and the sentence about the Stop hook); widen the `description` line, which only mentions moving code between modules, so it also covers your task (for example, *Use when refactoring code without changing behaviour.*); keep the steps that still apply. A skill you borrow usually needs this kind of fitting. Commit the instructions and the skill.
 
-4. **Ask for a refactor.** In a fresh session: *"`total_price` and `member_price` repeat the same code. Refactor `prices.py` so the repetition goes, without changing what either function returns."* Do not name the skill: see whether the agent finds it. Read its plan before you approve it.
+4. **Ask for a refactor.** In a fresh session: *"`total_price` and `member_price` repeat the same code. Refactor `prices.py` so the repetition goes, without changing what either function returns."* Do not name the skill: see whether the agent finds it. Read its plan before you approve it. If the agent says it could not read files or run commands, its sandbox is blocking it: fix that first ([setup.md](setup.md#an-ai-coding-agent)), because a plan made without reading the code is not the behaviour you are testing. On Windows, Claude Code may ask to run the tests through PowerShell rather than Bash; the command is the same, so approve either.
 
 5. **Judge the result.** Run `git status`, `git diff` and the tests yourself.
 
