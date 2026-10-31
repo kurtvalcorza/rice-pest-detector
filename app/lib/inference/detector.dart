@@ -1,5 +1,6 @@
 // Detector interface. FakeDetector replays recorded outputs so the
 // app can be built and tested before a model passes its gates; OnnxDetector runs the real model.
+import 'dart:async';
 import 'dart:convert';
 
 import 'postprocess.dart';
@@ -18,6 +19,34 @@ abstract class Detector {
   /// All detections the model reports, unthresholded except for the model's own floor,
   /// sorted by score. Counting applies the threshold.
   Future<List<Detection>> detect(PhotoRef photo);
+}
+
+/// Counts the analyses running on [inner], so its native session is freed only after the last one has
+/// finished: switching model in Settings can then never close a session a count is still using.
+class TrackedDetector implements Detector {
+  TrackedDetector(this.inner);
+  final Detector inner;
+  int _running = 0;
+  Completer<void>? _idle;
+
+  @override
+  String get modelId => inner.modelId;
+
+  @override
+  Future<List<Detection>> detect(PhotoRef photo) async {
+    _running++;
+    try {
+      return await inner.detect(photo);
+    } finally {
+      if (--_running == 0) {
+        _idle?.complete();
+        _idle = null;
+      }
+    }
+  }
+
+  /// Completes once no analysis is running on this detector.
+  Future<void> idle() => _running == 0 ? Future.value() : (_idle ??= Completer<void>()).future;
 }
 
 class FakeDetector implements Detector {

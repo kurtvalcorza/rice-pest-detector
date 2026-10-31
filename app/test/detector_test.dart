@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -33,4 +34,32 @@ void main() {
     final det = FakeDetector.fromJson(fixtures);
     expect(() => det.detect(PhotoRef('missing.jpg')), throwsA(isA<StateError>()));
   });
+
+  test('TrackedDetector is idle only once every running count has finished', () async {
+    final gate = Completer<void>();
+    final tracked = TrackedDetector(_Gated(gate.future));
+    await tracked.idle(); // nothing running: completes at once
+    final counting = tracked.detect(const PhotoRef('trap-1.jpg'));
+    var idle = false;
+    unawaited(tracked.idle().then((_) => idle = true));
+    await Future<void>.delayed(Duration.zero);
+    expect(idle, isFalse, reason: 'a count is still running');
+    gate.complete();
+    await counting;
+    await Future<void>.delayed(Duration.zero);
+    expect(idle, isTrue);
+    expect(tracked.modelId, 'gated');
+  });
+}
+
+class _Gated implements Detector {
+  _Gated(this.gate);
+  final Future<void> gate;
+  @override
+  String get modelId => 'gated';
+  @override
+  Future<List<Never>> detect(PhotoRef photo) async {
+    await gate;
+    return const [];
+  }
 }

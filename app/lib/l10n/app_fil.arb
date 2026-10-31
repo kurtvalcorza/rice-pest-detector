@@ -22,6 +22,7 @@
   "photoTooSmall": "Masyadong maliit ang litrato. Kunan nang mas malapit ang bitag.",
   "photoTooLarge": "Masyadong malaki ang litrato para bilangin. Pumili ng litratong 50 megapixel o mas maliit.",
   "photoUnreadable": "Hindi mabuksan ang file bilang litrato.",
+  "analysisFailed": "Hindi nabilang ang litratong ito, at walang na-save. Subukan muli.",
   "about": "Tungkol sa app",
   "intendedUse": "Isang demonstrasyon para sa pagtuturo kung paano pinapatakbo ang isang modelo ng pagbilang ng peste sa telepono. Dalawang peste ang binibilang nito sa mga litrato ng light trap: atangya at puting aksip. Hindi ito ginawa para gamitin sa sakahan, hindi pa napapatunayan sa bukid, at hindi ito opisyal na kasangkapan ng anumang organisasyon. Tantiya lamang ang mga bilang at hindi ito para sa pagpapasya tungkol sa pagkontrol ng peste.",
   "privacyNotice": "Nananatili sa teleponong ito ang mga litrato at bilang. Walang ipinapadala maliban kung piliin ninyong ibahagi.",

@@ -1,7 +1,7 @@
 // Counts one photo with every installed model, one model at a time (each is loaded, run and freed before
 // the next, to bound memory), and shows the counts, review flags and time side by side. Clearly a
 // comparison of demo models; nothing is saved to history and nothing leaves the phone.
-import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -40,15 +40,9 @@ class _CompareScreenState extends State<CompareScreen> {
   PhotoRef? _photo;
 
   void _discardPhoto() {
-    final path = _photo?.path;
+    final photo = _photo;
     _photo = null;
-    if (path == null) return;
-    try {
-      final f = File(path);
-      if (f.existsSync()) f.deleteSync();
-    } on FileSystemException {
-      // Best effort: a leftover copy stays in app-private storage only.
-    }
+    if (photo != null) unawaited(s.photos.discard(photo));
   }
 
   @override
@@ -63,7 +57,12 @@ class _CompareScreenState extends State<CompareScreen> {
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final photo = await pick();
-    if (photo == null || !mounted) return;
+    if (photo == null) return;
+    if (!mounted) {
+      // The screen closed while the camera or gallery was open: delete the copy nothing will show.
+      await s.photos.discard(photo);
+      return;
+    }
     _discardPhoto();
     _photo = photo;
     setState(_rows.clear);

@@ -124,11 +124,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     _say(messenger, l.importPickManifest);
+    // The screen can be left while a file picker is open: stop then rather than update a closed screen.
     final manifest = await files.pickManifest();
-    if (manifest == null) return;
+    if (manifest == null || !mounted) return;
     _say(messenger, l.importPickModel);
     final model = await files.pickModel();
-    if (model == null) return;
+    if (model == null || !mounted) return;
     messenger.hideCurrentSnackBar();
     setState(() {
       _busy = true;

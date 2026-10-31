@@ -6,6 +6,7 @@ import '../inference/decode.dart';
 import '../inference/detector.dart';
 import '../inference/preprocess.dart';
 import '../l10n/app_localizations.dart';
+import '../model/model_store.dart';
 import '../storage/history.dart';
 import 'about_screen.dart';
 import 'not_validated_banner.dart';
@@ -28,12 +29,21 @@ class _HomeScreenState extends State<HomeScreen> {
   List<HistoryEntry> _entries = [];
   bool _busy = false;
 
+  /// Stops the pinned-model download on Cancel, or when the screen goes away.
+  DownloadCancel? _cancel;
+
   AppServices get s => widget.services;
 
   @override
   void initState() {
     super.initState();
     _reload();
+  }
+
+  @override
+  void dispose() {
+    _cancel?.cancel();
+    super.dispose();
   }
 
   Future<void> _reload() async {
@@ -44,16 +54,33 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _download(ModelDownload download) async {
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    setState(() => _busy = true);
+    final cancel = DownloadCancel();
+    void idle() {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _cancel = null;
+        });
+      }
+    }
+
+    setState(() {
+      _busy = true;
+      _cancel = cancel;
+    });
     try {
-      await download.run();
+      await download.run(cancel);
+    } on DownloadCancelled {
+      idle();
+      if (mounted) messenger.showSnackBar(SnackBar(content: Text(l.downloadCancelled)));
+      return;
     } catch (_) {
-      // Network error, HTTP error, or size/SHA-256 mismatch: nothing was installed.
-      if (mounted) setState(() => _busy = false);
+      // Network error, timeout, HTTP error, or size/SHA-256 mismatch: nothing was installed.
+      idle();
       messenger.showSnackBar(SnackBar(content: Text(l.downloadFailed)));
       return;
     }
-    if (mounted) setState(() => _busy = false);
+    idle();
     await widget.onModelInstalled?.call();
   }
 
@@ -63,6 +90,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final navigator = Navigator.of(context);
     final photo = await pick();
     if (photo == null) return;
+    if (!mounted) {
+      // The screen went away while the camera or gallery was open: nothing will own the copy.
+      await s.photos.discard(photo);
+      return;
+    }
+    // Set once the history entry that points to the photo is saved; until then a failure deletes the copy.
+    var kept = false;
     setState(() => _busy = true);
     try {
       final counted = countPhoto(photo.name, await detector.detect(photo),
@@ -72,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
           reasons: [for (final r in counted.reasons) r.name], threshold: counted.threshold,
           modelId: detector.modelId, notValidated: s.notValidated);
       await s.history.add(entry);
+      kept = true;
       if (!mounted) return;
       setState(() => _busy = false);
       await navigator.push(MaterialPageRoute(builder: (_) => ResultScreen(entry: entry, services: s)));
@@ -82,7 +117,13 @@ class _HomeScreenState extends State<HomeScreen> {
       messenger.showSnackBar(SnackBar(content: Text(l.photoTooLarge)));
     } on PhotoUnreadable {
       messenger.showSnackBar(SnackBar(content: Text(l.photoUnreadable)));
+    } catch (_) {
+      // Once the entry is saved, a later error (showing the result) is not a failed count.
+      if (kept) rethrow;
+      // The model or the history store failed: nothing was counted or saved, and the copy is deleted below.
+      messenger.showSnackBar(SnackBar(content: Text(l.analysisFailed)));
     } finally {
+      if (!kept) await s.photos.discard(photo);
       if (mounted && _busy) setState(() => _busy = false);
     }
   }
@@ -96,7 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
             tooltip: l.settings,
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () async {
+            // Not while counting or downloading: switching model in Settings would replace the detector
+            // this screen is using.
+            onPressed: _busy
+                ? null
+                : () async {
               await Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => SettingsScreen(services: s, onModelChanged: widget.onModelInstalled)));
               await _reload();
@@ -114,7 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(children: [
             const CircularProgressIndicator(),
             const SizedBox(width: 16),
-            Text(detector == null ? l.downloading : l.analysing),
+            Expanded(child: Text(detector == null ? l.downloading : l.analysing)),
+            if (_cancel != null) TextButton(onPressed: _cancel!.cancel, child: Text(l.cancelDownload)),
           ])
         else ...[
           if (detector == null && s.download != null) ...[

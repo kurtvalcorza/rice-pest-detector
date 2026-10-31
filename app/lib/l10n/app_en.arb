@@ -51,6 +51,7 @@
   "photoTooSmall": "This photo is too small. Take a closer photo of the trap.",
   "photoTooLarge": "This photo is too large to count. Choose a photo of 50 megapixels or less.",
   "photoUnreadable": "This file could not be opened as a photo.",
+  "analysisFailed": "This photo could not be counted, and nothing was saved. Try again.",
   "about": "About",
   "intendedUse": "A teaching demonstration of running a pest-counting model on a phone. It counts two pests in light-trap photos: rice black bug and white stemborer. It is not made for farm use, has not been validated in the field, and is not an official tool of any organisation. The counts are estimates and are not for pest-management decisions.",
   "privacyNotice": "Photos and counts stay on this phone. Nothing is sent unless you choose to share it.",

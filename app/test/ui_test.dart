@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,10 +31,21 @@ final fixtures = jsonEncode({
 class FakePhotos implements PhotoSource {
   FakePhotos(this.next);
   PhotoRef? next;
+
+  /// When set, the picker stays open until the test completes it.
+  Completer<PhotoRef?>? pending;
+  final discarded = <String?>[];
   @override
-  Future<PhotoRef?> camera() async => next;
+  Future<PhotoRef?> camera() async => pending == null ? next : pending!.future;
   @override
-  Future<PhotoRef?> gallery() async => next;
+  Future<PhotoRef?> gallery() async => pending == null ? next : pending!.future;
+  @override
+  Future<void> discard(PhotoRef photo) async {
+    discarded.add(photo.path);
+    // Synchronous: real async file IO does not complete inside testWidgets' fake clock.
+    final path = photo.path;
+    if (path != null && File(path).existsSync()) File(path).deleteSync();
+  }
 }
 
 class RecordingSharer implements Sharer {
@@ -62,12 +75,41 @@ class TooSmallDetector implements Detector {
   Future<List<Never>> detect(PhotoRef photo) async => throw PhotoTooSmall(10, 10);
 }
 
+/// Fails the way a broken model session would.
+class BrokenDetector implements Detector {
+  @override
+  String get modelId => 'broken';
+  @override
+  Future<List<Never>> detect(PhotoRef photo) async => throw StateError('session closed');
+}
+
+/// Holds every count until [gate] completes, so a test can act while the count is running.
+class GateDetector implements Detector {
+  final gate = Completer<void>();
+  @override
+  String get modelId => 'gate';
+  @override
+  Future<List<Never>> detect(PhotoRef photo) async {
+    await gate.future;
+    return const [];
+  }
+}
+
+/// A private photo copy in a temporary folder, removed after the test.
+File tempPhoto() {
+  final dir = Directory.systemTemp.createTempSync('home-photo');
+  addTearDown(() => dir.deleteSync(recursive: true));
+  return File('${dir.path}${Platform.pathSeparator}trap-1.jpg')..writeAsBytesSync([0]);
+}
+
+Finder get settingsButton => find.widgetWithIcon(IconButton, Icons.settings_outlined);
+
 AppServices services({Detector? detector, MemoryHistory? history, RecordingSharer? sharer, PhotoRef? photo,
-        ModelMode mode = ModelMode.published, double threshold = 0.04}) =>
+        FakePhotos? photos, ModelMode mode = ModelMode.published, double threshold = 0.04}) =>
     AppServices(
       detector: mode == ModelMode.none ? null : detector ?? FakeDetector.fromJson(fixtures),
       history: history ?? MemoryHistory(),
-      photos: FakePhotos(photo ?? const PhotoRef('trap-1.jpg', '/photos/trap-1.jpg')),
+      photos: photos ?? FakePhotos(photo ?? const PhotoRef('trap-1.jpg', '/photos/trap-1.jpg')),
       sharer: sharer ?? RecordingSharer(),
       mode: mode,
       threshold: threshold,
@@ -77,6 +119,7 @@ AppServices services({Detector? detector, MemoryHistory? history, RecordingShare
 
 void main() {
   downloadTests();
+  photoLifecycleTests();
   testWidgets('home shows the model notice and the photo buttons', (tester) async {
     await tester.pumpWidget(RicePestApp(services: services()));
     await tester.pumpAndSettle();
@@ -181,7 +224,7 @@ void main() {
     expect(history.entries.single.threshold, 0.03);
   });
 }
-AppServices noModelWithDownload({required Future<void> Function() run}) => AppServices(
+AppServices noModelWithDownload({required Future<void> Function(DownloadCancel cancel) run}) => AppServices(
       history: MemoryHistory(),
       photos: FakePhotos(const PhotoRef('trap-1.jpg', '/photos/trap-1.jpg')),
       sharer: RecordingSharer(),
@@ -191,7 +234,7 @@ AppServices noModelWithDownload({required Future<void> Function() run}) => AppSe
 
 void downloadTests() {
   testWidgets('with a pinned model not yet installed, the app offers the download and its size', (tester) async {
-    await tester.pumpWidget(RicePestApp(services: noModelWithDownload(run: () async {})));
+    await tester.pumpWidget(RicePestApp(services: noModelWithDownload(run: (_) async {})));
     await tester.pumpAndSettle();
     expect(find.textContaining('No model is installed'), findsOneWidget);
     expect(find.text('Download the model (172 MB)'), findsOneWidget);
@@ -200,7 +243,7 @@ void downloadTests() {
   testWidgets('a successful download reloads the app into the pin\'s mode and threshold', (tester) async {
     var ran = false;
     await tester.pumpWidget(RicePestApp(
-      services: noModelWithDownload(run: () async => ran = true),
+      services: noModelWithDownload(run: (_) async => ran = true),
       reload: () async => services(mode: ModelMode.demo, threshold: 0.04),
     ));
     await tester.pumpAndSettle();
@@ -215,7 +258,7 @@ void downloadTests() {
 
   testWidgets('a failed or rejected download keeps the app in no-model mode and says so', (tester) async {
     await tester.pumpWidget(RicePestApp(
-      services: noModelWithDownload(run: () async => throw ModelVerificationFailed('sha256 mismatch')),
+      services: noModelWithDownload(run: (_) async => throw ModelVerificationFailed('sha256 mismatch')),
       reload: () async => fail('must not reload after a failed download'),
     ));
     await tester.pumpAndSettle();
@@ -223,5 +266,112 @@ void downloadTests() {
     await tester.pumpAndSettle();
     expect(find.text('The model download failed. Check the connection and try again.'), findsOneWidget);
     expect(find.textContaining('No model is installed'), findsOneWidget);
+  });
+
+  testWidgets('the home download can be cancelled, and nothing is installed', (tester) async {
+    await tester.pumpWidget(RicePestApp(
+      services: noModelWithDownload(run: (cancel) async {
+        await cancel.whenCancelled;
+        throw DownloadCancelled();
+      }),
+      reload: () async => fail('must not reload after a cancelled download'),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Download the model (172 MB)'));
+    await tester.pump();
+    expect(find.text('Downloading the model…'), findsOneWidget);
+    await tester.tap(find.text('Cancel download'));
+    await tester.pumpAndSettle();
+    expect(find.text('Download cancelled. Nothing was installed.'), findsOneWidget);
+    expect(find.text('Download the model (172 MB)'), findsOneWidget);
+  });
+
+  testWidgets('leaving the home screen stops its download', (tester) async {
+    var stopped = false;
+    await tester.pumpWidget(RicePestApp(services: noModelWithDownload(run: (cancel) async {
+      await cancel.whenCancelled;
+      stopped = true;
+      throw DownloadCancelled();
+    })));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Download the model (172 MB)'));
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+    expect(stopped, isTrue);
+  });
+}
+
+void photoLifecycleTests() {
+  testWidgets('a counted photo is kept for its history entry', (tester) async {
+    final copy = tempPhoto();
+    final photos = FakePhotos(PhotoRef('trap-1.jpg', copy.path));
+    final history = MemoryHistory();
+    await tester.pumpWidget(RicePestApp(services: services(history: history, photos: photos)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Take a photo of the trap'));
+    await tester.pumpAndSettle();
+    expect(history.entries.single.photoPath, copy.path);
+    expect(photos.discarded, isEmpty);
+    expect(copy.existsSync(), isTrue);
+  });
+
+  testWidgets('a photo the model rejects is not kept: its private copy is deleted', (tester) async {
+    final copy = tempPhoto();
+    final history = MemoryHistory();
+    await tester.pumpWidget(RicePestApp(services: services(
+        detector: TooSmallDetector(), history: history, photo: PhotoRef('trap-1.jpg', copy.path))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Take a photo of the trap'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('too small'), findsOneWidget);
+    expect(history.entries, isEmpty);
+    expect(copy.existsSync(), isFalse);
+  });
+
+  testWidgets('a count that fails for another reason says so and keeps nothing', (tester) async {
+    final copy = tempPhoto();
+    final history = MemoryHistory();
+    await tester.pumpWidget(RicePestApp(services: services(
+        detector: BrokenDetector(), history: history, photo: PhotoRef('trap-1.jpg', copy.path))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Take a photo of the trap'));
+    await tester.pumpAndSettle();
+    expect(find.text('This photo could not be counted, and nothing was saved. Try again.'), findsOneWidget);
+    expect(history.entries, isEmpty);
+    expect(copy.existsSync(), isFalse);
+    expect(find.text('Take a photo of the trap'), findsOneWidget, reason: 'the app is ready for the next photo');
+  });
+
+  testWidgets('a photo that arrives after the home screen has gone is deleted', (tester) async {
+    final copy = tempPhoto();
+    final photos = FakePhotos(PhotoRef('trap-1.jpg', copy.path))..pending = Completer<PhotoRef?>();
+    final history = MemoryHistory();
+    await tester.pumpWidget(RicePestApp(services: services(history: history, photos: photos)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Take a photo of the trap'));
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox());
+    photos.pending!.complete(photos.next);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(history.entries, isEmpty);
+    expect(copy.existsSync(), isFalse);
+  });
+
+  testWidgets('Settings cannot be opened while a count is running', (tester) async {
+    final detector = GateDetector();
+    await tester.pumpWidget(RicePestApp(services: services(detector: detector)));
+    await tester.pumpAndSettle();
+    expect(tester.widget<IconButton>(settingsButton).onPressed, isNotNull);
+    await tester.tap(find.text('Take a photo of the trap'));
+    await tester.pump();
+    expect(find.text('Counting insects…'), findsOneWidget);
+    expect(tester.widget<IconButton>(settingsButton).onPressed, isNull);
+    detector.gate.complete();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(tester.widget<IconButton>(settingsButton).onPressed, isNotNull);
   });
 }

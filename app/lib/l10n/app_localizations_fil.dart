@@ -92,6 +92,10 @@ class AppLocalizationsFil extends AppLocalizations {
   String get photoUnreadable => 'Hindi mabuksan ang file bilang litrato.';
 
   @override
+  String get analysisFailed =>
+      'Hindi nabilang ang litratong ito, at walang na-save. Subukan muli.';
+
+  @override
   String get about => 'Tungkol sa app';
 
   @override

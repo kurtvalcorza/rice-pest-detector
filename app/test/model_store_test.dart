@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -82,4 +83,49 @@ void main() {
     expect(sent, lessThan(100 * 1024), reason: 'stops near the ${pin.bytes} pinned bytes, not after 1 MB');
     expect(dir.listSync(), isEmpty);
   });
+
+  test('a server that never answers times out, and nothing is left behind', () async {
+    final store = ModelStore(dir, client: _Stalled(answer: false), responseTimeout: const Duration(milliseconds: 50));
+    await expectLater(store.download(pin),
+        throwsA(isA<ModelDownloadFailed>().having((e) => e.detail, 'detail', contains('no response'))));
+    expect(dir.listSync(), isEmpty);
+  });
+
+  test('a download that stops sending data times out and its partial file is deleted', () async {
+    final client = _Stalled(answer: true);
+    final store = ModelStore(dir, client: client, idleTimeout: const Duration(milliseconds: 100));
+    await expectLater(store.download(pin),
+        throwsA(isA<ModelDownloadFailed>().having((e) => e.detail, 'detail', contains('no data'))));
+    expect(client.listenerCancelled, isTrue, reason: 'the stalled connection is closed');
+    expect(dir.listSync(), isEmpty);
+  });
+
+  test('the pinned download can be cancelled while it waits for the server or for data', () async {
+    for (final answer in [false, true]) {
+      final store = ModelStore(dir, client: _Stalled(answer: answer));
+      final cancel = DownloadCancel();
+      final run = store.download(pin, cancel: cancel);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      cancel.cancel();
+      await expectLater(run, throwsA(isA<DownloadCancelled>()), reason: 'answer: $answer');
+      expect(dir.listSync(), isEmpty, reason: 'answer: $answer');
+    }
+  });
+}
+
+/// Never sends response headers ([answer] false), or sends three bytes of a 100-byte body and then nothing.
+/// Ignores the abort trigger, like a server that does not close the connection.
+class _Stalled extends http.BaseClient {
+  _Stalled({required this.answer});
+  final bool answer;
+  var listenerCancelled = false;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    if (!answer) return Completer<http.StreamedResponse>().future;
+    late final StreamController<List<int>> body;
+    body = StreamController<List<int>>(
+        onListen: () => body.add([1, 2, 3]), onCancel: () => listenerCancelled = true);
+    return Future.value(http.StreamedResponse(body.stream, 200, contentLength: 100));
+  }
 }

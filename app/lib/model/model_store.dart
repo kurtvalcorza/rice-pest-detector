@@ -71,15 +71,48 @@ class DownloadCancel {
 /// Bytes received so far and the total from the server's Content-Length (null when it sends none).
 typedef DownloadProgress = void Function(int received, int? total);
 
+/// How long a download waits for the server's response headers, and for the next chunk of data.
+const downloadResponseTimeout = Duration(seconds: 30);
+const downloadIdleTimeout = Duration(seconds: 60);
+
 /// Streams [url] into [out] (created or truncated), reporting progress after each chunk is written.
-/// Throws [ModelDownloadFailed] on an HTTP error or broken connection, [ModelVerificationFailed] once more
-/// than [maxBytes] arrive, and [DownloadCancelled] after [cancel]. On any failure [out] may hold a partial
-/// file: the caller deletes it. Redirects are followed by the client.
+/// Throws [ModelDownloadFailed] on an HTTP error, a broken connection, no response within
+/// [responseTimeout] or no data for [idleTimeout]; [ModelVerificationFailed] once more than [maxBytes]
+/// arrive; and [DownloadCancelled] after [cancel]. On any failure [out] may hold a partial file: the caller
+/// deletes it. Redirects are followed by the client.
 Future<void> fetchToFile(http.Client client, Uri url, File out,
-    {DownloadProgress? onProgress, DownloadCancel? cancel, int? maxBytes}) async {
+    {DownloadProgress? onProgress,
+    DownloadCancel? cancel,
+    int? maxBytes,
+    Duration responseTimeout = downloadResponseTimeout,
+    Duration idleTimeout = downloadIdleTimeout}) async {
+  // Aborts the request on the user's cancel or on a timeout, so a stalled connection is closed.
+  final abort = Completer<void>();
+  void abortRequest() {
+    if (!abort.isCompleted) abort.complete();
+  }
+
+  unawaited(cancel?.whenCancelled.then((_) => abortRequest()));
+  final sending = client.send(http.AbortableRequest('GET', url, abortTrigger: abort.future));
+  // A response that arrives after the wait has ended is closed unread.
+  void dropLateResponse() => unawaited(sending.then<void>((r) => unawaited(r.stream.listen(null).cancel()),
+      onError: (Object _) {}));
   final http.StreamedResponse resp;
   try {
-    resp = await client.send(http.AbortableRequest('GET', url, abortTrigger: cancel?.whenCancelled));
+    // Cancel ends the wait at once, even with a client that does not honour the abort.
+    resp = await Future.any([
+      sending,
+      if (cancel != null) cancel.whenCancelled.then<http.StreamedResponse>((_) => throw DownloadCancelled()),
+    ]).timeout(responseTimeout);
+  } on DownloadCancelled {
+    abortRequest();
+    dropLateResponse();
+    rethrow;
+  } on TimeoutException {
+    abortRequest();
+    dropLateResponse();
+    if (cancel?.isCancelled ?? false) throw DownloadCancelled();
+    throw ModelDownloadFailed('no response within ${responseTimeout.inSeconds} s');
   } catch (e) {
     if (cancel?.isCancelled ?? false) throw DownloadCancelled();
     throw ModelDownloadFailed('$e');
@@ -99,14 +132,24 @@ Future<void> fetchToFile(http.Client client, Uri url, File out,
   var received = 0;
   var writing = Future<void>.value();
   late final StreamSubscription<List<int>> sub;
+  Timer? idle;
   void fail(Object error) {
     if (done.isCompleted) return;
+    idle?.cancel();
+    abortRequest();
     unawaited(sub.cancel());
     done.completeError(error);
   }
 
+  // Runs only while waiting for the network, not while a chunk is being written.
+  void waitForData() {
+    idle?.cancel();
+    idle = Timer(idleTimeout, () => fail(ModelDownloadFailed('no data for ${idleTimeout.inSeconds} s')));
+  }
+
   sub = resp.stream.listen((chunk) {
     // Paused while the chunk is written, so a fast connection cannot fill memory.
+    idle?.cancel();
     sub.pause();
     writing = file.writeFrom(chunk).then((_) {
       received += chunk.length;
@@ -114,30 +157,40 @@ Future<void> fetchToFile(http.Client client, Uri url, File out,
         fail(ModelVerificationFailed('more than the expected $maxBytes bytes'));
       } else if (!done.isCompleted) {
         onProgress?.call(received, total);
+        waitForData();
         sub.resume();
       }
     }, onError: (Object e) => fail(ModelDownloadFailed('$e')));
   }, onError: (Object e) {
-    fail(e is http.RequestAbortedException ? DownloadCancelled() : ModelDownloadFailed('$e'));
+    fail(e is http.RequestAbortedException && (cancel?.isCancelled ?? false)
+        ? DownloadCancelled()
+        : ModelDownloadFailed('$e'));
   }, onDone: () {
+    idle?.cancel();
     if (!done.isCompleted) done.complete();
   }, cancelOnError: true);
+  waitForData();
   unawaited(cancel?.whenCancelled.then((_) => fail(DownloadCancelled())));
   try {
     await done.future;
   } finally {
+    idle?.cancel();
     await writing.catchError((_) {});
     await file.close();
   }
 }
 
 class ModelStore {
-  ModelStore(this.dir, {this.client});
+  ModelStore(this.dir,
+      {this.client, this.responseTimeout = downloadResponseTimeout, this.idleTimeout = downloadIdleTimeout});
 
   final Directory dir;
 
   /// Injected in tests; a fresh client per download otherwise.
   final http.Client? client;
+
+  /// Passed to [fetchToFile]; shortened in tests.
+  final Duration responseTimeout, idleTimeout;
 
   File get modelFile => File('${dir.path}${Platform.pathSeparator}rice-pest.onnx');
   File get _part => File('${modelFile.path}.part');
@@ -148,12 +201,13 @@ class ModelStore {
     return (await sha256.bind(f.openRead()).first).toString() == pin.sha256;
   }
 
-  Future<File> download(ModelPin pin) async {
+  Future<File> download(ModelPin pin, {DownloadCancel? cancel}) async {
     if (!pin.isSet) throw StateError('No model is published yet: the model pin is empty');
     final client = this.client ?? http.Client();
     try {
       try {
-        await fetchToFile(client, Uri.parse(pin.url), _part, maxBytes: pin.bytes);
+        await fetchToFile(client, Uri.parse(pin.url), _part,
+            maxBytes: pin.bytes, cancel: cancel, responseTimeout: responseTimeout, idleTimeout: idleTimeout);
       } catch (_) {
         await _discardPart();
         rethrow;

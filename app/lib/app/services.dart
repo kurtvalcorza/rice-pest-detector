@@ -12,6 +12,10 @@ import '../storage/history.dart';
 abstract class PhotoSource {
   Future<PhotoRef?> camera();
   Future<PhotoRef?> gallery();
+
+  /// Deletes the app's private copy of [photo] when it will not be kept (the count failed, or the screen
+  /// that asked for it has gone). Never touches the original in the gallery.
+  Future<void> discard(PhotoRef photo);
 }
 
 abstract class Sharer {
@@ -36,8 +40,9 @@ class ModelDownload {
   final int bytes;
   final String label;
 
-  /// Downloads and verifies the file; throws ModelDownloadFailed or ModelVerificationFailed.
-  final Future<void> Function() run;
+  /// Downloads and verifies the file; throws ModelDownloadFailed, ModelVerificationFailed or, after
+  /// [DownloadCancel.cancel], DownloadCancelled.
+  final Future<void> Function(DownloadCancel cancel) run;
 }
 
 /// The installed models, for Settings (switch, import, delete) and the compare screen.

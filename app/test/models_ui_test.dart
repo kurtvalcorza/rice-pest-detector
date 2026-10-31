@@ -129,6 +129,19 @@ class FakeModelFiles implements ModelFilePicker {
   Future<File?> pickModel() async => model;
 }
 
+/// Keeps the manifest picker open until the test completes [gate].
+class SlowModelFiles extends FakeModelFiles {
+  final gate = Completer<File?>();
+  var modelPicked = false;
+  @override
+  Future<File?> pickManifest() => gate.future;
+  @override
+  Future<File?> pickModel() async {
+    modelPicked = true;
+    return this.model;
+  }
+}
+
 AppServices servicesWith(InstalledModel? active, ModelCatalog catalog,
         {MemoryHistory? history, RecordingSharer? sharer, ModelFilePicker? files, PhotoRef? photo}) =>
     AppServices(
@@ -423,6 +436,46 @@ void main() {
     expect(copy.existsSync(), isTrue, reason: 'kept while its results are on screen');
     await tester.pageBack();
     await tester.pumpAndSettle();
+    expect(copy.existsSync(), isFalse);
+  });
+
+  testWidgets('a file picker that returns after Settings has closed changes nothing', (tester) async {
+    final files = SlowModelFiles()
+      ..manifest = File('manifest.json')
+      ..model = File('model.onnx');
+    final catalog = FakeCatalog([r50]);
+    await tester.pumpWidget(RicePestApp(services: servicesWith(r50, catalog, files: files)));
+    await tester.pumpAndSettle();
+    await openSettings(tester);
+    await tester.tap(find.text('Import a model from a file'));
+    await tester.pump();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    files.gate.complete(files.manifest);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(files.modelPicked, isFalse);
+  });
+
+  testWidgets('a photo that arrives after the compare screen has closed is deleted', (tester) async {
+    tallScreen(tester);
+    final dir = Directory.systemTemp.createTempSync('compare-photo');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final copy = File('${dir.path}${Platform.pathSeparator}trap-1.jpg')..writeAsBytesSync([0]);
+    final services = servicesWith(r50, FakeCatalog([r50, rf]), photo: PhotoRef('trap-1.jpg', copy.path));
+    final photos = services.photos as FakePhotos..pending = Completer<PhotoRef?>();
+    await tester.pumpWidget(RicePestApp(services: services));
+    await tester.pumpAndSettle();
+    await openSettings(tester);
+    await tester.tap(find.text('Compare models on one photo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Choose a photo'));
+    await tester.pump();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    photos.pending!.complete(photos.next);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
     expect(copy.existsSync(), isFalse);
   });
 }

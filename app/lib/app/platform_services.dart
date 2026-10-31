@@ -29,6 +29,19 @@ class ImagePickerSource implements PhotoSource {
     final saved = await File(picked.path).copy('${photoDir.path}${Platform.pathSeparator}$name');
     return PhotoRef(name, saved.path);
   }
+
+  @override
+  Future<void> discard(PhotoRef photo) async {
+    final path = photo.path;
+    // Only copies this source made: a path outside the app's photo folder is never deleted.
+    if (path == null || File(path).parent.absolute.path != photoDir.absolute.path) return;
+    try {
+      final f = File(path);
+      if (await f.exists()) await f.delete();
+    } on FileSystemException {
+      // Best effort: a leftover copy stays in app-private storage only.
+    }
+  }
 }
 
 class SharePlusSharer implements Sharer {

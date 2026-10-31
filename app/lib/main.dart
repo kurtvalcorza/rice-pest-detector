@@ -56,7 +56,9 @@ Future<void> main() async {
   Future<AppServices> bootstrap() async {
     final choice = await chooseModel(
         pin: pin, store: store, demoStore: demoStore, demoMeta: demoMeta, registry: registry, load: load);
-    final detector = choice.detector;
+    // Wrapped so a model switch frees the old session only after any count still running on it.
+    final loaded = choice.detector;
+    final detector = loaded == null ? null : TrackedDetector(loaded);
     return AppServices(
       detector: detector,
       history: history,
@@ -68,9 +70,15 @@ Future<void> main() async {
       activeModel: choice.active,
       models: catalog,
       modelFiles: modelFiles,
-      release: detector == null ? null : () => unload(detector),
+      release: detector == null
+          ? null
+          : () async {
+              await detector.idle();
+              await unload(detector.inner);
+            },
       download: choice.canDownload
-          ? ModelDownload(bytes: pin.bytes, label: pin.label, run: () async => store.download(pin))
+          ? ModelDownload(
+              bytes: pin.bytes, label: pin.label, run: (cancel) async => store.download(pin, cancel: cancel))
           : null,
     );
   }

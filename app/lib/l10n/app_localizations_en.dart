@@ -92,6 +92,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get photoUnreadable => 'This file could not be opened as a photo.';
 
   @override
+  String get analysisFailed =>
+      'This photo could not be counted, and nothing was saved. Try again.';
+
+  @override
   String get about => 'About';
 
   @override

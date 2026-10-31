@@ -236,6 +236,12 @@ abstract class AppLocalizations {
   /// **'This file could not be opened as a photo.'**
   String get photoUnreadable;
 
+  /// No description provided for @analysisFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo could not be counted, and nothing was saved. Try again.'**
+  String get analysisFailed;
+
   /// No description provided for @about.
   ///
   /// In en, this message translates to:

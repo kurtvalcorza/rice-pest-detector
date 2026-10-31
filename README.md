@@ -558,6 +558,7 @@ The debug APK is about 184 MB, mostly ONNX Runtime's native libraries for every 
 ### Privacy and wording
 
 - Photos and history stay in app-private storage. The app makes no network call except the explicit model download, and it has no analytics.
+- Android backup is off: nothing of the app's data goes into Google cloud backup or a device-to-device transfer (`allowBackup="false"` and `res/xml/data_extraction_rules.xml`). Moving to a new phone therefore starts with an empty history; models can be downloaded again. A photo whose count fails is deleted at once, so only photos with a history entry are kept.
 - Sharing happens only through the Android share sheet, when the user taps "Share the counts".
 - Languages are English and Filipino (`lib/l10n/*.arb`). The **Filipino text is a draft**, including the pest names *atangya* and *puting aksip*. It needs review by a native speaker before it is used outside the workshop.
 
