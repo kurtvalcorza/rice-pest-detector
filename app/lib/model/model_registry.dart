@@ -51,6 +51,10 @@ class InstalledModel {
 
   bool get isDefault => sha256 == defaultModelSha256;
 
+  /// [id] when the model is in the registry; null for the pin and the side-loaded demo, whose ids are
+  /// derived from their labels and so identify nothing. [sha256] identifies every model.
+  String? get registryId => source == ModelSource.registry ? id : null;
+
   /// Only imported models can be removed, and never the default.
   bool get deletable => source == ModelSource.registry && !isDefault;
 }

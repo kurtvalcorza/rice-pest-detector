@@ -43,7 +43,8 @@ Future<void> main() async {
   final sharer = SharePlusSharer();
 
   Future<Detector> load(InstalledModel m) =>
-      OnnxDetector.fromFile(m.path, modelId: m.label, inputSize: m.inputSize);
+      OnnxDetector.fromFile(m.path, modelId: m.label, modelSha256: m.sha256, modelRegistryId: m.registryId,
+          inputSize: m.inputSize);
   Future<void> unload(Detector d) async {
     if (d is OnnxDetector) await d.close();
   }

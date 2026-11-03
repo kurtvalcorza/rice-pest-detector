@@ -72,6 +72,10 @@ class TooSmallDetector implements Detector {
   @override
   String get modelId => 'test';
   @override
+  String? get modelSha256 => null;
+  @override
+  String? get modelRegistryId => null;
+  @override
   Future<List<Never>> detect(PhotoRef photo) async => throw PhotoTooSmall(10, 10);
 }
 
@@ -79,6 +83,10 @@ class TooSmallDetector implements Detector {
 class BrokenDetector implements Detector {
   @override
   String get modelId => 'broken';
+  @override
+  String? get modelSha256 => null;
+  @override
+  String? get modelRegistryId => null;
   @override
   Future<List<Never>> detect(PhotoRef photo) async => throw StateError('session closed');
 }
@@ -88,6 +96,10 @@ class GateDetector implements Detector {
   final gate = Completer<void>();
   @override
   String get modelId => 'gate';
+  @override
+  String? get modelSha256 => null;
+  @override
+  String? get modelRegistryId => null;
   @override
   Future<List<Never>> detect(PhotoRef photo) async {
     await gate.future;

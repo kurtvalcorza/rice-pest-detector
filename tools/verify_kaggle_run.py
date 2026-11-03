@@ -50,6 +50,8 @@ EXPECTED_OUTPUTS = ("run_summary.json", "val_metrics.json", "val_detections.json
                     "history.jsonl", "model.onnx", "export_record.json", "reload_check.json",
                     "reload_onnx_detections.json", "predictions_val_sample.csv")
 USER_AGENT = "Mozilla/5.0 (compatible; anonymous-visibility-check)"
+# tools/export_onnx.py's parity tolerances (it imports torch, so they are restated; a test keeps them equal).
+RELOAD_TOLERANCES = {"iou_min": 0.99, "score_diff_max": 1e-3}
 
 
 def recompute(detections: dict, manifest: dict) -> dict:
@@ -166,6 +168,8 @@ def verify(run_dir: Path, declaration: dict, notebook: Path | None = None, image
     if not result["recomputed_equal"]:
         diff = [k for k in recomputed if not _equal(recomputed[k], printed[k])]
         failed.append("recomputed numbers differ from the printed ones: " + ", ".join(diff))
+    result["reload_check"] = reload_problems(run_dir, summary, manifest, declaration)
+    failed += ["reload check: " + p for p in result["reload_check"]]
     result["comparisons"] = compare(variant, summary)
     findings += [f"{c['metric']}: {c['kaggle']} vs recorded {c['recorded']} (tolerance {c['tolerance']})"
                  for c in result["comparisons"] if c["verdict"] == "OUTSIDE"]
@@ -176,6 +180,42 @@ def verify(run_dir: Path, declaration: dict, notebook: Path | None = None, image
     result["verdict"] = "FAILED" if failed else "DIFFERS" if findings else "VERIFIED"
     result["findings"] = failed + findings
     return result
+
+
+def reload_problems(run_dir: Path, summary: dict, manifest: dict, declaration: dict) -> list[str]:
+    """What is wrong with the run's own fresh-process reload report; an empty list means it holds up."""
+    try:
+        report = json.loads((run_dir / "reload_check.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return [f"reload_check.json unreadable ({exc})"]
+    keys = ("photos", "files", "detections_compared", "failures", "verdict", "threshold", "min_iou",
+            "max_score_diff", "iou_min", "score_diff_max", "score_tolerance_enforced")
+    if not isinstance(report, dict) or any(k not in report for k in keys):
+        return ["reload_check.json lacks " + ", ".join(k for k in keys if not isinstance(report, dict)
+                                                       or k not in report)]
+    edition = bn.kaggle_edition(declaration["variant"], declaration["model"]["revision"])
+    files = [r["file"] for r in manifest["images"] if r["split"] == "val"][:kd.RELOAD_PHOTOS]
+    problems = []
+    if report["verdict"] != "PASS" or report["failures"]:
+        problems.append(f"verdict {report['verdict']!r} with {len(report['failures'] or [])} failure(s)")
+    if not isinstance(report["detections_compared"], int) or report["detections_compared"] < 1:
+        problems.append(f"{report['detections_compared']!r} detections compared")
+    if report["photos"] != kd.RELOAD_PHOTOS or report["files"] != files:
+        problems.append(f"photos are not the first {kd.RELOAD_PHOTOS} validation records")
+    if report["threshold"] != edition["threshold"]:
+        problems.append(f"threshold {report['threshold']!r}, declared {edition['threshold']!r}")
+    if report["score_tolerance_enforced"] != edition["score_tolerance_enforced"]:
+        problems.append("score tolerance enforcement differs from the edition")
+    if any(report[k] != v for k, v in RELOAD_TOLERANCES.items()):
+        problems.append("tolerances differ from tools/export_onnx.py")
+    elif not isinstance(report["min_iou"], (int, float)) or report["min_iou"] < report["iou_min"]:
+        problems.append(f"min IoU {report['min_iou']!r} below {report['iou_min']}")
+    elif report["score_tolerance_enforced"] and not report["max_score_diff"] <= report["score_diff_max"]:
+        problems.append(f"max score difference {report['max_score_diff']!r} above {report['score_diff_max']}")
+    printed = summary.get("reload_check") or {}
+    if any(printed.get(k) != report[k] for k in ("photos", "detections_compared", "verdict")):
+        problems.append("run_summary.json reload_check differs from reload_check.json")
+    return problems
 
 
 def local_onnx_check(run_dir: Path, manifest: dict, declaration: dict, images: Path | None) -> str:

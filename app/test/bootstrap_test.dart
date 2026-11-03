@@ -12,9 +12,13 @@ import 'package:rice_pest_app/model/model_registry.dart';
 import 'package:rice_pest_app/model/model_store.dart';
 
 class _Probe implements Detector {
-  _Probe(this.modelId, this.inputSize);
+  _Probe(this.modelId, this.inputSize, {this.modelSha256, this.modelRegistryId});
   @override
   final String modelId;
+  @override
+  final String? modelSha256;
+  @override
+  final String? modelRegistryId;
   final int inputSize;
   @override
   Future<List<Never>> detect(PhotoRef photo) async => [];
@@ -27,7 +31,9 @@ void main() {
   final sha = sha256.convert(payload).toString();
   ModelPin pin({String kind = 'published', double? threshold, String label = ''}) =>
       ModelPin('https://example.invalid/m.onnx', sha, payload.length, threshold: threshold, label: label, kind: kind);
-  Future<Detector> load(InstalledModel m) async => _Probe(m.label, m.inputSize);
+  // Builds the detector from the model the way main.dart's loader does: label, SHA-256 and registry id.
+  Future<Detector> load(InstalledModel m) async =>
+      _Probe(m.label, m.inputSize, modelSha256: m.sha256, modelRegistryId: m.registryId);
 
   setUp(() => root = Directory.systemTemp.createTempSync('bootstrap '));
   tearDown(() => root.deleteSync(recursive: true));
@@ -43,11 +49,11 @@ void main() {
 
   /// Places a model in the registry as an import would leave it.
   Future<void> register(String id, List<int> bytes, {int inputSize = 640, double threshold = 0.48,
-      double reviewBelow = 0.64, bool validated = false}) async {
+      double reviewBelow = 0.64, bool validated = false, String? label}) async {
     final dir = Directory('${registry().root.path}$sep$id')..createSync(recursive: true);
     File('${dir.path}${sep}model.onnx').writeAsBytesSync(bytes);
     File('${dir.path}${sep}manifest.json').writeAsStringSync(jsonEncode({
-      'id': id, 'label': id.toUpperCase(), 'architecture': 'x', 'base_model': 'x', 'licence': 'Apache-2.0',
+      'id': id, 'label': label ?? id.toUpperCase(), 'architecture': 'x', 'base_model': 'x', 'licence': 'Apache-2.0',
       'input_size': inputSize, 'threshold': threshold, 'review_below': reviewBelow,
       'sha256': sha256.convert(bytes).toString(), 'bytes': bytes.length, 'outputs': ['logits', 'pred_boxes'],
       'num_classes': 4, 'validation': {'count_accuracy': 0.8, 'species_map50': 0.9, 'wsb30_mae': 9.0},
@@ -133,6 +139,28 @@ void main() {
         demoMeta: demoMeta(), registry: registry(), load: load, defaultSha256: sha);
     expect([c.active!.id, c.active!.isDefault], ['dflt', false],
         reason: 'isDefault uses the shipped default SHA-256; defaultSha256 only steers the fallback here');
+  });
+
+  test('two registry models sharing a label load as detectors that carry their own id and SHA-256', () async {
+    await register('rf-a', [1, 2, 3], label: 'RF-DETR-M');
+    await register('rf-b', [4, 5, 6], label: 'RF-DETR-M');
+    final seen = <List<String?>>[];
+    for (final id in ['rf-a', 'rf-b']) {
+      await registry().setActive(id);
+      final d = (await choose()).detector!;
+      seen.add([d.modelId, d.modelRegistryId, d.modelSha256]);
+    }
+    expect(seen, [
+      ['RF-DETR-M', 'rf-a', sha256.convert([1, 2, 3]).toString()],
+      ['RF-DETR-M', 'rf-b', sha256.convert([4, 5, 6]).toString()],
+    ]);
+  });
+
+  test('the pinned model carries its SHA-256 and no registry id', () async {
+    await install(store('model'));
+    final c = await choose(p: pin(kind: 'demo', threshold: 0.48, label: 'r50-v5-demo'), withRegistry: false);
+    expect([c.detector!.modelId, c.detector!.modelRegistryId, c.detector!.modelSha256], ['r50-v5-demo', null, sha]);
+    expect(c.active!.id, 'r50-v5-demo', reason: 'the id is the label here, so it is not recorded as a registry id');
   });
 
   test('the old pin still wins over a non-active registry model', () async {

@@ -405,6 +405,10 @@ def compare_detections(onnx_dets: list, torch_dets: list, score_tolerance_enforc
         if score > SCORE_DIFF_MAX:
             entry = {"photo": i, "check": "score difference", "detail": f"{score:.2e} > {SCORE_DIFF_MAX}"}
             (failures if score_tolerance_enforced else photos[-1].setdefault("waived", [])).append(entry)
+    if not compared and not failures:
+        # A check that compared nothing has not shown the exported model behaves like the trained one.
+        failures.append({"photo": None, "check": "detections compared",
+                         "detail": f"no detections were compared on {len(photos)} photo(s)"})
     return {"photos": len(photos), "detections_compared": compared, "max_score_diff": max_score,
             "min_iou": min_iou, "iou_min": IOU_MIN, "score_diff_max": SCORE_DIFF_MAX,
             "score_tolerance_enforced": score_tolerance_enforced, "per_photo": photos, "failures": failures,
@@ -414,8 +418,12 @@ def compare_detections(onnx_dets: list, torch_dets: list, score_tolerance_enforc
 def judge_reload(report: dict) -> None:
     if report["failures"]:
         first = report["failures"][0]
-        raise RuntimeError(f"fresh-process ONNX reload check failed: {first['check']} on photo {first['photo']} "
+        where = "" if first["photo"] is None else f" on photo {first['photo']}"
+        raise RuntimeError(f"fresh-process ONNX reload check failed: {first['check']}{where} "
                            f"({first['detail']}); {len(report['failures'])} failure(s) in reload_check.json")
+    if report["verdict"] != "PASS" or not report["detections_compared"]:
+        raise RuntimeError(f"fresh-process ONNX reload check failed: verdict {report['verdict']}, "
+                           f"{report['detections_compared']} detections compared")
 
 
 def stage_reload(ctx: Context) -> None:

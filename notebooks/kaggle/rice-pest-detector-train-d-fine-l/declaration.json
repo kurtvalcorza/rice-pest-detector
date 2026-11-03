@@ -1,7 +1,7 @@
 {
  "variant": "dfine-l-kaggle",
- "notebook_sha256": "1c4a6d4d4eb8a68b161267fc26169ff75013d132190794fa27e38ba435ad5455",
- "cell_sources_sha256": "626180839f368a79d291b49eccd6a65269687e725855ae4727a12dcb6d5f2e61",
+ "notebook_sha256": "eb9e9dea34a82dd9dacacf3cbfb4ab712d68a3d465a05faee6fc92f8dce2746c",
+ "cell_sources_sha256": "284e9d4f3bd185aa4acb72979d6b8e498de0a416ab64e2c267fa6f5006c8c83b",
  "embedded": {
   "src/rice_pest_detector/__init__.py": "ad2a8e84b83c9043fe992aed2daeedf5b7a55c3552d3573fb328c70e15a73f2b",
   "src/rice_pest_detector/dedup.py": "618ae02dbca94cc39bb33f67ef9ba56465d00249b469a9a4a1bae2ec0824f2bb",
@@ -14,7 +14,7 @@
   "src/rice_pest_detector/split.py": "22050bf1536ab2de29cebdd6cb17cae6fe9e3f1c9bc1c80883e2118a4129db48",
   "src/rice_pest_detector/train.py": "f741827839e815bf1847843e1798444ae83740c246f57260f87cf03fbb3e5cd2",
   "tools/export_onnx.py": "e384068f3cc806524b583b7cae305ca9ac5464adbf4d71e9162494b70f99c085",
-  "tools/kaggle_driver.py": "fd3718db66a1faf192ddc8d4b11cebc5bc3810b8bc29e33297227feec0262983",
+  "tools/kaggle_driver.py": "03fc6efc394b6d4d37ff4b3365f39f2df89f2c2615e37ebf59ecb7d79eaf424a",
   "notebooks/kaggle/requirements-kaggle.lock.txt": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
   "data/annotations_test.json": "d602a8d86ff63ef4ece1dfa20d9a7b5307d3b4066b37f8245b84045f54bcce6e",
   "data/annotations_train.json": "3b032f97eeff5dc5d67a055cca4cc4d31594b38f2d50f9b2edd73be00b87431b",

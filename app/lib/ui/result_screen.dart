@@ -41,14 +41,14 @@ class ResultScreen extends StatelessWidget {
         const SizedBox(height: 16),
         Text(l.modelNotice),
         const SizedBox(height: 8),
-        Text(l.modelInfo(entry.modelId, threshold), style: text.bodySmall),
+        Text(l.modelInfo(entry.modelDisplay, threshold), style: text.bodySmall),
         const SizedBox(height: 24),
         FilledButton.icon(
           icon: const Icon(Icons.share),
           label: Text(l.shareCounts),
           onPressed: () {
             final summary = l.shareSummary(formatTakenAt(entry.takenAt), entry.counts['RBB']!,
-                entry.counts['WSB']!, entry.modelId, threshold);
+                entry.counts['WSB']!, entry.modelDisplay, threshold);
             // A count from a non-default model carries the banner wherever it goes.
             services.sharer.share(entry.notValidated ? '${l.notValidatedBanner} $summary' : summary,
                 photoPath: entry.photoPath);

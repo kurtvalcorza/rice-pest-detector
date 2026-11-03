@@ -32,9 +32,13 @@ final df = model('dfine-l', 'D-FINE-L', threshold: 0.50, reviewBelow: 0.68, accu
 
 /// Scores fixed per model so the compare screen shows different counts.
 class ScoreDetector implements Detector {
-  ScoreDetector(this.modelId, this.scores);
+  ScoreDetector(this.modelId, this.scores, {this.modelSha256, this.modelRegistryId});
   @override
   final String modelId;
+  @override
+  final String? modelSha256;
+  @override
+  final String? modelRegistryId;
   final List<(int, double)> scores;
   @override
   Future<List<Detection>> detect(PhotoRef photo) async =>
@@ -110,7 +114,7 @@ class FakeCatalog implements ModelCatalog {
     final scores = detections[m.id];
     if (scores == null) throw StateError('cannot open ${m.id}');
     maxOpen = ++openNow > maxOpen ? openNow : maxOpen;
-    return ScoreDetector(m.label, scores);
+    return ScoreDetector(m.label, scores, modelSha256: m.sha256, modelRegistryId: m.registryId);
   }
 
   @override
@@ -145,7 +149,10 @@ class SlowModelFiles extends FakeModelFiles {
 AppServices servicesWith(InstalledModel? active, ModelCatalog catalog,
         {MemoryHistory? history, RecordingSharer? sharer, ModelFilePicker? files, PhotoRef? photo}) =>
     AppServices(
-      detector: active == null ? null : ScoreDetector(active.label, detections[active.id]!),
+      detector: active == null
+          ? null
+          : ScoreDetector(active.label, detections[active.id]!,
+              modelSha256: active.sha256, modelRegistryId: active.registryId),
       history: history ?? MemoryHistory(),
       photos: FakePhotos(photo ?? const PhotoRef('trap-1.jpg', '/photos/trap-1.jpg')),
       sharer: sharer ?? RecordingSharer(),
@@ -260,6 +267,34 @@ void main() {
     for (final w in treatmentWords) {
       expect(sharer.text!.toLowerCase().contains(w), isFalse, reason: w);
     }
+  });
+
+  testWidgets('two models sharing a label leave history entries and shares that tell them apart', (tester) async {
+    // Same label, different registry id and file. The label alone cannot say which model counted.
+    final twin = InstalledModel(id: 'dfine-l', label: 'RF-DETR-M', sha256: 'a' * 64, inputSize: 640, threshold: 0.48,
+        reviewBelow: 0.63, path: '/models/dfine-l/model.onnx', source: ModelSource.registry);
+    final histories = <MemoryHistory>[];
+    final shares = <String>[];
+    for (final m in [rf, twin]) {
+      final history = MemoryHistory();
+      final sharer = RecordingSharer();
+      await tester.pumpWidget(RicePestApp(
+          key: ValueKey(m.id), services: servicesWith(m, FakeCatalog([r50, rf, twin]), history: history, sharer: sharer)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take a photo of the trap'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Model RF-DETR-M (${m.sha256.substring(0, 12)})'), findsOneWidget);
+      await tester.tap(find.text('Share the counts'));
+      await tester.pumpAndSettle();
+      histories.add(history);
+      shares.add(sharer.text!);
+    }
+    final [a, b] = [for (final h in histories) h.entries.single];
+    expect([a.modelId, b.modelId], ['RF-DETR-M', 'RF-DETR-M'], reason: 'the display label is kept');
+    expect([a.modelSha256, a.modelRegistryId], ['f' * 64, 'rfdetr-m']);
+    expect([b.modelSha256, b.modelRegistryId], ['a' * 64, 'dfine-l']);
+    expect(shares[0], contains('Model RF-DETR-M (ffffffffffff),'));
+    expect(shares[1], contains('Model RF-DETR-M (aaaaaaaaaaaa),'));
   });
 
   testWidgets('a count from the default model has no banner anywhere', (tester) async {

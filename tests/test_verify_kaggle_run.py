@@ -25,6 +25,17 @@ def _declaration() -> dict:
     return json.loads((bn.committed_path(VARIANT).parent / "declaration.json").read_text(encoding="utf-8"))
 
 
+def _reload_report(decl: dict) -> dict:
+    """A passing fresh-process reload report on the first validation photos, as kaggle_driver writes it."""
+    edition = bn.kaggle_edition(VARIANT, decl["model"]["revision"])
+    manifest = json.loads((ROOT / "data" / "split_manifest.json").read_text(encoding="utf-8"))
+    files = [r["file"] for r in manifest["images"] if r["split"] == "val"][:vk.kd.RELOAD_PHOTOS]
+    return {"photos": len(files), "detections_compared": 412, "max_score_diff": 2e-4, "min_iou": 0.9991,
+            **vk.RELOAD_TOLERANCES, "score_tolerance_enforced": edition["score_tolerance_enforced"],
+            "per_photo": [], "failures": [], "verdict": "PASS", "threshold": edition["threshold"],
+            "files": files, "waiver": edition["score_waiver"]}
+
+
 @pytest.fixture(scope="module")
 def perfect():
     """Detections equal to the ground truth, and the numbers the repository's metric code gives for them."""
@@ -47,9 +58,11 @@ def run(tmp_path, perfect, monkeypatch):
     run_dir.mkdir()
     shutil.copy(bn.committed_path(VARIANT), run_dir / "executed.ipynb")
     (run_dir / "val_detections.json").write_text(json.dumps(dets))
-    for name in ("val_metrics.json", "best.json", "history.jsonl", "export_record.json", "reload_check.json",
+    for name in ("val_metrics.json", "best.json", "history.jsonl", "export_record.json",
                  "reload_onnx_detections.json", "predictions_val_sample.csv"):
         (run_dir / name).write_text("{}")
+    reload_check = _reload_report(decl)
+    (run_dir / "reload_check.json").write_text(json.dumps(reload_check))
     (run_dir / "best.pt").write_bytes(b"weights")
     (run_dir / "model.onnx").write_bytes(b"onnx")
     summary = {"schema": 1, "status": "PASS", "variant": VARIANT,
@@ -58,7 +71,9 @@ def run(tmp_path, perfect, monkeypatch):
                "training": {"best_epoch": 2, "best_val_map50_species": numbers["map50_species"]},
                "validation": numbers,
                "artifacts": {"best.pt": {"bytes": 7, "sha256": hashlib.sha256(b"weights").hexdigest()},
-                             "model.onnx": {"bytes": 4, "sha256": hashlib.sha256(b"onnx").hexdigest()}}}
+                             "model.onnx": {"bytes": 4, "sha256": hashlib.sha256(b"onnx").hexdigest()}},
+               "reload_check": {k: reload_check[k] for k in ("photos", "detections_compared", "max_score_diff",
+                                                              "min_iou", "score_tolerance_enforced", "verdict")}}
     (run_dir / "run_summary.json").write_text(json.dumps(summary))
     recorded = {"best_val_map50_species": numbers["map50_species"], "map50_four_class": numbers["map50_four_class"],
                 "count_accuracy": numbers["count_accuracy"], "wsb30_mae": numbers["wsb30_mae"], "onnx_bytes": 4,
@@ -115,6 +130,54 @@ def test_hard_failures(run, change, finding):
     _rewrite(run_dir, change)
     result = vk.verify(run_dir, decl)
     assert result["verdict"] == "FAILED" and any(finding in f for f in result["findings"]), result["findings"]
+
+
+def _rewrite_reload(run_dir: Path, change, summary_too: bool = True):
+    path = run_dir / "reload_check.json"
+    report = json.loads(path.read_text())
+    change(report)
+    path.write_text(json.dumps(report))
+    if summary_too:  # a forger keeps run_summary.json consistent with the edited report
+        _rewrite(run_dir, lambda s: s["reload_check"].update(
+            {k: report.get(k) for k in ("photos", "detections_compared", "verdict")}))
+
+
+@pytest.mark.parametrize("change, finding", [
+    (lambda r: r.update(verdict="FAIL", failures=[{"photo": 0, "check": "box overlap", "detail": "x"}]),
+     "verdict 'FAIL'"),
+    (lambda r: r.update(verdict="FAIL", photos=0, files=[], detections_compared=0), "0 detections compared"),
+    (lambda r: r.update(detections_compared=0), "0 detections compared"),
+    (lambda r: r.update(files=r["files"][1:] + ["other.jpg"]), "first 10 validation records"),
+    (lambda r: r.update(threshold=0.3), "threshold 0.3"),
+    (lambda r: r.update(score_tolerance_enforced=not r["score_tolerance_enforced"]), "enforcement differs"),
+    (lambda r: r.update(iou_min=0.5), "tolerances differ"),
+    (lambda r: r.update(min_iou=0.98), "min IoU 0.98"),
+    (lambda r: r.pop("files"), "lacks files"),
+])
+def test_failed_vacuous_or_mismatched_reload_report_fails(run, change, finding):
+    run_dir, decl, _ = run
+    _rewrite_reload(run_dir, change)
+    result = vk.verify(run_dir, decl)
+    assert result["verdict"] == "FAILED" and any(finding in f for f in result["findings"]), result["findings"]
+
+
+def test_reload_report_inconsistent_with_the_summary_or_unreadable_fails(run):
+    run_dir, decl, _ = run
+    _rewrite_reload(run_dir, lambda r: r.update(detections_compared=7), summary_too=False)
+    result = vk.verify(run_dir, decl)
+    assert result["verdict"] == "FAILED" and any("differs from reload_check.json" in f for f in result["findings"])
+    (run_dir / "reload_check.json").write_text("not json")
+    result = vk.verify(run_dir, decl)
+    assert result["verdict"] == "FAILED" and any("unreadable" in f for f in result["findings"])
+
+
+@pytest.mark.torch
+def test_reload_tolerances_match_the_exporter():
+    pytest.importorskip("torch")
+    pytest.importorskip("onnxruntime")
+    from tools import export_onnx
+
+    assert vk.RELOAD_TOLERANCES == {"iou_min": export_onnx.IOU_MIN, "score_diff_max": export_onnx.SCORE_DIFF_MAX}
 
 
 def test_error_output_and_missing_output_fail(run):

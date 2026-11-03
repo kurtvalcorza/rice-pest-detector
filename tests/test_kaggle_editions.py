@@ -363,6 +363,24 @@ def test_reload_judgement_enforces_the_score_tolerance_only_when_the_variant_say
     assert boxes["verdict"] == "FAIL" and boxes["failures"][0]["check"] == "box overlap"
 
 
+@pytest.mark.torch
+@pytest.mark.onnx
+def test_reload_that_compared_no_detections_fails():
+    pytest.importorskip("onnxruntime")
+    pytest.importorskip("torch")
+    empty = kd.compare_detections([[], []], [[], []], score_tolerance_enforced=True)
+    assert empty["verdict"] == "FAIL" and empty["detections_compared"] == 0
+    assert empty["failures"] == [{"photo": None, "check": "detections compared",
+                                  "detail": "no detections were compared on 2 photo(s)"}]
+    with pytest.raises(RuntimeError, match="detections compared .no detections"):
+        kd.judge_reload(empty)
+    with pytest.raises(RuntimeError, match="verdict FAIL, 0 detections compared"):
+        kd.judge_reload({"failures": [], "verdict": "FAIL", "detections_compared": 0})
+    one = kd.compare_detections([[], [_det()]], [[], [_det()]], score_tolerance_enforced=True)
+    assert one["verdict"] == "PASS" and one["detections_compared"] == 1
+    kd.judge_reload(one)
+
+
 @pytest.fixture
 def tiny_run(tmp_path, monkeypatch):
     torch = pytest.importorskip("torch")

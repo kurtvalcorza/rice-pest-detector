@@ -48,7 +48,7 @@ void main() {
     await counting;
     await Future<void>.delayed(Duration.zero);
     expect(idle, isTrue);
-    expect(tracked.modelId, 'gated');
+    expect([tracked.modelId, tracked.modelSha256, tracked.modelRegistryId], ['gated', 'c' * 64, 'gated-id']);
   });
 }
 
@@ -57,6 +57,10 @@ class _Gated implements Detector {
   final Future<void> gate;
   @override
   String get modelId => 'gated';
+  @override
+  String? get modelSha256 => 'c' * 64;
+  @override
+  String? get modelRegistryId => 'gated-id';
   @override
   Future<List<Never>> detect(PhotoRef photo) async {
     await gate;

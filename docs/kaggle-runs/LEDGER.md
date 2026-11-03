@@ -20,6 +20,8 @@ Append-only record of the Kaggle editions' verification runs and publication rec
 
 **Pillow 13.0.0 (2026-10-23).** From this date the repository's editions lock Pillow 13.0.0 (spec 011), so their source hashes differ from the runs below. The public Kaggle notebooks stay at their verified versions, which lock Pillow 12.3.0. No re-run is needed: under both versions every dataset image gives a byte-identical model input (evaluation record, "Pillow 13.0.0").
 
+**Reload gate (2026-11-01).** From this date `tools/kaggle_driver.py` fails a fresh-process reload check that compared no detections, and `tools/verify_kaggle_run.py` reads `reload_check.json` and fails a run whose report failed, compared no detections, or does not match the declared photos, threshold and tolerances (a 2026-11-01 review found the verifier only checked that the file existed). The editions' source hashes change again; the public Kaggle notebooks stay at their verified versions, which carry the older gate. The rows below were judged before this check existed. The review reports that their reload reports compared a nonzero number of detections; this repository does not hold those run outputs, so that is not re-checked here.
+
 **Final gate (2026-10-22).** Fresh clone of public `main` at `2559a08`, clean Python 3.12 environment from `requirements.txt` with CPU torch: `python -m pytest -q` exit 0, 201 passed, 1 skipped (baseline above: 141 passed, 1 skipped); `tools/build_notebook.py --check-all` 8 of 8; the five Colab notebooks' SHA-256 unchanged from the baseline; leak check 0 hits.
 
 | Date (UTC) | Edition | Kaggle version | Code commit | Source hash | GPU | Time | Verdict | Evidence |

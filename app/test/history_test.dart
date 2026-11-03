@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -46,6 +47,34 @@ void main() {
   test('writes are atomic: no temp file left behind', () async {
     await HistoryStore(dir).add(entry('a', DateTime.utc(2026, 10, 1)));
     expect(dir.listSync().where((e) => e.path.endsWith('.tmp')), isEmpty);
+  });
+
+  test('two models with one label are stored apart: label, registry id and SHA-256 round-trip', () async {
+    final store = HistoryStore(dir);
+    HistoryEntry by(String id, String registryId, String sha) => HistoryEntry(id: id, takenAt: DateTime.utc(2026, 10, 2),
+        photoPath: null, counts: {'RBB': 1, 'WSB': 0}, reasons: [], threshold: 0.48, modelId: 'RF-DETR-M',
+        modelRegistryId: registryId, modelSha256: sha);
+    await store.add(by('x', 'rfdetr-m', '1' * 64));
+    await store.add(by('y', 'rfdetr-m-2', '2' * 64));
+    final got = {for (final e in await HistoryStore(dir).load()) e.id: e};
+    expect([got['x']!.modelId, got['x']!.modelRegistryId, got['x']!.modelSha256], ['RF-DETR-M', 'rfdetr-m', '1' * 64]);
+    expect([got['y']!.modelId, got['y']!.modelRegistryId, got['y']!.modelSha256], ['RF-DETR-M', 'rfdetr-m-2', '2' * 64]);
+    expect([got['x']!.modelDisplay, got['y']!.modelDisplay], ['RF-DETR-M (111111111111)', 'RF-DETR-M (222222222222)']);
+  });
+
+  test('a history file from before model identity was recorded loads with the id and hash unknown', () async {
+    File('${dir.path}${Platform.pathSeparator}history.json').writeAsStringSync(jsonEncode([
+      {'id': 'o', 'takenAt': '2026-10-01T00:00:00.000Z', 'photoPath': null, 'counts': {'RBB': 2, 'WSB': 1},
+        'reasons': [], 'threshold': 0.48, 'modelId': 'r50-v5-demo', 'notValidated': true},
+    ]));
+    final store = HistoryStore(dir);
+    final old = (await store.load()).single;
+    expect([old.modelId, old.modelSha256, old.modelRegistryId, old.modelDisplay],
+        ['r50-v5-demo', null, null, 'r50-v5-demo']);
+    expect(dir.listSync().map((e) => e.uri.pathSegments.last), isNot(contains('history.json.corrupt')));
+    await store.add(entry('n', DateTime.utc(2026, 10, 3))); // rewriting keeps the old entry as it was
+    final again = (await HistoryStore(dir).load()).last;
+    expect([again.id, again.modelId, again.modelSha256, again.modelRegistryId], ['o', 'r50-v5-demo', null, null]);
   });
 
   test('entries record whether the model was not validated; old entries read as validated-default', () async {

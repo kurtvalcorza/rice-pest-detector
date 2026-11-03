@@ -104,7 +104,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final entry = HistoryEntry(
           id: s.newId(), takenAt: s.now(), photoPath: photo.path, counts: counted.counts,
           reasons: [for (final r in counted.reasons) r.name], threshold: counted.threshold,
-          modelId: detector.modelId, notValidated: s.notValidated);
+          modelId: detector.modelId, modelSha256: detector.modelSha256, modelRegistryId: detector.modelRegistryId,
+          notValidated: s.notValidated);
       await s.history.add(entry);
       kept = true;
       if (!mounted) return;

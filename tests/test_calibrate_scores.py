@@ -101,3 +101,71 @@ def test_onnx_input_size_reads_the_exported_side_and_defaults_to_640():
     assert onnx_input_size(_Session([1, 3, 576, 576])) == 576
     assert onnx_input_size(_Session([1, 3, 640, 640])) == 640
     assert onnx_input_size(_Session(["batch", 3, "h", "w"])) == 640
+
+
+# ------------------------------------------------------------------ detection cache identity
+
+
+def _cache_run(tmp_path, monkeypatch, records, cache_body):
+    """main() on a stub model; returns True when it ran the model (the cache was not reused)."""
+    import json
+
+    from tools import calibrate_scores as cs
+
+    onnx = tmp_path / "m.onnx"
+    onnx.write_bytes(b"model bytes")
+    manifest = tmp_path / "split_manifest.json"
+    manifest.write_text(json.dumps({"images": records}))
+    cache = tmp_path / "val_dets.json"
+    if cache_body is not None:
+        cache.write_text(json.dumps(cache_body(cs, records, onnx)))
+    ran = []
+    monkeypatch.setattr(cs, "_run_onnx", lambda *a: ran.append(1) or [])
+    monkeypatch.setattr(cs, "analyse", lambda images: {"platt": {}, "calibrated_threshold": 0, "mae_threshold": 0,
+                                                       "ece": {}})
+    cs.main(["--onnx", str(onnx), "--dataset-root", str(tmp_path), "--manifest", str(manifest),
+             "--out", str(tmp_path / "out.json"), "--cache", str(cache)])
+    return bool(ran), json.loads(cache.read_text())
+
+
+def _records(family="f1", box_class=0):
+    return [{"file": "a.jpg", "split": "val", "family": family, "group": "g1", "width": 10, "height": 10,
+             "boxes": [[box_class, 0.5, 0.5, 0.2, 0.2]]},
+            {"file": "b.jpg", "split": "train", "family": "f2", "group": "g2", "width": 10, "height": 10,
+             "boxes": []}]
+
+
+def _sha(onnx):
+    import hashlib
+
+    return hashlib.sha256(onnx.read_bytes()).hexdigest()
+
+
+def test_cache_is_reused_only_for_the_same_model_floor_labeller_and_validation_records(tmp_path, monkeypatch):
+    current = lambda cs, recs, onnx: {**cs.cache_identity(_sha(onnx), [r for r in recs if r["split"] == "val"]),
+                                      "images": []}
+    ran, _ = _cache_run(tmp_path, monkeypatch, _records(), current)
+    assert not ran
+
+
+@pytest.mark.parametrize("records, change, stale", [
+    (_records(family="f9"), None, "val_records_sha256"),        # family / membership changed after caching
+    (_records(box_class=2), None, "val_records_sha256"),        # reference boxes changed (RBB -> WSB)
+    (_records(), {"labeller_version": 0}, "labeller_version"),
+    (_records(), {"floor": 0.05}, "floor"),
+    (_records(), {"onnx_sha256": "0" * 64}, "onnx_sha256"),
+])
+def test_cache_is_refused_when_anything_it_depends_on_changed(tmp_path, monkeypatch, capsys, records, change, stale):
+    def made_before(cs, recs, onnx):
+        body = {**cs.cache_identity(_sha(onnx), [r for r in _records() if r["split"] == "val"]), "images": []}
+        return {**body, **(change or {})}
+
+    ran, rewritten = _cache_run(tmp_path, monkeypatch, records, made_before)
+    assert ran and stale in capsys.readouterr().out
+    assert rewritten["val_records_sha256"] != "" and rewritten["labeller_version"] == 1
+
+
+def test_a_cache_written_before_the_identity_existed_is_refused(tmp_path, monkeypatch):
+    legacy = lambda cs, recs, onnx: {"onnx_sha256": _sha(onnx), "floor": cs.FLOOR, "images": []}
+    ran, rewritten = _cache_run(tmp_path, monkeypatch, _records(), legacy)
+    assert ran and set(rewritten) >= {"labeller_version", "val_records_sha256"}

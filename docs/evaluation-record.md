@@ -369,7 +369,7 @@ Executed with the Colab CLI on a Colab **T4**, 40 epochs, with the committed not
 | WSB 30+ MAE (23 images) / RBB 30+ MAE (17) | 4.87 / 3.65 | 4.57 / 5.00 | 5.26 / 3.47 |
 | Exact count, RBB / WSB | 84% / 74% | 84% / 68% | 84% / 71% |
 
-All three meet the three model gates on test. The test results agree with the validation decision: mAP is level (0.943–0.946), and r50-v5 counts best. RF-DETR-M, the best counter on validation (0.846), is the weakest on test (0.806), a reminder that differences of a few points between these models are within run-to-run and split-to-split variation.
+All three meet the three model gates on test. The test results agree with the validation decision: mAP is level (0.943–0.946), and r50-v5 counts best. RF-DETR-M, the best counter on validation (0.846), is the weakest on test (0.806), a reminder that differences of a few points between these models may be sensitive to the training run and the split, a variance that has not been measured.
 
 **Status after wave 2.** r50-v5 meets all three model quality gates on the held-out test split. The weights are published on Kaggle as a teaching demo (owner, 2026-10-18), so that gate is met. The release gates that remain (field validation on phone photos, a wording review of the English text and its Filipino draft, a data-protection review and a phone latency target) are still open, so the model stays a demo model. Every model carries a "Not validated" tag in the app (owner decision): none has been validated in the field or by experts.
 
@@ -453,6 +453,8 @@ The validation photos came from the pinned Zenodo archive (bytes, MD5 and SHA-25
 read. The numbers are in [`kaggle-runs/dfine-l/onnx-v4-app-runtime.json`](kaggle-runs/dfine-l/onnx-v4-app-runtime.json).
 
 **Open observation (not investigated, owner 2026-10-25).** In the reference row, r50-v5 counted 212 of 253 validation photos within tolerance at 0.48 (0.838) on both runtimes, against 211 of 253 (0.834) recorded for r50-v5 in its manifest and card. The one-photo difference was not traced; the recorded 0.834 is unchanged.
+
+**Resolved (2026-11-01): the two figures measure different things.** 212 of 253 (0.838) is one fixed threshold, 0.48, applied to every validation photo. 211 of 253 (0.834) is out-of-fold: the threshold is re-chosen inside each of the 5 family folds (0.48 in four, 0.50 in one) and applied to the held-out fold. Recounting the saved validation detections (`runs/run-r50v5/val_dets_onnx.json`, the cache `calibration_val.json` was computed from) gives 212 at the fixed 0.48, and that report's out-of-fold count is 211. So this is not a runtime difference, and the recorded out-of-fold 0.834 is unchanged. The runtime reference row is a fixed-threshold count and should be compared with fixed-threshold figures only.
 
 **Guard.** `tools/app_runtime.py check` lists anything the app's runtime would refuse (today: float64 tensors), and
 `tests/test_app_runtime.py` ties that runtime version to the `flutter_onnxruntime` version in `app/pubspec.lock`, so

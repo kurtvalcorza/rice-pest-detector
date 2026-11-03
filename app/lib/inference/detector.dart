@@ -13,8 +13,15 @@ class PhotoRef {
 }
 
 abstract class Detector {
-  /// Identifies the model behind every count: shown on results and stored in history.
+  /// The model's display label, shown on results and stored in history. Two models can share a label,
+  /// so it does not identify the model file on its own: [modelSha256] does.
   String get modelId;
+
+  /// SHA-256 of the model file behind every count; null when there is no model file (a replay).
+  String? get modelSha256;
+
+  /// The model's registry id (its folder under `models/`); null for a model that is not in the registry.
+  String? get modelRegistryId;
 
   /// All detections the model reports, unthresholded except for the model's own floor,
   /// sorted by score. Counting applies the threshold.
@@ -31,6 +38,12 @@ class TrackedDetector implements Detector {
 
   @override
   String get modelId => inner.modelId;
+
+  @override
+  String? get modelSha256 => inner.modelSha256;
+
+  @override
+  String? get modelRegistryId => inner.modelRegistryId;
 
   @override
   Future<List<Detection>> detect(PhotoRef photo) async {
@@ -69,6 +82,13 @@ class FakeDetector implements Detector {
 
   @override
   final String modelId;
+
+  /// A replay of recorded outputs, not a model file.
+  @override
+  String? get modelSha256 => null;
+  @override
+  String? get modelRegistryId => null;
+
   final Map<String, List<Detection>> _byFile;
 
   @override

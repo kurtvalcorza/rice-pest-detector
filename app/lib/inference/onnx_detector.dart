@@ -13,7 +13,7 @@ import 'postprocess.dart';
 import 'preprocess.dart';
 
 class OnnxDetector implements Detector {
-  OnnxDetector._(this.modelId, this._session, this.inputSize);
+  OnnxDetector._(this.modelId, this._session, this.inputSize, {this.modelSha256, this.modelRegistryId});
 
   /// Detections below this are dropped before counting; counting applies the real threshold.
   /// Keep it below every counting threshold (demo thresholds so far: 0.04 for r50-1, 0.48 for r50-v5;
@@ -25,11 +25,17 @@ class OnnxDetector implements Detector {
       OnnxDetector._(modelId, await OnnxRuntime().createSessionFromAsset(assetKey), inputSize);
 
   static Future<OnnxDetector> fromFile(String path,
-          {required String modelId, int inputSize = contract.inputSize}) async =>
-      OnnxDetector._(modelId, await OnnxRuntime().createSession(path), inputSize);
+          {required String modelId, String? modelSha256, String? modelRegistryId,
+          int inputSize = contract.inputSize}) async =>
+      OnnxDetector._(modelId, await OnnxRuntime().createSession(path), inputSize,
+          modelSha256: modelSha256, modelRegistryId: modelRegistryId);
 
   @override
   final String modelId;
+  @override
+  final String? modelSha256;
+  @override
+  final String? modelRegistryId;
   final OrtSession _session;
 
   /// Square input side the model was exported at (its manifest's input_size; 640 by contract default).

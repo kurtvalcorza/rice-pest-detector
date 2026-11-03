@@ -5,3 +5,4 @@ app/test/fixtures/*.json text eol=lf
 notebooks/kaggle/*.txt text eol=lf
 notebooks/kaggle/*.in text eol=lf
 notebooks/kaggle/*/*.json text eol=lf
+*.patch text eol=lf

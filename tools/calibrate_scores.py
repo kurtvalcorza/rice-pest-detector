@@ -28,6 +28,7 @@ from rice_pest_detector.metrics import _box_iou, count_accuracy, count_errors, s
 from tools.choose_demo_threshold import GRID, choose_threshold, onnx_input_size
 
 FLOOR = 0.01  # detections below this raw score are dropped before fitting
+LABELLER_VERSION = 1  # bump whenever _run_onnx or label_detections changes what a cached image holds
 EPS = 1e-6
 K = 5
 
@@ -210,24 +211,40 @@ def _run_onnx(onnx_path: Path, records: list[dict], root: Path) -> list[dict]:
     return images
 
 
+def cache_identity(onnx_sha256: str, records: list[dict]) -> dict:
+    """Everything a cache of labelled validation detections depends on, not just the model: the score floor,
+    the labelling code, and every validation record (files, families, groups, boxes) in order."""
+    records_sha256 = hashlib.sha256(json.dumps(records, sort_keys=True).encode("utf-8")).hexdigest()
+    return {"onnx_sha256": onnx_sha256, "floor": FLOOR, "labeller_version": LABELLER_VERSION,
+            "val_records_sha256": records_sha256}
+
+
+def stale_cache_keys(cached: dict, identity: dict) -> list[str]:
+    """The identity fields a cache no longer matches (empty: it describes the current validation set)."""
+    return [k for k in identity if cached.get(k) != identity[k]]
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--onnx", type=Path, required=True)
     ap.add_argument("--dataset-root", type=Path, required=True, help="folder holding datasets/...")
     ap.add_argument("--manifest", type=Path, default=Path("data/split_manifest.json"))
     ap.add_argument("--out", type=Path, required=True)
-    ap.add_argument("--cache", type=Path, help="labelled validation detections; reused when the ONNX sha matches")
+    ap.add_argument("--cache", type=Path, help="labelled validation detections; reused only when cache_identity() matches")
     args = ap.parse_args(argv)
     records = [r for r in json.loads(args.manifest.read_text())["images"] if r["split"] == "val"]
     sha = hashlib.sha256(args.onnx.read_bytes()).hexdigest()
+    identity = cache_identity(sha, records)
     cached = json.loads(args.cache.read_text()) if args.cache and args.cache.exists() else None
-    if cached and cached["onnx_sha256"] == sha and cached["floor"] == FLOOR:
+    stale = stale_cache_keys(cached, identity) if cached else []
+    if cached and not stale:
         images = cached["images"]
     else:
+        if stale:
+            print(f"cache not reused, it no longer matches: {', '.join(stale)}", flush=True)
         images = _run_onnx(args.onnx, records, args.dataset_root)
         if args.cache:
-            args.cache.write_text(json.dumps({"onnx_sha256": sha, "floor": FLOOR, "images": images}),
-                                  encoding="utf-8", newline="\n")
+            args.cache.write_text(json.dumps({**identity, "images": images}), encoding="utf-8", newline="\n")
     report = {"split": "val", "images": len(records), "onnx": str(args.onnx),
               "onnx_sha256": sha, "floor": FLOOR, **analyse(images)}
     args.out.parent.mkdir(parents=True, exist_ok=True)

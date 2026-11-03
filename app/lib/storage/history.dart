@@ -6,7 +6,8 @@ import 'dart:io';
 
 class HistoryEntry {
   HistoryEntry({required this.id, required this.takenAt, required this.photoPath, required this.counts,
-      required this.reasons, required this.threshold, required this.modelId, this.notValidated = false});
+      required this.reasons, required this.threshold, required this.modelId, this.modelSha256,
+      this.modelRegistryId, this.notValidated = false});
 
   factory HistoryEntry.fromJson(Map<String, dynamic> j) => HistoryEntry(
         id: j['id'] as String,
@@ -16,6 +17,8 @@ class HistoryEntry {
         reasons: (j['reasons'] as List).cast<String>(),
         threshold: (j['threshold'] as num).toDouble(),
         modelId: j['modelId'] as String,
+        modelSha256: j['modelSha256'] as String?,
+        modelRegistryId: j['modelRegistryId'] as String?,
         notValidated: j['notValidated'] as bool? ?? false,
       );
 
@@ -25,7 +28,21 @@ class HistoryEntry {
   final Map<String, int> counts;
   final List<String> reasons;
   final double threshold;
+
+  /// The model's display label (the JSON key predates [modelSha256] and keeps its name).
   final String modelId;
+
+  /// SHA-256 of the model file that made the count, and its registry id. Null in entries written before
+  /// they were recorded (and, for the registry id, for models outside the registry): unknown, not guessed.
+  final String? modelSha256;
+  final String? modelRegistryId;
+
+  /// The label, with the first 12 hex digits of [modelSha256] when known, so two models that share a
+  /// label can be told apart on the result and in what is shared.
+  String get modelDisplay {
+    final sha = modelSha256;
+    return sha == null || sha.length < 12 ? modelId : '$modelId (${sha.substring(0, 12)})';
+  }
 
   /// Counted with a model that is not the default: the result and anything shared carry the
   /// "Demo model, not validated" banner. Entries written before this field read as false.
@@ -34,6 +51,7 @@ class HistoryEntry {
   Map<String, dynamic> toJson() => {
         'id': id, 'takenAt': takenAt.toUtc().toIso8601String(), 'photoPath': photoPath,
         'counts': counts, 'reasons': reasons, 'threshold': threshold, 'modelId': modelId,
+        'modelSha256': modelSha256, 'modelRegistryId': modelRegistryId,
         'notValidated': notValidated,
       };
 }
