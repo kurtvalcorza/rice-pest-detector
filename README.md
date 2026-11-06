@@ -564,7 +564,7 @@ The debug APK is about 184 MB, mostly ONNX Runtime's native libraries for every 
 
 | Suite | Command | Count | Covers |
 | :-- | :-- | --: | :-- |
-| Python | `.\.venv\Scripts\python -m pytest` | 289 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
+| Python | `.\.venv\Scripts\python -m pytest` | 293 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
 | Dart (PC) | `flutter test` in `app/` | 168 | contract parity, decoding, counting, history, model store and registry, model import and download checks, localisation, screens (including the no-model state, settings and compare) |
 | Dart (device) | `flutter drive … --no-enable-impeller` | 1 | the real app starting with no model installed (note: `flutter drive` uninstalls the app afterwards, which also removes a demo model) |
 
