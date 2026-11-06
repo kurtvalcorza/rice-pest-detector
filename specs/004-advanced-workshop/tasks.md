@@ -142,6 +142,7 @@ description: "Task list for the advanced workshop track"
 - **Setup (Phase 1)** → **Foundational (Phase 2)** → user stories. T001 blocks T006.
 - **US1 (Phase 3)** first: US2 uses its verifier; US3 uses both.
 - **US4 (Phase 6)** can be written alongside US2 and US3, but T033 lands only when all three module pages exist.
+- **Owner exception (2026-11-03).** The core course page already links the advanced track (Module 6 ready, Modules 7 and 8 "will follow"), ahead of this gate. The owner keeps the link rather than pulling it from the live course; T033's final form still lands when all three pages exist.
 - **Polish (Phase 7)** last; T038 needs every page finished.
 
 ### Within each story

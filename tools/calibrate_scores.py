@@ -90,6 +90,20 @@ def expected_calibration_error(probs, labels, bins: int = 10) -> float:
     return float(total / len(probs))
 
 
+def require_upright(img, rec: dict) -> None:
+    """Refuse a validation photo whose boxes would not match the pixels the model sees.
+
+    The manifest's boxes and size are in the stored image's frame, while ``preprocess`` turns the pixels upright
+    (EXIF). The two agree only when the photo carries no rotation, which holds for all 5,453 images (evaluation
+    record, "EXIF"); a rotated photo added later must fail here rather than be scored against turned boxes.
+    Training and the notebooks are not guarded: their committed sources are frozen (see the evaluation record).
+    """
+    orientation = img.getexif().get(0x0112, 1)  # EXIF Orientation; 1 = stored upright
+    if orientation != 1 or img.size != (rec["width"], rec["height"]):
+        raise ValueError(f"{rec['file']}: EXIF orientation {orientation}, size {img.size[0]}x{img.size[1]}, manifest "
+                         f"{rec['width']}x{rec['height']}: its boxes would not match the upright pixels")
+
+
 def label_detections(gt: list[tuple[int, list[float]]], dets: list[dict], iou: float = 0.5) -> list[int]:
     """1 if a detection claims an unclaimed same-species truth box at IoU >= iou, else 0."""
     labels = [0] * len(dets)
@@ -196,6 +210,7 @@ def _run_onnx(onnx_path: Path, records: list[dict], root: Path) -> list[dict]:
     images = []
     for i, rec in enumerate(records, 1):
         with Image.open(root / rec["archive_member"]) as img:
+            require_upright(img, rec)
             logits, boxes = sess.run(["logits", "pred_boxes"], {"pixel_values": preprocess(img, size)})
         found = postprocess(logits, boxes, rec["width"], rec["height"], threshold=FLOOR)
         w, h = rec["width"], rec["height"]

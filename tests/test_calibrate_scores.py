@@ -8,6 +8,7 @@ from tools.calibrate_scores import (
     fit_platt,
     label_detections,
     raw_threshold,
+    require_upright,
 )
 
 
@@ -169,3 +170,33 @@ def test_a_cache_written_before_the_identity_existed_is_refused(tmp_path, monkey
     legacy = lambda cs, recs, onnx: {"onnx_sha256": _sha(onnx), "floor": cs.FLOOR, "images": []}
     ran, rewritten = _cache_run(tmp_path, monkeypatch, _records(), legacy)
     assert ran and set(rewritten) >= {"labeller_version", "val_records_sha256"}
+
+
+def _photo(tmp_path, size=(64, 48), orientation=None):
+    from PIL import Image
+
+    exif = Image.Exif()
+    if orientation is not None:
+        exif[0x0112] = orientation
+    Image.new("RGB", size).save(tmp_path / "p.jpg", exif=exif)
+    return Image.open(tmp_path / "p.jpg")
+
+
+REC = {"file": "p.jpg", "width": 64, "height": 48}
+
+
+@pytest.mark.parametrize("orientation", [None, 1])
+def test_an_upright_photo_of_the_recorded_size_passes(tmp_path, orientation):
+    with _photo(tmp_path, orientation=orientation) as img:
+        require_upright(img, REC)
+
+
+@pytest.mark.parametrize("orientation", [2, 3, 4, 5, 6, 7, 8])
+def test_any_exif_rotation_or_flip_is_refused(tmp_path, orientation):
+    with _photo(tmp_path, orientation=orientation) as img, pytest.raises(ValueError, match=f"orientation {orientation}"):
+        require_upright(img, REC)
+
+
+def test_a_size_that_differs_from_the_manifest_is_refused(tmp_path):
+    with _photo(tmp_path, size=(48, 64)) as img, pytest.raises(ValueError, match="size 48x64, manifest 64x48"):
+        require_upright(img, REC)

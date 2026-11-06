@@ -97,7 +97,7 @@ def test_matching_run_is_verified(run):
     assert result["artifacts"] == {"best.pt": "match", "model.onnx": "match"}
     assert result["errors_in_executed_notebook"] == 0 and result["gpu"] == "Tesla T4"
     assert result["local_onnx_check"] == "SKIPPED (no images)"
-    assert result["verdict"] == "VERIFIED", result["findings"]
+    assert result["verdict"] == "VERIFIED-REMOTE", result["findings"]  # no --images: no local ONNX check
     assert {c["verdict"] for c in result["comparisons"]} == {"WITHIN", "RECORDED"}
 
 
@@ -116,7 +116,13 @@ def test_kaggle_metadata_rewrites_do_not_change_the_source_hash(run):
     nb["metadata"]["kaggle"]["isGpuEnabled"] = True
     nb["cells"][2]["outputs"] = [{"output_type": "stream", "name": "stdout", "text": ["ok\n"]}]
     (run_dir / "executed.ipynb").write_text(json.dumps(nb), encoding="utf-8")
-    assert vk.verify(run_dir, decl)["verdict"] == "VERIFIED"
+    assert vk.verify(run_dir, decl)["verdict"] == "VERIFIED-REMOTE"
+
+
+def test_a_run_whose_local_onnx_check_passed_is_verified_without_qualification(run, monkeypatch):
+    run_dir, decl, _ = run
+    monkeypatch.setattr(vk, "local_onnx_check", lambda *a: "PASS")
+    assert vk.verify(run_dir, decl, images=run_dir)["verdict"] == "VERIFIED"
 
 
 @pytest.mark.parametrize("change, finding", [
@@ -224,11 +230,11 @@ def test_cli_writes_verification_and_appends_one_ledger_row(run, tmp_path):
     decl_path = bn.committed_path(VARIANT).parent / "declaration.json"
     code = vk.main([str(run_dir), "--declaration", str(decl_path), "--ledger", str(ledger), "--out", str(out),
                     "--kernel-version", "3", "--code-commit", "abc1234def"])
-    assert code == 0 and json.loads(out.read_text())["verdict"] == "VERIFIED"
+    assert code == 0 and json.loads(out.read_text())["verdict"] == "VERIFIED-REMOTE"
     after = ledger.read_text(encoding="utf-8")
     assert after.startswith(before) and len(after.splitlines()) == len(before.splitlines()) + 1
     row = vk.ledger_rows(after)[-1]
-    assert row["verdict"] == "VERIFIED" and row["version"] == "3" and row["commit"] == "abc1234"
+    assert row["verdict"] == "VERIFIED-REMOTE" and row["version"] == "3" and row["commit"] == "abc1234"
     assert row["source"] == decl["cell_sources_sha256"][:12] + "…" and row["time"] == "6.4 h"
 
 
@@ -253,6 +259,13 @@ def test_status_follows_the_source_hash():
     assert vk.edition_status(LEDGER + rows, decl)["state"] == "verified"
     rows += f"| 2026-10-23 | {VARIANT} | 2 | b | {current} | - | - | PUBLIC | r50v5/receipt.json |\n"
     assert vk.edition_status(LEDGER + rows, decl)["state"] == "public"  # the receipt row carries its run's source
+
+
+def test_a_remote_only_verification_still_counts_as_verified():
+    decl = _declaration()
+    current = decl["cell_sources_sha256"][:12] + "…"
+    rows = f"| 2026-11-03 | {VARIANT} | 2 | b | {current} | Tesla T4 | 6.4 h | VERIFIED-REMOTE | r50v5/v.json |\n"
+    assert vk.edition_status(LEDGER + rows, decl)["state"] == "verified"
 
 
 def test_metadata_only_change_keeps_the_edition_verified(tmp_path, monkeypatch):

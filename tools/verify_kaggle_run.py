@@ -177,9 +177,16 @@ def verify(run_dir: Path, declaration: dict, notebook: Path | None = None, image
     if result["local_onnx_check"] == "FAIL":
         failed.append("local ONNX check failed")
     result["training_seconds"] = summary.get("durations_s", {}).get("total")
-    result["verdict"] = "FAILED" if failed else "DIFFERS" if findings else "VERIFIED"
+    remote_only = result["local_onnx_check"].startswith("SKIPPED")
+    result["verdict"] = ("FAILED" if failed else "DIFFERS" if findings
+                         else "VERIFIED-REMOTE" if remote_only else "VERIFIED")
     result["findings"] = failed + findings
     return result
+
+
+# VERIFIED-REMOTE: every check passed but the local ONNX check was skipped (no --images), so parity rests on the
+# run's own reload report alone. It counts as verified; the ledger records which kind of verification it was.
+VERIFIED_VERDICTS = ("VERIFIED", "VERIFIED-REMOTE")
 
 
 def reload_problems(run_dir: Path, summary: dict, manifest: dict, declaration: dict) -> list[str]:
@@ -261,7 +268,8 @@ def edition_status(ledger_text: str, declaration: dict) -> dict:
     rows = [r for r in ledger_rows(ledger_text) if r["edition"] == declaration["variant"]]
     current = [r for r in rows if r["source"].rstrip("…").startswith(source) or source.startswith(r["source"].rstrip("…"))]
     verdicts = [r["verdict"] for r in current]
-    state = "public" if "PUBLIC" in verdicts else "verified" if "VERIFIED" in verdicts else "candidate"
+    state = ("public" if "PUBLIC" in verdicts else "verified" if any(v in VERIFIED_VERDICTS for v in verdicts)
+             else "candidate")
     return {"state": state, "current": current, "history": [r for r in rows if r not in current]}
 
 
@@ -293,7 +301,7 @@ def receipt(ref: str, ledger: Path, authorized: str, public_version: int) -> dic
     if variant is None:
         raise ValueError(f"{ref} is not a Kaggle edition of this project")
     rows = ledger_rows(Path(ledger).read_text(encoding="utf-8"))
-    verified = [r for r in rows if r["edition"] == variant and r["verdict"] == "VERIFIED"]
+    verified = [r for r in rows if r["edition"] == variant and r["verdict"] in VERIFIED_VERDICTS]
     if not verified:
         raise RuntimeError(f"{variant} has no VERIFIED run in the ledger; no receipt is written before verification")
     page_status, _ = http_get(f"https://www.kaggle.com/code/{owner}/{slug}")
@@ -304,7 +312,7 @@ def receipt(ref: str, ledger: Path, authorized: str, public_version: int) -> dic
         is_private = None
     return {"ref": ref, "authorized_by": f"owner, {authorized} (route: Share → Public in the Kaggle interface)",
             "public_version": public_version,
-            "verified_run": f"docs/kaggle-runs/{verified[-1]['evidence']} (VERIFIED)",
+            "verified_run": f"docs/kaggle-runs/{verified[-1]['evidence']} ({verified[-1]['verdict']})",
             "anonymous_page_http": page_status, "anonymous_api_http": api_status,
             "anonymous_api_is_private": is_private, "new_version_created": False,
             "metadata_updated": ("generator variant public=True; kernel-metadata.json is_private false"
@@ -328,7 +336,7 @@ def main(argv: list[str] | None = None) -> int:
         ok = rec["anonymous_page_http"] == 200 and rec["anonymous_api_http"] == 200 and rec["anonymous_api_is_private"] is False
         variant = next(v for v, k in bn.KAGGLE_VARIANTS.items() if k["slug"] == args.ref.split("/", 1)[1])
         verified = [r for r in ledger_rows(args.ledger.read_text(encoding="utf-8"))
-                    if r["edition"] == variant and r["verdict"] == "VERIFIED"][-1]  # the run the receipt rests on
+                    if r["edition"] == variant and r["verdict"] in VERIFIED_VERDICTS][-1]  # the run the receipt rests on
         append_ledger(args.ledger, {"date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d"),
                                     "edition": variant, "version": args.public_version, "commit": verified["commit"],
                                     "source": verified["source"], "gpu": "-", "time": "-",
@@ -355,7 +363,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.ledger:
         append_ledger(args.ledger, _row(result, f"{short}/{out.name}"))
     print(json.dumps(result, indent=1))
-    return 0 if result["verdict"] == "VERIFIED" else 1
+    return 0 if result["verdict"] in VERIFIED_VERDICTS else 1
 
 
 if __name__ == "__main__":
