@@ -12,16 +12,14 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 > licences (see [docs/model-card.md](docs/model-card.md) and [data/README.md](data/README.md)) and uses compute on your own Colab or Kaggle account.
 > The Android app's counts are experimental estimates: they are not agronomic advice, must not be the
 > basis for any pest-management or spraying decision, and should be reviewed by an agricultural
-> technician. Installing the app or a model on a device is at your own risk.
+> technician. The app is **not made for farmers** and has not been validated in the field.
+> Installing the app or a model on a device is at your own risk.
+> This is not an official tool, product or service of any organisation or government agency, and
+> no organisation endorses it.
 > Results here are tutorial evidence, not benchmarks. Everything is provided "as is", without
 > warranty of any kind. To the maximum extent permitted by law, the maintainers accept no liability for its use.
->
-> This is a teaching and demonstration project, made for the *Coding with AI Agents* workshop. It is
-> not an official tool, product or service of any organisation or government agency, and no
-> organisation endorses it. The Android app demonstrates running a model on a phone: it is **not made
-> for farmers** and has not been validated in the field.
 
-**Who it is for.** Participants in the *Coding with AI Agents* workshop, and anyone learning to build software with AI coding agents. The repository is a worked example of the whole path, from a written spec to a tested, documented result:
+**Who it is for.** Participants in the *Coding with AI Agents* workshop, and anyone learning to build software with AI coding agents. This is a teaching and demonstration project, and its Android app demonstrates running a model on a phone. The repository is a worked example of the whole path, from a written spec to a tested, documented result:
 
 - **Specs.** [Spec Kit](https://github.com/github/spec-kit) specs for the project: a [constitution](.specify/memory/constitution.md) and one folder per feature in [specs/](specs/): the model (001), the phone app (002) and a planned desktop app (003), each with its spec, plan and task list. A self-paced exercise walks you through Spec Kit's [quickstart](https://github.github.io/spec-kit/quickstart.html) on the desktop app ([docs/workshop-setup.md](docs/workshop-setup.md), Module 3, "Going further").
 - **Agent configuration.** The `AGENTS.md` briefing, a skill, a read-only sub-agent and a Stop hook that sends the agent back once when the app's tests fail (`.claude/`).
