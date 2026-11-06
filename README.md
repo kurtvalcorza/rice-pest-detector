@@ -5,7 +5,8 @@
 
 A CPU-friendly object detector, in development, for counting **rice black bug** (*Scotinophara coarctata*) and **white stemborer** (*Scirpophaga innotata*) in light-trap photos. It is trained on an open light-trap image dataset (Deleña et al.), and it comes with a demonstration Android app that runs the model on the phone. The trained weights are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector) as ONNX files, for teaching and demonstration only.
 
-> **⚠️ Notice.** For research, training and evaluation only. Not validated for production,
+> [!WARNING]
+> For research, training and evaluation only. Not validated for production,
 > clinical, diagnostic or safety-critical use, and not a field pest-surveillance or pest-alert system.
 > Running the training notebook downloads third-party model weights and datasets under their own
 > licences (see [docs/model-card.md](docs/model-card.md) and [data/README.md](data/README.md)) and uses compute on your own Colab or Kaggle account.
@@ -27,9 +28,6 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 - **A model, trained and judged by rules fixed in advance.** Colab and Kaggle training notebooks, evaluation, calibration and ONNX export, with every result and its provenance in [docs/evaluation-record.md](docs/evaluation-record.md).
 - **A demonstration app.** A Flutter Android app (`app/`) built milestone by milestone, test-first, that counts both species on a trap photo and can switch between and compare models. It shows how to put a model behind an app; it is not a tool for farmers and is not validated for any pest-management decision.
 - **The story in slides.** The session deck and case studies on how the model was trained and the app was built ([docs/presentations/](docs/presentations/)).
-
-> **Status (2026-10-18): teaching demo.** The current model, r50-v5, meets the three model quality gates on held-out test photos (count accuracy 0.849). Its ONNX weights are published on [Kaggle](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector) as a teaching demo; it has not been validated in the field and is not for farmers.
-> See [Models](#models) and [Status and release gates](#status-and-release-gates).
 
 ---
 
