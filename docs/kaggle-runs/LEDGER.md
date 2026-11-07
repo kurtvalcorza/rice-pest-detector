@@ -37,3 +37,8 @@ Append-only record of the Kaggle editions' verification runs and publication rec
 | 2026-10-21 | r50v5-kaggle | 4 | 7a2d240 | 0710e8e53f77… | - | - | SAVED (no run) | model link and tags |
 | 2026-10-22 | dfine-l-kaggle | 1 | 7a2d240 | 262841d8e4ed… | Tesla T4 | 6.9 h | VERIFIED | dfine-l/dfine-l-v1-verification.json |
 | 2026-10-22 | dfine-l-kaggle | 1 | 7a2d240 | 262841d8e4ed… | - | - | PUBLIC | dfine-l/receipt.json |
+| 2026-11-07 | r50v5-kaggle | 5 | c58b057 | a8b7d9acac5e… | - | - | SAVED (no run) | text only: where the labels come from |
+| 2026-11-07 | rfdetr-m-kaggle | 3 | c58b057 | 92e7fe42ca37… | - | - | SAVED (no run) | text only: where the labels come from |
+| 2026-11-07 | dfine-l-kaggle | 2 | c58b057 | fce618d58108… | - | - | SAVED (no run) | same text; Kaggle dropped the model link |
+| 2026-11-07 | dfine-l-kaggle | 3 | c58b057 | fce618d58108… | - | - | SAVED (no run) | retry; the link to model version 3 did not take |
+| 2026-11-07 | dfine-l-kaggle | 4 | c58b057 | fce618d58108… | - | - | SAVED (no run) | model link now version 4, the one the app downloads |

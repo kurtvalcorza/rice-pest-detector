@@ -43,6 +43,8 @@ def calibrate(scores, a: float, b: float) -> np.ndarray:
 
 
 def raw_threshold(a: float, b: float, p: float = 0.5) -> float:
+    if a <= 0:
+        raise ValueError(f"the fit has no usable slope (a = {a})")
     """The raw score whose calibrated probability is p."""
     z = (np.log(p / (1 - p)) - b) / a
     return float(1 / (1 + np.exp(-z)))
@@ -56,6 +58,8 @@ def fit_platt(scores, labels, l2: float = 1e-4, iters: int = 100) -> tuple[float
     """
     x = np.stack([_logit(scores), np.ones(len(scores))], axis=1)
     y = np.asarray(labels, dtype=np.float64)
+    if y.size == 0 or y.min() == y.max():
+        raise ValueError("a calibration fit needs both real and false detections")
 
     def nll(w):
         z = x @ w

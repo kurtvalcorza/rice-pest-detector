@@ -32,3 +32,24 @@ def test_choose_takes_the_lowest_error_and_prefers_the_higher_threshold_on_ties(
 
 def test_default_grid_spans_low_scores_and_includes_the_shipping_threshold():
     assert min(GRID) <= 0.05 and 0.5 in GRID and GRID == sorted(GRID)
+
+
+def test_the_tool_uses_the_guarded_inference_loop(tmp_path, monkeypatch):
+    import json
+
+    import tools.calibrate_scores as cal
+    import tools.choose_demo_threshold as choose
+
+    assert not hasattr(choose, "_run_onnx")
+    seen = []
+
+    def fake(onnx, records, root):
+        seen.append(records)
+        return [{"refs": {"RBB": 1, "WSB": 0}, "dets": [{"class_id": 0, "score": 0.4}]}]
+
+    monkeypatch.setattr(cal, "_run_onnx", fake)
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"images": [{"split": "val"}, {"split": "test"}]}), encoding="utf-8")
+    out = tmp_path / "report.json"
+    assert choose.main(["--onnx", "m.onnx", "--dataset-root", ".", "--manifest", str(manifest), "--out", str(out)]) == 0
+    assert seen == [[{"split": "val"}]] and json.loads(out.read_text(encoding="utf-8"))["chosen_threshold"] == 0.4

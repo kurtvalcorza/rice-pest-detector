@@ -183,7 +183,7 @@ Differences of a few points between the three fine-tuned models may be sensitive
 
 **Sources of variability.** The seed fixes Python, NumPy and PyTorch random state, and the data-loader shuffle uses seed plus epoch. Random state is restored on resume. Not controlled: non-deterministic CUDA kernels, float16 autocast and the GPU type. The new class head is randomly initialised from the seed. ONNX and PyTorch differ slightly in numerics: up to 5.1e-6 in score at the operating threshold.
 
-**Confidence outputs.** The score is a sigmoid output, not a calibrated probability. On validation its expected calibration error was 0.035, so raw scores are close to calibrated on these photos. The app uses raw scores and does not apply a calibration. To obtain calibrated probabilities on other photos, label a sample and fit Platt scaling with `tools/calibrate_scores.py`.
+**Confidence outputs.** The score is a sigmoid output, not a calibrated probability. On validation its expected calibration error was 0.035 across all detections down to the 0.01 score floor, but 83% of those score below 0.1, which flatters the figure. Over the detections the app counts (score 0.48 or above) the error is 0.096, and scores run low: above 0.6 a score understates how often a detection is real (scores of 0.7 to 0.8 were real 86% of the time). The app's review level pools both species: near it, rice black bug detections were real 95% of the time and white stemborer 62%. The app uses raw scores and does not apply a calibration. To obtain calibrated probabilities on other photos, label a sample and fit Platt scaling with `tools/calibrate_scores.py`.
 
 #### Ethical considerations and biases
 

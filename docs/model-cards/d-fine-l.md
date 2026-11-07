@@ -162,7 +162,7 @@ Presence recall, the other density bins and the confusion counts are not recorde
 
 **The counting threshold, 0.50.** `models/rice-pest-dfine-l.manifest.json` sets `threshold` to 0.5. `tools/choose_demo_threshold.py` chooses the value with the lowest total count error on validation, on a grid from 0.02 to 0.50 in steps of 0.02, preferring the higher threshold on ties. Inside 5 family-grouped folds it chose 0.50 in four folds and 0.48 in one.
 
-**The grid edge.** Four of five folds chose 0.50, the top of the grid. The count-optimal threshold for this model may therefore lie above 0.50, and its count accuracy may be understated. The grid was fixed before any result for this model and was not extended afterwards, so this remains unmeasured.
+**The grid edge.** Four of five folds chose 0.50, the top of the grid. The MAE-optimal threshold for this model may therefore lie above 0.50, and its count accuracy may be understated. The grid was fixed before any result for this model and was not extended afterwards, so this remains unmeasured.
 
 **The review flags.** The app flags a photo when any counted detection scores below `review_below`, 0.68 for this model. That is the raw score whose Platt-calibrated probability on validation is about 0.74, the same meaning as the default model's flag. The Platt parameters for this model are not recorded in `docs/evaluation-record.md`. The app also flags any photo with more than 30 counted insects (`crowdedAbove` in `app/lib/counting/counting.dart`); this limit is the same for every model.
 
@@ -186,7 +186,7 @@ Differences of a few points between the three fine-tuned models may be sensitive
 
 **Sources of variability.** The seed fixes Python, NumPy and PyTorch random state, and the data-loader shuffle uses seed plus epoch. Random state is restored on resume. Not controlled: non-deterministic CUDA kernels, float16 autocast and the GPU type. The new class head is randomly initialised from the seed. ONNX and PyTorch differ in numerics: up to 2.95e-3 in score at threshold 0.48, and up to 7.5e-3 at 0.04. A detection whose score lies within that distance of the threshold can be kept by one runtime and dropped by the other.
 
-**Confidence outputs.** The score is a sigmoid output, not a calibrated probability. On validation its expected calibration error was 0.048, so raw scores are close to calibrated on these photos. The app uses raw scores and does not apply a calibration. To obtain calibrated probabilities on other photos, label a sample and fit Platt scaling with `tools/calibrate_scores.py`.
+**Confidence outputs.** The score is a sigmoid output, not a calibrated probability. On validation its expected calibration error was 0.048 across all detections down to the 0.01 score floor, but 81% of those score below 0.1, which flatters the figure. Over the detections the app counts (score 0.50 or above) the error is 0.087, and scores run low: above 0.6 a score understates how often a detection is real (scores of 0.7 to 0.8 were real 85% of the time). The app's review level pools both species: near it, rice black bug detections were real 95% of the time and white stemborer 65%. The app uses raw scores and does not apply a calibration. To obtain calibrated probabilities on other photos, label a sample and fit Platt scaling with `tools/calibrate_scores.py`.
 
 #### Ethical considerations and biases
 
@@ -291,7 +291,7 @@ The Apache-2.0 licence of the upstream weights permits broad use and adds no use
 | ONNX file | `rice-pest-dfine-l.onnx` |
 | Size | 125,611,873 bytes (125.6 MB) |
 | SHA-256 | `3cf578df735d12269bde78bc9e7765fdf016f410585c3eb46e939c6e0e46b9cf` |
-| Kaggle version | 4 (2026-10-25). Version 3 (`c823f5d8…`, 125,213,572 bytes) computed its encoder position embedding in float64, which the app's ONNX Runtime 1.28 cannot load; version 4 stores that embedding as precomputed constants and is otherwise the same graph. Outputs are identical (see the evaluation record, "D-FINE-L ONNX version 4") |
+| Kaggle version | 4 (2026-10-25). The validation figures on this card were measured on version 3; on version 4 the count accuracy was checked again (0.822 on both), but the calibration was not run again. Version 3 (`c823f5d8…`, 125,213,572 bytes) computed its encoder position embedding in float64, which the app's ONNX Runtime 1.28 cannot load; version 4 stores that embedding as precomputed constants and is otherwise the same graph. Outputs are identical (see the evaluation record, "D-FINE-L ONNX version 4") |
 | Opset | 17 |
 | Manifest | [`models/rice-pest-dfine-l.manifest.json`](../../models/rice-pest-dfine-l.manifest.json) |
 | Source checkpoint | `best.pt`, SHA-256 beginning `758e2d12`, epoch 3 (counting from 0); not distributed |

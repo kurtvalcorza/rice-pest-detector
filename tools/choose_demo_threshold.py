@@ -2,8 +2,9 @@
 
 Run r18-1 never scores a detection >= 0.5, so the shipping threshold counts nothing. This tool
 runs the ONNX model on validation images, sweeps thresholds, and picks the one with the lowest
-total per-image count error (rice black bug + white stemborer), preferring the higher threshold
-on ties. The test split is never read. The result is a demo setting, not a shipping decision.
+summed per-image count error (rice black bug + white stemborer MAE), preferring the higher
+threshold on ties: the MAE-optimal threshold, not the one with the highest count accuracy. The
+test split is never read. The result is a demo setting, not a shipping decision.
 
 Run: python -m tools.choose_demo_threshold --onnx models/rice-pest-r18-1.onnx
          --dataset-root <riceprotek-insects-v28> --out runs/run-r18/demo_threshold.json
@@ -49,27 +50,9 @@ def onnx_input_size(sess) -> int:
     return side if isinstance(side, int) else 640
 
 
-def _run_onnx(onnx_path: Path, records: list[dict], root: Path) -> list[dict]:
-    import onnxruntime as ort
-    from PIL import Image
-
-    from rice_pest_detector.infer import postprocess, preprocess
-
-    sess = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
-    size = onnx_input_size(sess)
-    images = []
-    for i, rec in enumerate(records, 1):
-        with Image.open(root / rec["archive_member"]) as img:
-            logits, boxes = sess.run(["logits", "pred_boxes"], {"pixel_values": preprocess(img, size)})
-        found = postprocess(logits, boxes, rec["width"], rec["height"], threshold=FLOOR)
-        images.append({"file": rec["file"], "refs": species_counts([b[0] for b in rec["boxes"]]),
-                       "dets": [{"class_id": d.class_id, "score": d.score} for d in found]})
-        if i % 50 == 0:
-            print(f"{i}/{len(records)} images", flush=True)
-    return images
-
-
 def main(argv: list[str] | None = None) -> int:
+    from tools.calibrate_scores import _run_onnx  # one guarded inference loop; it imports GRID from here
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--onnx", type=Path, required=True)
     ap.add_argument("--dataset-root", type=Path, required=True, help="folder holding datasets/...")

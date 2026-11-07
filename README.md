@@ -411,7 +411,7 @@ Every result, with the command and file it came from, is in [docs/evaluation-rec
 - **Count accuracy** (`count_accuracy`): an image passes when each species' count is within ±10% of the truth, or within ±1 when the true count is below 10. It is always reported beside the **no-detection baseline** (0.456 on test, 0.474 on validation), because the ±1 tolerance lets an image with one insect pass when nothing is detected.
 - **Count errors** (`count_errors`): per-species mean absolute error, signed bias, exact-count rate, presence recall and mean absolute error by density (1–9, 10–29, 30+ insects).
 - **Confusion** (`confusion`): missed insects, spurious detections and class mix-ups at the counting threshold.
-- **Review flags** (in the app, `counting.dart`): a photo is flagged when any counted detection scores below the model's `review_below` (the raw score that is about 74% likely to be a real insect after calibration), or when more than 30 insects are counted.
+- **Review flags** (in the app, `counting.dart`): a photo is flagged when any counted detection scores below the model's `review_below` (the raw score that is about 74% likely to be a real insect after calibration, pooled across species: on validation, 91% for rice black bug and 67% for white stemborer), or when more than 30 insects are counted.
 
 **Checkpoint selection** (`src/rice_pest_detector/train.py`): validation species mAP50 after each epoch; the test split is never read during training.
 
@@ -421,7 +421,7 @@ Every result, with the command and file it came from, is in [docs/evaluation-rec
 - Every count result is **out-of-fold**: 5 folds with photos grouped by family, and the count threshold re-chosen inside each fold.
 - `tools/choose_demo_threshold.py` sweeps thresholds from 0.02 to 0.50 in steps of 0.02 and picks the one with the lowest total count error, preferring the higher threshold on ties.
 
-**Dense-tray paired bootstrap.** On the 18 validation photos with 30 or more white stemborers (one per family), the per-photo white-stemborer count errors of two models are paired and resampled 10,000 times (seed 20261017). A model counts as better on crowded trays only when the 95% interval of the mean difference lies entirely below 0. This comparison was run as a one-off analysis; there is no tool for it in this repository, and its method and results are in the evaluation record.
+**Dense-tray paired bootstrap.** On the 18 validation photos with 30 or more white stemborers (one per family), the per-photo white-stemborer count errors of two models are paired and resampled 10,000 times (seed 20261017). A model counts as better on crowded trays only when the 95% interval of the mean difference lies entirely below 0. `tools/dense_tray_bootstrap.py` recomputes a saved comparison, and the method and results are in the evaluation record.
 
 **Pre-registered rules** (fixed before any wave-2 result):
 
@@ -461,7 +461,7 @@ r50-v5 export: 171,744,970 bytes, SHA-256 `dc3927ae0967f6553721e18eec826305cca66
 
 The tool runs the ONNX model on the **validation** split only, sweeps thresholds from 0.02 to 0.50, and picks the one with the lowest total per-image count error, preferring the higher threshold on ties. The test split is never read.
 
-For r50-v5, whose scores are close to calibrated, it chooses **0.48** (0.48 in four of five held-out folds, 0.50 in one): out-of-fold count accuracy 0.834, mean count error 0.23 per image for rice black bug and 1.40 for white stemborer.
+For r50-v5 it chooses **0.48** (0.48 in four of five held-out folds, 0.50 in one): out-of-fold count accuracy 0.834, mean count error 0.23 per image for rice black bug and 1.40 for white stemborer.
 
 For the earlier run r18-1, whose scores never exceeded 0.25, the same tool chose 0.04 (validation count accuracy 0.632). That was a demo setting to make the app show counts, not a fix for the model's calibration.
 
@@ -565,7 +565,7 @@ The debug APK is about 184 MB, mostly ONNX Runtime's native libraries for every 
 
 | Suite | Command | Count | Covers |
 | :-- | :-- | --: | :-- |
-| Python | `.\.venv\Scripts\python -m pytest` | 599 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
+| Python | `.\.venv\Scripts\python -m pytest` | 610 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
 | Dart (PC) | `flutter test` in `app/` | 168 | contract parity, decoding, counting, history, model store and registry, model import and download checks, localisation, screens (including the no-model state, settings and compare) |
 | Dart (device) | `flutter drive … --no-enable-impeller` | 1 | the real app starting with no model installed (note: `flutter drive` uninstalls the app afterwards, which also removes a demo model) |
 
@@ -594,6 +594,7 @@ rice-pest-detector/
 │   ├── export_app_fixtures.py    # golden fixtures for the app
 │   ├── compare_base_vs_finetuned.py  # base vs fine-tuned, validation only
 │   ├── calibrate_scores.py       # Platt calibration, validation only
+│   ├── dense_tray_bootstrap.py   # paired bootstrap of crowded-tray count errors
 │   └── run_emulator.ps1 / .sh    # start an emulator and run the demo app
 ├── tests/                    # pytest suite
 ├── .specify/                 # Spec Kit: constitution (memory/), templates, scripts

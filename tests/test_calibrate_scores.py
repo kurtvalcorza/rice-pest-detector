@@ -200,3 +200,14 @@ def test_any_exif_rotation_or_flip_is_refused(tmp_path, orientation):
 def test_a_size_that_differs_from_the_manifest_is_refused(tmp_path):
     with _photo(tmp_path, size=(48, 64)) as img, pytest.raises(ValueError, match="size 48x64, manifest 64x48"):
         require_upright(img, REC)
+
+
+@pytest.mark.parametrize("scores, labels", [([], []), ([0.2, 0.9], [1, 1]), ([0.2, 0.9], [0, 0])])
+def test_a_fit_with_nothing_to_learn_from_is_refused(scores, labels):
+    with pytest.raises(ValueError, match="both real and false"):
+        fit_platt(scores, labels)
+
+
+def test_a_threshold_is_refused_when_the_fit_has_no_slope():
+    with pytest.raises(ValueError, match="slope"):
+        raw_threshold(0.0, 1.0)

@@ -63,7 +63,7 @@ One line per epoch: `epoch`, `train_loss`, `updates`, `nonfinite_loss_steps`, `s
 
 ## Threshold and calibration reports (run: `demo_threshold.json`, `calibration_val.json`, `val_dets_onnx.json`)
 
-Validation only. The threshold report holds the sweep (threshold, total MAE, count accuracy, count errors, detections kept) and the chosen threshold. The calibration report holds the Platt `a`, `b`, the calibrated and count-optimal thresholds, calibration error raw / in-sample / out-of-fold, and in-sample and out-of-fold count reports per fold (5 folds, seed 20261016). The detection cache is reused only when the ONNX file's SHA-256, the score floor, the labelling version and the SHA-256 of the validation records (files, families, groups, boxes, in order) all match; otherwise the model is run again (2026-11-01; before this date only the ONNX SHA-256 and the floor were checked).
+Validation only. The threshold report holds the sweep (threshold, total MAE, count accuracy, count errors, detections kept) and the chosen threshold. The calibration report holds the Platt `a`, `b`, the calibrated and MAE-optimal thresholds, calibration error raw / in-sample / out-of-fold, and in-sample and out-of-fold count reports per fold (5 folds, seed 20261016). The detection cache is reused only when the ONNX file's SHA-256, the score floor, the labelling version and the SHA-256 of the validation records (files, families, groups, boxes, in order) all match; otherwise the model is run again (2026-11-01; before this date only the ONNX SHA-256 and the floor were checked).
 
 ## Exported model and export record (run: `models/<name>.onnx`, `models/<name>.json`)
 
