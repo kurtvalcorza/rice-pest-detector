@@ -62,6 +62,10 @@ One file per task in the state folder given to `workflow.py` (`--state-dir`).
 
 A rejected event (not in the table) writes nothing: the file is byte-for-byte unchanged.
 
+## Mutation report (`mutation-report.json`)
+
+Defined in [contracts/mutation-check.md](contracts/mutation-check.md#report-mutation-reportjson). Invariants: every entry in `mutants.json` appears once; `counts` equal the labels; `baseline` is a PASS, or the run wrote no report.
+
 ## Evidence bundle (per module)
 
 A folder the learner keeps, outside the clone and any worktree: `agents-practice/advanced-evidence/<m6|m7|m8>/`. Contents are listed, with the check for each, in [contracts/evidence-checklist.md](contracts/evidence-checklist.md).

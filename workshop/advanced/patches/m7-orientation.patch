@@ -1,0 +1,13 @@
+diff --git a/src/rice_pest_detector/infer.py b/src/rice_pest_detector/infer.py
+index 10f184b..bdfbde2 100644
+--- a/src/rice_pest_detector/infer.py
++++ b/src/rice_pest_detector/infer.py
+@@ -20,7 +20,7 @@ class Detection:
+ 
+ def preprocess(image: Image.Image, size: int = INPUT_SIZE) -> np.ndarray:
+     """size is the model input side; the app contract is 640 (RF-DETR-M trains at 576)."""
+-    rgb = ImageOps.exif_transpose(image).convert("RGB")
++    rgb = image.convert("RGB")
+     resized = rgb.resize((size, size), Image.Resampling.BILINEAR)
+     array = np.asarray(resized, dtype=np.float32) / 255.0
+     return array.transpose(2, 0, 1)[np.newaxis].copy()

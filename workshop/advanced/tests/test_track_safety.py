@@ -7,6 +7,7 @@ that the teaching scripts use only the standard library.
 """
 
 import ast
+import json
 import shutil
 import subprocess
 import sys
@@ -17,6 +18,9 @@ import pytest
 TRACK = Path(__file__).resolve().parents[1]
 ROOT = TRACK.parents[1]
 PATCHES = TRACK / "patches"
+MUTANTS = TRACK / "mutants.json"
+REQUIREMENTS = {"orientation", "no-normalisation", "resize-filter", "inclusive-threshold", "sorted-by-score",
+                "default-threshold"}
 TARGET = "src/rice_pest_detector/infer.py"
 
 
@@ -61,6 +65,49 @@ def test_each_patch_applies_to_a_copy_of_todays_file(patch, tmp_path):
                          capture_output=True, text=True, check=False)
     assert run.returncode == 0, run.stderr
     assert copy.read_bytes() == before  # --check writes nothing; nothing is imported or run
+
+
+def _changed_lines(patch_text):
+    lines = patch_text.splitlines()
+    return ([line for line in lines if line.startswith("-") and not line.startswith("---")],
+            [line for line in lines if line.startswith("+") and not line.startswith("+++")])
+
+
+@pytest.mark.parametrize("patch", sorted(PATCHES.glob("m7-*.patch")), ids=lambda p: p.name)
+def test_each_module_7_patch_changes_exactly_one_line(patch):
+    removed, added = _changed_lines(patch.read_text(encoding="utf-8"))
+    assert (len(removed), len(added)) == (1, 1)
+
+
+def _mutants():
+    return json.loads(MUTANTS.read_text(encoding="utf-8"))
+
+
+def test_the_mutants_file_lists_the_six_requirements_once_each():
+    ids = [entry["id"] for entry in _mutants()["requirements"]]
+    assert sorted(ids) == sorted(REQUIREMENTS)
+
+
+def test_each_requirement_has_exactly_one_patch_of_its_own():
+    patches = [entry["patch"] for entry in _mutants()["requirements"]]
+    assert all(isinstance(name, str) and name for name in patches)
+    assert len(set(patches)) == len(patches)
+
+
+def test_every_patch_named_in_the_mutants_file_exists():
+    missing = [entry["patch"] for entry in _mutants()["requirements"] if not (PATCHES / entry["patch"]).is_file()]
+    assert missing == []
+
+
+def test_every_patch_in_the_folder_is_named_in_the_mutants_file():
+    named = {entry["patch"] for entry in _mutants()["requirements"]}
+    assert {patch.name for patch in _patches()} == named
+
+
+def test_the_assumed_list_is_not_empty_and_gives_reasons():
+    assumed = _mutants()["assumed"]
+    assert assumed
+    assert all(entry["item"].strip() and entry["reason"].strip() for entry in assumed)
 
 
 def _imported_top_level_modules(source):

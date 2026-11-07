@@ -1,0 +1,13 @@
+diff --git a/src/rice_pest_detector/infer.py b/src/rice_pest_detector/infer.py
+index 10f184b..41ed15e 100644
+--- a/src/rice_pest_detector/infer.py
++++ b/src/rice_pest_detector/infer.py
+@@ -27,7 +27,7 @@ def preprocess(image: Image.Image, size: int = INPUT_SIZE) -> np.ndarray:
+ 
+ 
+ def postprocess(logits: np.ndarray, boxes: np.ndarray, width: int, height: int,
+-                threshold: float = 0.5) -> list[Detection]:
++                threshold: float = 0.4) -> list[Detection]:
+     """Turn raw RT-DETR outputs into detections in original-image pixels.
+ 
+     ``width`` and ``height`` MUST be the size of the EXIF-transposed image

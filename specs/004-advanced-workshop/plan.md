@@ -12,7 +12,7 @@ Add an optional advanced track of three modules to the *Coding with AI Agents* c
 
 **Language/Version**: Python 3.12 (the repository's `requires-python`), standard library only for the new scripts; Markdown for the course pages
 
-**Primary Dependencies**: None new. pytest (already a dev dependency) runs the tests; `uv` (already in `docs/setup.md`) runs the light path; the GitHub CLI (already in `docs/setup.md`) for Module 8. LangGraph appears only in an optional, untested-in-CI listing
+**Primary Dependencies**: None new. pytest (already a dev dependency) runs the tests; `uv` (already in `docs/setup.md`) runs the light path; the GitHub CLI (already in `docs/setup.md`) for Module 8. The optional connected path uses a short script and needs no new package
 
 **Storage**: Files only. Verifier evidence (result JSON, run log, JUnit XML) and workflow records (one JSON file per task) in a folder the learner names, by default under `agents-practice/advanced-evidence/<module>/`
 

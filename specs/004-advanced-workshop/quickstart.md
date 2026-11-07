@@ -63,7 +63,7 @@ $W show m7-success                # approved, attempts 2
 $W event m7-success approve; echo $?   # 3: not allowed in approved
 ```
 
-Repeat with a task `m7-exhaustion`, leaving the patch in place for three `verify` runs: it ends `blocked`, `retry_exhausted`, attempts 3. Compare both records with `workshop/advanced/solutions/traces/`.
+Repeat with a task `m7-exhaustion`, leaving the patch in place for three `verify` runs: it ends `blocked`, `retry_exhausted`, attempts 3. Restore the file, then run `mutation_check.py` with Module 6's tests (2 `checked`, 4 `unguarded`, exit 1) and with `tests/test_infer_contract.py` added (6 `checked`, exit 0). Compare both records with `workshop/advanced/solutions/traces/`.
 
 ## Walk Module 8
 

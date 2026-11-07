@@ -26,7 +26,9 @@ Page: [module-6-engineer.md](module-6-engineer.md).
 - [ ] You tried one event the table does not allow (for example `approve` while verifying, or sending `verifier_pass` by hand): exit code 3, and the record file did not change.
 - [ ] Every `verifier_*` entry has actor `verifier` and a verification result; none was typed by you or the agent.
 - [ ] `prompts.md` has the prompt you gave the agent at each handoff.
-- [ ] `reflection.md` answers: what moved each task forward; what the workflow cannot stop (a hand-edited record, an unauthenticated "human"); when a connected path would be worth its risk.
+- [ ] `mutation-m6/mutation-report.json` shows 2 requirements `checked` and 4 `unguarded`, exit 1, and lists what stays `assumed`.
+- [ ] `mutation-contract/mutation-report.json` shows all 6 `checked`, exit 0.
+- [ ] `reflection.md` answers: what moved each task forward; what the workflow cannot stop (a hand-edited record, an unauthenticated "human"); when a connected path would be worth its risk; why a passing verifier did not mean the tests could catch every break.
 - [ ] Nothing in the folder holds a token, key, password or personal data.
 
 ## Module 8: Automate
@@ -34,6 +36,9 @@ Page: [module-6-engineer.md](module-6-engineer.md).
 - [ ] `links.md` has the issue, pull request and CI run URLs, all under `github.com/<you>/rice-pest-detector`, none under the upstream repository.
 - [ ] The pull request's diff changes only files under `tests/` (or the test file the issue names); no threshold, `infer.py` line, contract text or fixture changed.
 - [ ] Your local verifier run on the branch says `PASS` before the pull request was opened.
+- [ ] Your approved intent record is a comment on the issue, dated before the branch's first commit.
+- [ ] `mutation-report.json` from the branch shows all 6 requirements `checked`, exit 0.
+- [ ] The pull-request description is a receipt: intent, labels before and after, `assumed` items, verifier and CI results, reviewer.
 - [ ] The fork's CI run shows the Python tests and Flutter app tests jobs, with their result.
 - [ ] `review.md` records your review: what you read, what you checked, and your decision; any merge was done by you, by hand.
 - [ ] `reflection.md` answers: which text in the issue or pull request the agent read as instructions; what a malicious issue could ask for; why forks have no secrets and why this exercise needs none.

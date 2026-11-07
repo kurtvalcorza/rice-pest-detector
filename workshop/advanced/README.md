@@ -4,9 +4,10 @@ The pages that teach this material are in [docs/workshop-advanced/](../../docs/w
 
 | Folder | What it holds |
 | :-- | :-- |
-| `solutions/` | The reference scripts (`verify.py`, the fail-closed verifier). CI tests these |
+| `solutions/` | The reference scripts (`verify.py`, the fail-closed verifier; `workflow.py`, the bounded state machine; `mutation_check.py`, which plants one bug per requirement) and two reference traces. CI tests these |
 | `starter/` | The same scripts with the same command line and functions, bodies left as `TODO` for learners to fill in, test-first |
 | `patches/` | Intentional bugs, as `.patch` files only. A learner applies one with `git apply` in a disposable Git worktree. **Patches are never imported or run in CI, and no Python file may sit in this folder**; a test fails if one does |
+| `mutants.json` | The inference requirements, the patch that breaks each, and what stays assumed |
 | `tests/` | The specification for both `solutions/` and `starter/`, plus safety checks: the patch folder holds no Python, each patch changes only `src/rice_pest_detector/infer.py` and still applies to a copy of it, and the scripts use only the standard library |
 
 ## Run the tests

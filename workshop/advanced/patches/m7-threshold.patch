@@ -1,0 +1,13 @@
+diff --git a/src/rice_pest_detector/infer.py b/src/rice_pest_detector/infer.py
+index 10f184b..4dad906 100644
+--- a/src/rice_pest_detector/infer.py
++++ b/src/rice_pest_detector/infer.py
+@@ -37,7 +37,7 @@ def postprocess(logits: np.ndarray, boxes: np.ndarray, width: int, height: int,
+     probs = 1.0 / (1.0 + np.exp(-logits[0].astype(np.float64)))
+     scores, classes = probs.max(axis=1), probs.argmax(axis=1)
+     detections = []
+-    for q in np.nonzero(scores >= threshold)[0]:
++    for q in np.nonzero(scores > threshold)[0]:
+         cx, cy, w, h = boxes[0, q].astype(np.float64)
+         detections.append(Detection(int(classes[q]), float(scores[q]),
+                                     float((cx - w / 2) * width), float((cy - h / 2) * height),

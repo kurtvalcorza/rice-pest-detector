@@ -59,13 +59,13 @@ uv run --no-project --python 3.12 --with numpy==2.5.4 --with pillow==13.0.0 --wi
 - **A table as data** is easy to test exhaustively (56 pairs, SC-005) and easy for a learner to read.
 - **JSON with a history list** is readable in any editor and diffable in Git; one file per task avoids locking between tasks.
 
-**Alternatives considered**: JSON Lines append-only log (rejected: current state must be recomputed, and a half-written last line needs repair logic); SQLite (rejected: not readable without a tool; more than the lesson needs); LangGraph as the core engine (rejected for the core path: a dependency and a framework to learn before the idea; kept as an optional example, R5); keeping state in memory only (rejected: the history is the evidence).
+**Alternatives considered**: JSON Lines append-only log (rejected: current state must be recomputed, and a half-written last line needs repair logic); SQLite (rejected: not readable without a tool; more than the lesson needs); LangGraph as the core engine (rejected: a dependency and a framework to learn before the idea); keeping state in memory only (rejected: the history is the evidence).
 
 **Limit stated to learners**: the record is a local file and the "human" actor is not authenticated. The approval gate is a process control. Real systems put approval where the agent cannot write, which is why Module 8 moves it to a pull-request review.
 
 ## R5. Manual versus connected agent path
 
-**Decision**: The core path is manual. The learner copies a prompt (given in the page) into their agent, reads the result, and runs `workflow.py event <task> implementation_done` (or `repair_done`) themselves; `workflow.py verify` does the checking. An optional section shows a connected path: a short driver that calls an agent's command-line tool non-interactively, or a LangGraph graph with the same states, each labelled "optional, connected, not tested in CI".
+**Decision**: The core path is manual. The learner copies a prompt (given in the page) into their agent, reads the result, and runs `workflow.py event <task> implementation_done` (or `repair_done`) themselves; `workflow.py verify` does the checking. An optional section shows a connected path: a short driver that calls an agent's command-line tool non-interactively, labelled "optional, connected, not tested in CI". Owner decision, 2026-11-07: the LangGraph listing is dropped, so the track has no extra dependency or pinned version to maintain.
 
 **Rationale**: Manual handoffs work with any agent the learner is allowed to use, need no API key, and keep a person reading every step, which is the course's stance (Module 4's safe defaults). A connected path is where real systems go, so it is shown, but it needs credentials, non-interactive permission settings and cost controls that the core path should not require.
 
@@ -123,3 +123,15 @@ Evidence goes to `agents-practice/advanced-evidence/m6/` (the practice folder fr
 **Rationale**: One set of tests is the specification for both; the learner works test-first against the starter (red, then green), CI keeps the reference green. Loading by path avoids putting a generic module name such as `verify` on `sys.path`.
 
 **Alternatives considered**: Tests copied into the learner's practice folder (rejected: two copies drift); a pytest command-line option (rejected: options declared in a sub-folder `conftest.py` are not seen when pytest runs from the root, as CI does).
+
+## R10. What the track takes from Proof-Driven Development
+
+Microsoft Research's PDD Kit article (read 2026-11-06, [Formally verifying agent-written full-stack web apps with PDD Kit](https://www.microsoft.com/en-us/research/blog/formally-verifying-agent-written-full-stack-web-apps-with-pdd-kit/)) moves human review from code to intent: an approved spec, machine-checked code, a mutation check on the checker, and a pull request as receipt.
+
+**Decision (owner, 2026-11-06)**: take the method, not the tool. Module 7 gains the mutation check and the labels; Module 8 gains the intent record and the receipt.
+
+**Why not the tool**: the article links no repository or licence for PDD Kit, it runs inside GitHub Next's Chopin, and Verus proves Rust while this repository's code is Python and Dart. Its evidence is one case study without effort or defect numbers. A dedicated module would also break the track's Git, `uv` and agent promise.
+
+**What changes in meaning**: PDD Kit's proofs hold for every input. Ours are tests, and a killed mutant shows only that one planted bug was caught. FR-039 keeps that difference on the page.
+
+**Measured gap (2026-11-06, `63ec0bd`)**: see [contracts/mutation-check.md](contracts/mutation-check.md#mutants-file-workshopadvancedmutantsjson). Four of six requirements had no Python test that failed when they broke. The owner chose to close them upstream, in `tests/test_infer_contract.py`, leaving `tests/test_infer.py` as Module 6 uses it. Module 7 therefore compares two real test sets, with nothing staged: the four tests pass but would miss four of six bugs.

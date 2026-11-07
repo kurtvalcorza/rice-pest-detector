@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "requirements": [
+    {"id": "orientation", "patch": "m7-orientation.patch", "bug": "EXIF orientation is not applied"},
+    {"id": "no-normalisation", "patch": "m6-normalisation.patch", "bug": "mean/std normalisation added"},
+    {"id": "resize-filter", "patch": "m7-resize-filter.patch", "bug": "NEAREST instead of BILINEAR"},
+    {"id": "inclusive-threshold", "patch": "m7-threshold.patch", "bug": "> instead of >="},
+    {"id": "sorted-by-score", "patch": "m7-order.patch", "bug": "the sort is removed"},
+    {"id": "default-threshold", "patch": "m7-default-threshold.patch", "bug": "the default becomes 0.4"}
+  ],
+  "assumed": [
+    {"item": "Pillow's own correctness", "reason": "The tests call Pillow to decode, rotate and resize and compare with its output; a bug inside Pillow would appear on both sides."},
+    {"item": "NumPy's own correctness", "reason": "The arithmetic in preprocess and postprocess runs on NumPy; no test here checks NumPy against an independent calculation."},
+    {"item": "The trained weights", "reason": "No test here loads a model: the tests feed made-up logits and boxes, so they say nothing about what the weights detect."},
+    {"item": "ONNX Runtime", "reason": "The light path does not install it, and no test here runs an exported model."},
+    {"item": "The app's Dart port of the contract", "reason": "It has its own Flutter tests, which this verify command does not run and which were not measured."},
+    {"item": "The list of requirements itself", "reason": "A requirement nobody wrote down has no mutant, so a person decides whether these six are the right ones."}
+  ]
+}

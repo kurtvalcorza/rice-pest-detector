@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-26
 
-**Status**: Draft, awaiting owner review of issue #3
+**Status**: Approved by the owner 2026-11-06, with the amendment for the mutation check, labels, intent record and receipt (FR-036 to FR-044)
 
 **Input**: GitHub issue #3, "Expand Coding with AI Agents workshop: harness, orchestration, and software factory modules", and its review comment (seven owner-approved changes). Add three cumulative modules that take a learner from using a coding agent to engineering a controlled agent workflow, on this repository's real inference code, as a separate advanced track that leaves the core course as it is.
 
@@ -45,7 +45,9 @@ A learner runs the same regression through a small state machine (plan, implemen
 3. **Given** any state, **When** an event arrives that the transition table does not allow (for example "approve" while verifying, or an agent claiming a verifier result), **Then** it is rejected with a clear message and the record is unchanged.
 4. **Given** a task waiting for approval, **When** a person approves or rejects it, **Then** it ends approved or blocked, and the record names the person as the actor.
 5. **Given** any task, **When** the learner opens its record, **Then** it shows the task ID, current state, attempts used, the last verification result and the full, append-only transition history.
-6. **Given** the core path, **When** the learner hands work to the agent, **Then** they do it by hand (copy the prompt, run the event command); a connected path (an agent's command-line tool driven by a script, or a LangGraph graph) is offered only as an optional extension and labelled as such.
+6. **Given** the core path, **When** the learner hands work to the agent, **Then** they do it by hand (copy the prompt, run the event command); a connected path (an agent's command-line tool driven by a script) is offered only as an optional extension and labelled as such.
+7. **Given** a clean practice worktree, **When** the learner runs the mutation check, **Then** it plants one bug per contract requirement. Run with Module 6's verify command (the four tests in `tests/test_infer.py`), it reports `no-normalisation` and `inclusive-threshold` as `checked` and the other four as `unguarded`, exit 1; run with `tests/test_infer_contract.py` added, it reports all six `checked`, exit 0.
+8. **Given** that report, **When** the learner reads it beside a passing verifier run, **Then** the module shows that PASS meant the tests ran and passed, not that they could catch every break, and that everything listed as `assumed` rests on a person's acceptance.
 
 ---
 
@@ -60,11 +62,14 @@ A learner files a small, contract-preserving issue in their own fork, has an age
 **Acceptance Scenarios**:
 
 1. **Given** a new fork, **When** the learner follows the set-up steps, **Then** they enable Actions (off by default on a new fork) and Issues, and set their fork as the default repository for the GitHub CLI.
-2. **Given** the practice issue (more tests for detection ordering, the inclusive threshold at a published model's threshold, and box scaling with the orientation-corrected size), **When** the agent implements it, **Then** the diff changes only test files; no threshold, no `infer.py` line and no contract text changes.
+2. **Given** the practice issue (more tests for the inclusive threshold at a published model's threshold and box scaling with the orientation-corrected size), **When** the agent implements it, **Then** the diff changes only test files; no threshold, no `infer.py` line and no contract text changes.
 3. **Given** the branch is ready and the verifier passes, **When** the learner opens the pull request with an explicit target (`gh pr create --repo <you>/rice-pest-detector --base main`), **Then** it is opened in the fork; the module warns that without the explicit target the GitHub CLI and web page default to the upstream repository.
 4. **Given** the pull request, **When** CI runs, **Then** the learner sees the fork's existing checks (Python tests with the notebook and fixture checks, and Flutter analysis and tests) without adding a workflow, and records the result.
 5. **Given** the pull request, **When** the learner reviews it, **Then** they record a review against the evidence checklist and decide by hand whether to merge in their fork; nothing merges automatically and nothing deploys.
 6. **Given** the issue and pull-request text, **When** the module discusses them, **Then** it treats both as untrusted input to the agent, and states that forks have no secrets and that the exercise uses no secrets, no unattended privileged commands, no automatic merge and no deployment.
+7. **Given** the agent's plan, **When** the learner has not yet approved an intent record, **Then** implementation does not start; the record lists what will change, what must not change and how each item will be checked, and the learner approves it as a comment on the fork's issue.
+8. **Given** the new tests, **When** the learner re-runs the mutation check, **Then** all six requirements are still `checked`, exit 0.
+9. **Given** the pull request, **When** the learner writes its description, **Then** it is a receipt: the approved intent, the labels before and after, what stays `assumed`, the verifier and CI results, and who reviewed it.
 
 ---
 
@@ -80,7 +85,7 @@ A learner who finished the core course finds the advanced track from the course 
 
 1. **Given** the course page, **When** the learner reaches the end of Module 5, **Then** a short paragraph links to the advanced track and says it is optional and takes about 2.75–3.75 hours.
 2. **Given** the track's landing page, **When** the learner reads "What you need", **Then** every install is a link into `docs/setup.md`; the course pages contain run commands only.
-3. **Given** any page of the track, **When** it names an agent or a tool, **Then** names appear only as examples, in alphabetical order, with the no-endorsement note that `docs/setup.md` uses; LangGraph appears only as one optional example.
+3. **Given** any page of the track, **When** it names an agent or a tool, **Then** names appear only as examples, in alphabetical order, with the no-endorsement note that `docs/setup.md` uses.
 
 ---
 
@@ -99,6 +104,9 @@ A learner who finished the core course finds the advanced track from the course 
 - Actions or Issues are not enabled on the fork: no checks appear, or `gh issue create` fails; the troubleshooting section names both.
 - The learner has no GitHub account, or may not create one: Modules 6 and 7 work without it; Module 8 can be read, with the reference evidence as the answer.
 - The fork's CI takes longer than the module allows (the Flutter job): the module says to move on and come back to the result.
+- The mutation check is run in the main clone, or in a worktree with uncommitted changes: it refuses and applies nothing.
+- The mutation check stops part-way (killed, or the machine sleeps): the worktree may hold a planted bug; the module says to delete the worktree, not to repair it.
+- An agent weakens a requirement so a mutant no longer counts (deleting a `mutants.json` entry): the diff shows it, and the intent record says that file must not change.
 
 ## Requirements *(mandatory)*
 
@@ -110,7 +118,7 @@ A learner who finished the core course finds the advanced track from the course 
 - **FR-002**: Every module page MUST state prerequisites, objectives, the concepts it teaches, timed steps, the expected result of each step, troubleshooting, reflection questions with model answers (hidden until opened), and links to primary references.
 - **FR-003**: The track MUST state its time: Module 6 45–60 minutes, Module 7 60–75 minutes, Module 8 60–90 minutes, about 2.75–3.75 hours in all.
 - **FR-004**: Any install the track needs MUST be documented in `docs/setup.md`; the track's pages MUST link to it and contain run commands only.
-- **FR-005**: Agent tools MUST be named only as examples, in alphabetical order, with the no-endorsement note used in `docs/setup.md`; LangGraph MAY appear only as one optional example.
+- **FR-005**: Agent tools MUST be named only as examples, in alphabetical order, with the no-endorsement note used in `docs/setup.md`.
 - **FR-006**: Every module MUST say that passing software tests shows the code meets its written contract, not that the model is accurate, validated in the field or suitable for decisions about crops.
 
 **Module 6: Engineer**
@@ -144,6 +152,21 @@ A learner who finished the core course finds the advanced track from the course 
 - **FR-027**: Module 8 MUST cover human review and, where the learner's plan allows it, a branch ruleset that requires the Python tests check; it MUST NOT use automatic merge, unattended privileged execution or deployment.
 - **FR-028**: Module 8 MUST explain why issue and pull-request text are untrusted input to an agent, with at least one concrete example of an instruction an issue might smuggle in.
 
+**Mutation check and labels (Module 7)**
+
+- **FR-036**: Module 7 MUST have the learner run a mutation check that plants one bug per contract requirement and judges each by the Module 6 verifier's exit code, as defined in `contracts/mutation-check.md`.
+- **FR-037**: Each requirement MUST be labelled `checked`, `unguarded` or `unverified` from that run, and what no test reaches MUST be listed as `assumed` with a reason. A label MUST come from a run or a stated acceptance, never from an agent's account.
+- **FR-038**: The mutation check MUST refuse to run outside a clean linked worktree, MUST stop if the unchanged code does not pass, and MUST leave the tree as it found it after each mutant.
+- **FR-039**: Track pages MUST NOT use "proved" or "verified" for a tested requirement; they MUST say a mutation check is testing, not proof, and that a requirement nobody wrote down cannot be checked.
+- **FR-040**: The track MUST credit Proof-Driven Development (Microsoft Research, PDD Kit) as the source of these ideas, in the references of Modules 7 and 8, and MUST NOT require PDD Kit, Verus, Rust or any install beyond FR-007.
+
+**Intent record and receipt (Module 8)**
+
+- **FR-041**: Before implementation starts, the learner MUST approve an intent record: what will change, what must not change (including `mutants.json`), and how each item will be checked. It lives as a comment on the fork's issue, so a person's account holds the approval.
+- **FR-042**: The learner MUST re-run the mutation check on the branch and show it still exits 0, so the change has not weakened a check.
+- **FR-043**: The pull-request description MUST serve as a receipt: the intent, labels before and after, `assumed` items, verifier and CI results, and the reviewer. It is written by the learner or checked by them line by line.
+- **FR-044**: Every requirement in `mutants.json` MUST have an upstream test that fails when it breaks. Tests added for this live in `tests/test_infer_contract.py`, so `tests/test_infer.py` keeps the four tests Module 6 is built on; Module 7 shows the difference between the two.
+
 **Safety of the repository**
 
 - **FR-029**: Nothing in this feature MAY change the published inference behaviour: `src/rice_pest_detector/`, `docs/inference-contract.md`, the app and its fixtures stay as they are.
@@ -163,7 +186,11 @@ A learner who finished the core course finds the advanced track from the course 
 - **Workflow record**: one task's ID, state, attempts used and allowed, verify command, last verifier result and its transition history.
 - **Transition**: one change of state, with its sequence number, time, actor (person, agent or verifier), event, from-state, to-state, attempt number and optional note.
 - **Regression patch**: a patch file that introduces the Module 6 bug in a disposable worktree.
-- **Evidence bundle**: the files a learner keeps for a module: verifier results, run output, test reports, diff, workflow records, pull-request and CI links, review notes and reflection answers.
+- **Evidence bundle**: the files a learner keeps for a module: verifier results, run output, test reports, diff, workflow records, mutation reports, pull-request and CI links, review notes and reflection answers.
+- **Mutant**: one requirement of the inference contract, the patch that breaks it, and the label its run earned.
+- **Mutation report**: one run's labels for every requirement, its `assumed` list, and the commit it ran on.
+- **Intent record**: a person's approved statement of what a change will and will not touch and how each item is checked, kept on the issue.
+- **Receipt**: the pull-request description that ties the intent to the results.
 
 ## Success Criteria *(mandatory)*
 
@@ -179,6 +206,9 @@ A learner who finished the core course finds the advanced track from the course 
 - **SC-008**: CI collects the track's tests (the collected count rises by the number of new tests) and executes 0 patched modules; adding a `.py` file to the patch folder makes CI fail.
 - **SC-009**: The diff to `docs/workshop-setup.md` adds only the link paragraph and one file-table row; its three-hour core estimate is unchanged.
 - **SC-010**: Every track page states that passing tests are not model accuracy or field suitability, and every page that names an agent tool lists it alphabetically with the no-endorsement note (checked page by page: 0 exceptions).
+- **SC-011**: The mutation check's tests cover every row of its verdict and exit-code tables (100%), and every tester's Module 7 reports show 2 `checked` and 4 `unguarded`, exit 1, on Module 6's tests, then 6 `checked`, exit 0, with the contract tests.
+- **SC-012**: Every tester's Module 8 re-run shows 6 `checked`, exit 0, on a diff that changes only test files.
+- **SC-013**: Every tester's pull request carries all the receipt's parts, and its intent record's approval predates the first commit on the branch.
 
 ## Assumptions
 
@@ -187,6 +217,9 @@ A learner who finished the core course finds the advanced track from the course 
 - A free GitHub account and a public fork are enough for Module 8; branch rulesets on public repositories are available on the free plan, and the module still works where they are not.
 - The GitHub facts in research R6 (Actions and Issues off on a new fork, the CLI's default target, no secrets on forks) are re-checked on the date the pages are written, because hosted tools change.
 - The Stop hook is a Claude Code hook; other agents do not run it. The track says so and makes no promise that hooks work the same across agents.
+- Owner decision, 2026-11-06: Proof-Driven Development ideas go into Modules 7 and 8; there is no separate module, and PDD Kit is a cited influence only. Its article links no repository, and Verus is Rust-only.
+- Owner decision, 2026-11-06: the contract gaps the mutation check found are fixed upstream rather than left open for learners, and Module 8 keeps its original tests-only practice issue.
+- The mutation check adds about 10 minutes to Module 7 and the intent record and receipt about 10 to Module 8; the stated ranges stay until the acceptance test measures them (SC-002).
 - Slides are out of scope; they are updated in a separate change after the module content is approved.
 - Times are estimates until the acceptance test measures them (SC-002).
 - The track is in English, like the core course.
