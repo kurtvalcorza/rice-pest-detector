@@ -1,7 +1,7 @@
 {
  "variant": "r50v5-kaggle",
- "notebook_sha256": "bd65ab4009e2988f6efc422d594dc2098063a6724c4fcd7270edf4fc0688a399",
- "cell_sources_sha256": "1eb4b5fc215dc92a9bd2bc412b0c8e29820a4a06779f1ddcbb254bd77bcdb9dc",
+ "notebook_sha256": "f52cb6a7a2269000c5bea418ef9e04532350616d22e79927ae34adf7392b7550",
+ "cell_sources_sha256": "eb1abbdd60d92b9a1e840a1a56858ad4209d67140763c44620d0229eb4129c8b",
  "embedded": {
   "src/rice_pest_detector/__init__.py": "ad2a8e84b83c9043fe992aed2daeedf5b7a55c3552d3573fb328c70e15a73f2b",
   "src/rice_pest_detector/dedup.py": "618ae02dbca94cc39bb33f67ef9ba56465d00249b469a9a4a1bae2ec0824f2bb",
@@ -14,7 +14,7 @@
   "src/rice_pest_detector/split.py": "22050bf1536ab2de29cebdd6cb17cae6fe9e3f1c9bc1c80883e2118a4129db48",
   "src/rice_pest_detector/train.py": "f741827839e815bf1847843e1798444ae83740c246f57260f87cf03fbb3e5cd2",
   "tools/export_onnx.py": "e384068f3cc806524b583b7cae305ca9ac5464adbf4d71e9162494b70f99c085",
-  "tools/kaggle_driver.py": "03fc6efc394b6d4d37ff4b3365f39f2df89f2c2615e37ebf59ecb7d79eaf424a",
+  "tools/kaggle_driver.py": "340e5fb8978880ace979eb1ae8e09f5e27497eb2cd31a92d0875570cf40eb937",
   "notebooks/kaggle/requirements-kaggle.lock.txt": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
   "data/annotations_test.json": "d602a8d86ff63ef4ece1dfa20d9a7b5307d3b4066b37f8245b84045f54bcce6e",
   "data/annotations_train.json": "3b032f97eeff5dc5d67a055cca4cc4d31594b38f2d50f9b2edd73be00b87431b",
@@ -31,7 +31,7 @@
  },
  "generator": {
   "tools/build_notebook.py": "bf34d4cfd821b32fe20f607b8524537536157ed6",
-  "tools/kaggle_cells.py": "c17812e49feaa981160c75ad90be9f4a4c0207ac"
+  "tools/kaggle_cells.py": "1b4c7e4a10f102b53ca1816aa96abcd7a4f90c66"
  },
  "model": {
   "base_model": "PekingU/rtdetr_r50vd",

@@ -73,7 +73,7 @@ These facts were checked on the downloaded archive before any design decision, a
 
 **Decision**: Before any wave-2 result, four rules were written down (evaluation record, "Wave 2"): A, r50-v5 replaces r50-1 only if it is better on crowded trays and its count accuracy is not lower; B, a challenger replaces r50-v5 only if its count accuracy is higher and it is better on crowded trays; C, the test look goes only to a model with out-of-fold validation count accuracy ≥ 0.80, the best such model, once; D, no model ships without ONNX ≤ 200 MB, parity on 10 validation photos and CPU time ≤ 5 s. Each test result is bound to the weights, manifest, annotations, threshold and evaluator version (`train.evaluation_id`, `check_cached_test`), and the notebooks' test cell refuses to run until a validation-chosen threshold is typed in.
 
-**Rationale**: As the README states, the test split has had both its rule-based looks, r18-1 and then r50-v5, plus a post-hoc comparison of the two challengers, so a later model needs a new held-out set. Writing the rules first is what lets the test result mean anything.
+**Rationale**: As the README states, the test split has had both its rule-based looks, r18-1 and then r50-v5, a post-hoc comparison of the two challengers, and one read outside the rules (evaluation record), so a later model needs a new held-out set. Writing the rules first is what lets the test result mean anything.
 
 **Alternatives considered**: Evaluate every model on test and pick the best (rejected: the choice would be fitted to the test split). Keep no test split and report validation only (rejected: validation is used for every choice and is optimistic).
 

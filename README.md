@@ -282,7 +282,7 @@ Run r50-v5: RT-DETR-r50vd on transformers 5.20.1, 40 epochs on a Colab T4, best 
 | ONNX ↔ PyTorch parity | same kept detections, IoU ≥ 0.99, score Δ ≤ 1e-3 | 145 detections on 10 validation photos at 0.48, IoU ≥ 0.99999, Δ ≤ 4.9e-6 | Yes (validation sample) |
 | CPU latency | ≤ 5 s per image on the reference laptop | 1.14 s (median of 10) | Yes |
 
-Crowded trays remain the weakest case: on test, white stemborer counts on trays with 30 or more insects are off by 4.9 per photo on average. The app shows species counts only, as designed, although the sex classes now pass. The test split has had both its rule-based looks (r18-1, then r50-v5), plus a post-hoc comparison of the two challengers, so a later model needs a new held-out set.
+Crowded trays remain the weakest case: on test, white stemborer counts on trays with 30 or more insects are off by 4.9 per photo on average. The app shows species counts only, as designed, although the sex classes now pass. The test split has had both its rule-based looks (r18-1, then r50-v5), a post-hoc comparison of the two challengers, and one read outside the rules (see the evaluation record), so a later model needs a new held-out set.
 
 ### Release gates
 
@@ -565,7 +565,7 @@ The debug APK is about 184 MB, mostly ONNX Runtime's native libraries for every 
 
 | Suite | Command | Count | Covers |
 | :-- | :-- | --: | :-- |
-| Python | `.\.venv\Scripts\python -m pytest` | 594 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
+| Python | `.\.venv\Scripts\python -m pytest` | 599 | data pipeline, splits (synthetic and the committed split), metrics, training loop, notebook build, fixtures, export, parity, threshold choice, calibration, the agent examples and Stop hook |
 | Dart (PC) | `flutter test` in `app/` | 168 | contract parity, decoding, counting, history, model store and registry, model import and download checks, localisation, screens (including the no-model state, settings and compare) |
 | Dart (device) | `flutter drive … --no-enable-impeller` | 1 | the real app starting with no model installed (note: `flutter drive` uninstalls the app afterwards, which also removes a demo model) |
 

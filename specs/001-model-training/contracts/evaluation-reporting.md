@@ -36,7 +36,7 @@ Model choice between candidates uses rules A and B (out-of-fold validation count
 1. The threshold, calibration and model are fixed on validation first; in every notebook after r18 the test cell has `THRESHOLD = None` and raises until a validation-chosen value is typed in (the r18 notebook, kept byte-identical to the one that ran, uses a fixed 0.5).
 2. `evaluation_id` binds the result to `best_pt_sha256`, `manifest_sha256`, `annotations_sha256`, `threshold` and `evaluator_version`; the result is written atomically to `test_metrics.json` with that identity.
 3. If `test_metrics.json` exists, `check_cached_test` compares identities (before printing anything, in every notebook after r18) and raises on any change ("protocol violation, stop and ask the owner"); a matching cache is shown instead of evaluating again.
-4. Each look is recorded with its date, rule and threshold. As the README and the evaluation record state: the test split has had both its rule-based looks (r18-1 on 13 Oct, r50-v5 on 18 Oct), plus a post-hoc comparison of the two challengers by owner exception, which was not used to choose a model. A later model needs a new held-out set.
+4. Each look is recorded with its date, rule and threshold. As the README and the evaluation record state: the test split has had both its rule-based looks (r18-1 on 13 Oct, r50-v5 on 18 Oct), plus a post-hoc comparison of the two challengers by owner exception, which was not used to choose a model, and one read outside the rules on 16 Oct, recorded in the evaluation record. A later model needs a new held-out set.
 
 ## Reporting rules (`docs/evaluation-record.md`)
 

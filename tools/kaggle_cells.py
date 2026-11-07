@@ -88,9 +88,9 @@ grouped into families (an original and its augmented variants), near-duplicate f
 families were re-split 70 / 15 / 15 at random by family with a fixed seed (20261013), on the assumption that \
 families are independent. The images are pre-stretched to 640 × 640 in the archive; {ed['resize_note']}
 
-**Why the notebook is about 4.5 MB.** The labels and the split manifest (about 4.4 MB of JSON, compressed in the \
-data cells below) travel inside the notebook so that it needs no repository clone; the images do not, so that none \
-is redistributed. Preprocessing is fixed (resize and division by 255), so nothing is fitted on any split.
+**Where the labels come from.** Kaggle limits a notebook's source to 1 MB, so the labels and the split manifest are \
+not inside it. A cell below downloads them from the project's public repository at a fixed commit and checks each \
+file's size and SHA-256 before use, so no clone is needed. Preprocessing is fixed (resize and division by 255), so nothing is fitted on any split.
 """
 
 

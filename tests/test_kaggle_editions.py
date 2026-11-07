@@ -487,6 +487,35 @@ def test_run_summary_has_the_contract_keys(tmp_path):
     assert summary["durations_s"]["total"] == 21500
 
 
+@pytest.mark.parametrize("change", [{"verdict": "FAIL"}, {"detections_compared": 0}])
+def test_summary_is_not_pass_after_a_failed_reload(tmp_path, monkeypatch, change):
+    ctx = _fake_run(tmp_path)
+    path = ctx.run_dir / "reload_check.json"
+    path.write_text(json.dumps({**json.loads(path.read_text(encoding="utf-8")), **change}), encoding="utf-8")
+    assert kd.build_summary(ctx, {"python": "3.12.12", "gpu": "Tesla T4", "gpu_count": 2})["status"] == "FAIL"
+    monkeypatch.setattr(kd, "versions", lambda: {"python": "3.12.12", "gpu": "Tesla T4", "gpu_count": 2, "torch": "t",
+                                                 "transformers": "x"})
+    with pytest.raises(SystemExit, match="status FAIL"):
+        kd.stage_summary(ctx)
+    assert json.loads((ctx.run_dir / "run_summary.json").read_text(encoding="utf-8"))["status"] == "FAIL"
+
+
+@pytest.mark.parametrize("experiment, refused", [(None, True), ({"config": {}}, False)])
+def test_resuming_needs_a_checkpoint_with_a_fingerprint(tmp_path, experiment, refused):
+    torch = pytest.importorskip("torch")
+    last = tmp_path / "last.pt"
+    torch.save({"epoch": 1, "experiment": experiment}, last)
+    if refused:
+        with pytest.raises(SystemExit, match="fingerprint"):
+            kd.require_fingerprint(last)
+    else:
+        kd.require_fingerprint(last)
+
+
+def test_a_fresh_run_needs_no_fingerprint(tmp_path):
+    kd.require_fingerprint(tmp_path / "last.pt")
+
+
 def test_summary_fails_on_images_archives_or_the_budget(tmp_path, monkeypatch):
     ctx = _fake_run(tmp_path)
     (ctx.run_dir / "photo.JPG").write_bytes(b"x")

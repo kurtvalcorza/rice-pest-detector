@@ -255,9 +255,21 @@ def device():
 # ---------------------------------------------------------------- fit
 
 
+def require_fingerprint(checkpoint: Path) -> None:
+    """A resumed run must prove it is the same experiment; `train.fit` only warns when last.pt has no fingerprint."""
+    if not checkpoint.exists():
+        return
+    import torch
+
+    if torch.load(checkpoint, map_location="cpu", weights_only=True).get("experiment") is None:
+        raise SystemExit(f"resume: {checkpoint.name} has no experiment fingerprint, so nothing shows it belongs to "
+                         "this run; leave RESUME_FROM empty to start from the base model")
+
+
 def stage_fit(ctx: Context) -> None:
     from rice_pest_detector.train import fit
 
+    require_fingerprint(ctx.run_dir / "last.pt")
     cfg = train_config(ctx.edition)
     print("recipe:", json.dumps({k: getattr(cfg, k) for k in ("base_model", "revision", "epochs", "batch_size",
                                                                "lr", "backbone_lr", "input_size", "seed", "fp16")}))
@@ -582,10 +594,11 @@ def build_summary(ctx: Context, runtime: dict) -> dict:
     val = read_json(run / "val_metrics.json")["headline"]
     reload_check = read_json(run / "reload_check.json")
     lock = ctx.work / LOCK_NAME
+    reload_passed = reload_check.get("verdict") == "PASS" and bool(reload_check.get("detections_compared"))
     durations = {k: times.get(k) for k in ("environment", "fetch", "fit", "evaluate", "export", "reload")}
     durations["total"] = round(sum(v for v in times.values() if isinstance(v, (int, float))), 1)
     return {
-        "schema": 1, "status": "PASS", "variant": ctx.edition["variant"],
+        "schema": 1, "status": "PASS" if reload_passed else "FAIL", "variant": ctx.edition["variant"],
         "model": {k: ctx.edition[k] for k in ("base_model", "revision", "threshold", "input_size")},
         "environment": {"uv": UV_VERSION, "lock_sha256": sha256_file(lock) if lock.exists() else None,
                         "build_seconds": times.get("environment")},
@@ -609,6 +622,8 @@ def build_summary(ctx: Context, runtime: dict) -> dict:
 def stage_summary(ctx: Context) -> None:
     summary = build_summary(ctx, versions())
     write_json(ctx.run_dir / "run_summary.json", summary)
+    if summary["status"] != "PASS":
+        raise SystemExit("run summary: status FAIL: the fresh-process reload check did not pass")
     v, t, r = summary["validation"], summary["training"], summary["reload_check"]
     onnx = summary["artifacts"]["model.onnx"]
     print(f"Run summary: {summary['variant']} ({summary['model']['base_model']}), status {summary['status']}")
