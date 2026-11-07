@@ -33,6 +33,7 @@ A CPU-friendly object detector, in development, for counting **rice black bug** 
 
 - **What to install, by task**, with the commands for Windows (winget), macOS (Homebrew) and Linux (Ubuntu): [docs/setup.md](docs/setup.md).
 - **Coding with AI Agents**, the 2-hour session or its exercises on your own: [docs/workshop-setup.md](docs/workshop-setup.md). It needs Git and this repository, an AI coding agent you are allowed to use (set up safely), an empty practice folder, and `uv` with Spec Kit, and it has a prompt that lets your agent check and install them, asking before each command.
+- **The optional advanced track** goes from using an agent to controlling one, on this repository's real inference code: a fail-closed verifier, a bounded agent loop with a mutation check, and an issue taken to a reviewed pull request in your own fork: [docs/workshop-advanced/](docs/workshop-advanced/README.md). Module 8 is still a draft. Its runnable material is in [workshop/advanced/](workshop/advanced/README.md).
 
 On a work or school laptop, installs may be blocked: ask your IT team first, or pair with someone for the exercises.
 
@@ -596,7 +597,8 @@ rice-pest-detector/
 │   └── run_emulator.ps1 / .sh    # start an emulator and run the demo app
 ├── tests/                    # pytest suite
 ├── .specify/                 # Spec Kit: constitution (memory/), templates, scripts
-├── specs/                    # Spec Kit features: 001 model, 002 phone app, 003 desktop app (planned)
+├── specs/                    # Spec Kit features: 001 model, 002 phone app, 003 desktop app (planned), 004 advanced workshop
+├── workshop/advanced/        # advanced track: verifier, workflow, mutation check, starters, patches, tests
 ├── docs/
 │   ├── inference-contract.md
 │   ├── evaluation-record.md  # every result, with provenance
@@ -604,6 +606,7 @@ rice-pest-detector/
 │   ├── model-card.md         # index of the model cards
 │   ├── model-cards/          # one card per model (r50-v5, rf-detr-m, d-fine-l)
 │   ├── setup.md  workshop-setup.md
+│   ├── workshop-advanced/    # advanced track pages (Modules 6 to 8)
 │   └── presentations/        # session deck and case-study decks (HTML)
 ├── app/                      # Flutter demo app
 │   ├── lib/{inference,counting,model,storage,app,ui,l10n}/
@@ -671,6 +674,7 @@ This repository was built with substantial help from an AI coding assistant (Cla
 | `specs/003-desktop-app/` | Spec, plan and tasks for a desktop version of the app (planned, not built) |
 | `docs/setup.md` | What to install, by task |
 | `docs/workshop-setup.md` | Setup for the 2-hour session |
+| `docs/workshop-advanced/` | The optional advanced track (Modules 6 to 8) |
 | `docs/model-card.md` | Index of the model cards |
 | `docs/model-cards/` | One model card per model (r50-v5, RF-DETR-M, D-FINE-L) |
 | `docs/presentations/` | Session deck and case-study decks (HTML) |

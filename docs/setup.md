@@ -7,6 +7,7 @@ What you install depends on what you want to do. Find your row, install what it 
 | Read the slides and the docs | A web browser | none |
 | Use a coding agent | An editor, an agent you are allowed to use and its command-line tool. See [An AI coding agent](#an-ai-coding-agent) | about 10 min |
 | Take part in the 2-hour session, or do its exercises on your own | Git, a coding agent, `uv` and Spec Kit. The course path is in [workshop-setup.md](workshop-setup.md) | about 15 min |
+| Do the optional advanced track | Git, `uv` and a coding agent; for Module 8, a GitHub account and the GitHub CLI (row in the table below). The track is in [workshop-advanced/](workshop-advanced/README.md) | about 15 min |
 | Run the Python tests and tools | Git, Python 3.12, the packages in `requirements.txt` | about 15 min |
 | Train a model | A Google account and a browser; training runs on Google Colab | none locally |
 | Export a model to ONNX, check parity, calibrate | Everything in the row "Run the Python tests and tools" | as above |

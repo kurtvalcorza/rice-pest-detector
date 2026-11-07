@@ -123,8 +123,8 @@ description: "Task list for the advanced workshop track"
 
 - [x] T032 [P] [US4] Write `docs/workshop-advanced/README.md`: who it is for, prerequisites (core Modules 0–4 and Exercise 1), the time table (45–60, 60–75, 60–90 minutes), what you need (links into `docs/setup.md` only), the agent naming note, the teaching-demo statement, a glossary (verifier, fail-closed, fail-open, regression, worktree, fork, state machine, evidence bundle) and getting help — done 2026-10-28: landing page with the module table (Modules 7–8 marked not written yet), linked from the core course's advanced-track paragraph and file table and from Module 6
 - [x] T033 [US4] Add to `docs/workshop-setup.md` one "Advanced track (optional)" paragraph after Module 5 and one row in "The files you will use"; change nothing else → paragraph and row landed early, with Module 6 (owner exception 2026-11-03); closed by the owner 2026-11-07, with Module 8 linked as a draft. When Module 8 is walked, remove its draft wording there and on the landing page
-- [ ] T034 [US4] Add one row to the "I want to…" table in `docs/setup.md` for the advanced track (Git, `uv`, a coding agent; for Module 8 a GitHub account and the GitHub CLI, both already covered there); add an install section only if T013 or T025 found one missing
-- [ ] T035 [P] [US4] Mention `workshop/advanced/` and `docs/workshop-advanced/` in `README.md` ("Repository layout" and the workshop bullet under "Who it is for")
+- [x] T034 [US4] Add one row to the "I want to…" table in `docs/setup.md` for the advanced track (Git, `uv`, a coding agent; for Module 8 a GitHub account and the GitHub CLI, both already covered there); add an install section only if T013 or T025 found one missing
+- [x] T035 [P] [US4] Mention `workshop/advanced/` and `docs/workshop-advanced/` in `README.md` ("Repository layout" and the workshop bullet under "Who it is for")
 
 ---
 
