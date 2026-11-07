@@ -16,7 +16,7 @@ The modules build on each other: Module 7 reuses Module 6's verifier and regress
 | :-- | :-- | :-- | :-- |
 | [6. Engineer: protect the inference contract](module-6-engineer.md) | Break the detector's preprocessing on purpose in a throwaway worktree, see which controls notice, and build a verifier that says PASS, FAIL or UNVERIFIED | 45–60 minutes | Ready |
 | [7. Orchestrate: a bounded agent loop](module-7-orchestrate.md) | Run the agent in a loop that repairs on FAIL, stops on UNVERIFIED, and gives up after a fixed number of tries; then plant one bug per requirement to see what the tests could have caught | 60–75 minutes | Ready |
-| 8. Automate: from issue to verified pull request | In your own fork, take an issue to a pull request that CI and a person check before anything merges | 60–90 minutes | Not written yet |
+| [8. Automate: from issue to verified pull request](module-8-automate.md) | In your own fork, approve the intent, then take an issue to a pull request that CI and a person check before anything merges | 60–90 minutes | Draft: GitHub steps not yet walked in a fork |
 
 The whole track takes about 2.75–3.75 hours. Each module ends with items in the [evidence checklist](evidence-checklist.md).
 
@@ -41,6 +41,8 @@ The whole track takes about 2.75–3.75 hours. Each module ends with items in th
 - **State machine.** A fixed set of states (for example run, repair, blocked, done) and the rules for moving between them. Module 7's loop is one.
 - **Mutation check.** Planting a known bug to see whether the tests notice. Here each requirement ends up `checked` (a planted bug was caught), `unguarded` (it got through) or `unverified` (the check could not run). This is testing, not proof.
 - **Assumed.** What nothing here tests, so a person accepts it, with a reason.
+- **Intent record.** What a change will and will not touch and how each item is checked, approved by a person before any code exists.
+- **Receipt.** A pull-request description that ties the intent to what was run, what stayed assumed and who reviewed it.
 - **Evidence bundle.** The files a run leaves behind (`verification.json`, `run.log`, `junit.xml`) so that anyone can check the result without trusting an account of it.
 
 ## Getting help
