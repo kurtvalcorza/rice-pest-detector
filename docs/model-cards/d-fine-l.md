@@ -47,7 +47,7 @@ The application domains envisioned during development are these:
 - learning to build software that runs more than one model behind one inference contract;
 - research and comparison of detectors on this repository's family-grouped split of the Deleña et al. light-trap dataset.
 
-The model's role is a challenger. It was trained with the same split and recipe as the default model, r50-v5, and judged against it under pre-registered rules. It did not replace r50-v5. In the demo app it is an optional model, which the app's compare screen can run beside the default on one photo.
+The model's role is a challenger. It was trained with the same split and recipe as the default model, r50-v5, and judged against it under prospectively documented rules. It did not replace r50-v5. In the demo app it is an optional model, which the app's compare screen can run beside the default on one photo.
 
 ###### Primary Intended Users
 
@@ -137,7 +137,7 @@ The repository reports these measures. Names are the keys the code writes.
 
 Each measure covers a gap in the others. mAP alone would hide a threshold that counts nothing, because it ignores the threshold. Count accuracy alone overstates skill, because about 46% of validation and test photos hold exactly one insect and pass at ±1 when nothing is detected; the baseline exposes that. MAE and bias give the size and direction of the error, and the density bins show where counting fails. ECE matters because the app's review flag reads a raw score as a probability.
 
-Results, measured by this repository. Validation counts are out-of-fold (see Approaches to uncertainty and variability). The test column is a post-hoc evaluation at the project owner's request, made after the demo model had been chosen and after r50-v5's pre-registered test evaluation. It is for comparison only and was **not** used to select any model.
+Results, measured by this repository. Validation counts are out-of-fold (see Approaches to uncertainty and variability). The test column is a post-hoc evaluation at the project owner's request, made after the demo model had been chosen and after r50-v5's prospectively documented test evaluation. It is for comparison only and was **not** used to select any model.
 
 | Measure | Test, 252 photos, post-hoc, threshold 0.50 | Validation, 253 photos |
 | :-- | --: | --: |
@@ -152,6 +152,7 @@ Results, measured by this repository. Validation counts are out-of-fold (see App
 | WSB `mae_by_density` `30+` | 5.26 (23 photos) | 8.56 (18 photos) |
 | RBB `mae_by_density` `30+` | 3.47 (17 photos) | not recorded |
 | `ece`, raw scores | not measured | 0.048 |
+| `ece`, counted detections only | not measured | 0.087 |
 | Highest top score on any photo | not recorded | 0.9590 |
 
 Presence recall, the other density bins and the confusion counts are not recorded in `docs/evaluation-record.md` for this model. Its count accuracy may be understated, because the threshold search stopped at the top of its grid (see Decision thresholds).
@@ -164,7 +165,7 @@ Presence recall, the other density bins and the confusion counts are not recorde
 
 **The grid edge.** Four of five folds chose 0.50, the top of the grid. The MAE-optimal threshold for this model may therefore lie above 0.50, and its count accuracy may be understated. The grid was fixed before any result for this model and was not extended afterwards, so this remains unmeasured.
 
-**The review flags.** The app flags a photo when any counted detection scores below `review_below`, 0.68 for this model. That is the raw score whose Platt-calibrated probability on validation is about 0.74, the same meaning as the default model's flag. The Platt parameters for this model are not recorded in `docs/evaluation-record.md`. The app also flags any photo with more than 30 counted insects (`crowdedAbove` in `app/lib/counting/counting.dart`); this limit is the same for every model.
+**The review flags.** The app flags a photo when any counted detection scores below `review_below`, 0.68 for this model. That is the raw score whose Platt-calibrated probability on validation is about 0.74, the same meaning as the default model's flag. The Platt parameters for this model are not recorded in `docs/evaluation-record.md`. The 0.74 is pooled over both species: within 0.04 of `review_below` on validation, detections were real 95% of the time for rice black bug and 65% for white stemborer, so the flag is weaker for white stemborer, the species on crowded trays. The app also flags any photo with more than 30 counted insects (`crowdedAbove` in `app/lib/counting/counting.dart`); this limit is the same for every model.
 
 **Acceptance thresholds set during development.** The model's specification (`specs/001-model-training/spec.md`, success criteria SC-002 to SC-006) records the quality gates, which were set before training: `map50_species` ≥ 0.80, `count_accuracy` ≥ 0.80, and each sex class ≥ 0.70 before sex classes may be shown. It also records the ship gates: ONNX ≤ 200 MB, CPU time ≤ 5 s per photo and parity with PyTorch (same kept detections, box IoU ≥ 0.99, score difference ≤ 1e-3). These are quality bars for a teaching demo, chosen before any result. They are not agronomic action thresholds, and no target domain imposed them. This model meets the size and speed gates and, on validation and on the post-hoc test, the quality gates. It does **not** meet the parity gate: its score difference is 2.95e-3.
 
@@ -178,7 +179,7 @@ Presence recall, the other density bins and the confusion counts are not recorde
 
 Validation counts are out-of-fold. The 253 validation photos were split into 5 folds grouped by family (fold seed `20261016`). For each fold, the threshold and the Platt fit were chosen on the other four folds and applied to the held-out fold. Two caveats apply (2026-11-01). The folds group photos by family, not by the near-duplicate group the split uses: two such groups, holding 16 of the 253 families, have families in more than one fold, so some held-out photos have near-duplicates in the folds the threshold was chosen on; how much this flatters the out-of-fold figures has not been estimated. And the detector itself, through its checkpoint, was chosen on these same validation photos, so the out-of-fold figures measure the threshold and calibration choice for this fixed detector, not the whole selection procedure. The test figures are the separate estimate.
 
-The test figures come from one post-hoc evaluation of 252 photos at threshold 0.50. It went beyond the pre-registered rule, which allowed one test evaluation for one model, and that evaluation went to r50-v5. This test split had already been evaluated three times for other models.
+The test figures come from one post-hoc evaluation of 252 photos at threshold 0.50. It went beyond the prospectively documented rule, which allowed one test evaluation for one model, and that evaluation went to r50-v5. This test split had already been evaluated three times for other models.
 
 **Dispersion.** No confidence interval is reported for mAP, count accuracy or MAE. The only interval is from a paired bootstrap on the 18 validation photos with 30 or more white stemborers: 10,000 resamples of photos, seed `20261017`. Against r50-v5, the mean paired difference in white stemborer absolute error (this model minus r50-v5) was −0.11, with a 95% interval of [−0.89, +0.72]: a tie. This model was better on 8 of those photos and worse on 5.
 
@@ -372,6 +373,7 @@ Each record below is one execution, as recorded in [`docs/evaluation-record.md`]
 - **Runtime:** CPU, ONNX Runtime `CPUExecutionProvider`; version and CPU model not recorded
 - **Procedure:** 10 validation photos at threshold 0.48; a second, query-by-query comparison at 0.04; CPU time as the median over 10 photos
 - **Observed result:** at 0.48, kept detections and classes identical, box IoU 1.000, maximum score difference 2.95e-3, above the 1e-3 tolerance. At 0.04, maximum score difference 7.5e-3 and minimum box IoU 0.989, and two photos differed by one or two detections near the cut. Median CPU time 0.14 s per photo.
+- **Result: qualified parity.** Kept detections matched, but the score tolerance set beforehand (1e-3) was not met and was waived.
 - **Caveats:** parity was first checked at 0.48; a re-run at this model's counting threshold of 0.50 (2026-10-18) also found kept detections and classes identical, with scores differing by up to 2.95e-3 on 2 of the 10 photos. The owner waived the 1e-3 score tolerance for this teaching demo (dated in `docs/evaluation-record.md`), and the manifest's `notes` field records it; 10 photos only; one laptop; no phone measured
 
 ## Citation

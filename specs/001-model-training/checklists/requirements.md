@@ -33,5 +33,5 @@
 
 - Validation pass 1 found two failures. (1) A draft of FR-015 and SC-005 named the training framework, the model file format and the cloud notebook service; they now say "the training framework", "a single portable model file" and "a free cloud GPU notebook". (2) A draft of SC-002 said "mAP50" with no explanation; it now spells out "mean average precision at 50% box overlap" for non-specialist readers. Pass 2: all items pass.
 - The numbers in SC-002 to SC-006 are the project's quality and ship gates, copied from the README ("Status and release gates") and `docs/evaluation-record.md` (rule D and the test look). They are outcomes a reader can check, not design choices.
-- "300 detection slots" (FR-015) and "10 validation photos" (FR-016, SC-005) are kept: the first is a user-visible limit on how many insects one photo can count, the second is the size of the pre-registered parity sample.
+- "300 detection slots" (FR-015) and "10 validation photos" (FR-016, SC-005) are kept: the first is a user-visible limit on how many insects one photo can count, the second is the size of the prospectively documented parity sample.
 - The release gates that are not met (field validation on phone photos, phone latency, wording review, data protection) are recorded under Assumptions as outside this feature, so the spec does not claim them.

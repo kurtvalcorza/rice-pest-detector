@@ -1,6 +1,6 @@
 """Paired bootstrap of per-photo white-stemborer count errors on crowded trays.
 
-The pre-registered rules compare two models on the 18 validation photos with 30 or more white
+The prospectively documented rules compare two models on the 18 validation photos with 30 or more white
 stemborers: the new model counts as better only if the 95% interval of the mean paired difference
 lies entirely below 0. Run: python -m tools.dense_tray_bootstrap runs/<run>/dense_wsb_bootstrap*.json
 recomputes a saved report and exits 1 if its interval does not match.

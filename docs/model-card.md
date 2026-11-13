@@ -10,7 +10,7 @@ Each fine-tuned model has its own card:
 - [RF-DETR-M: RF-DETR, medium](model-cards/rf-detr-m.md), fine-tuned from `Roboflow/rf-detr-medium`, 576×576.
 - [D-FINE-L: D-FINE, large](model-cards/d-fine-l.md), fine-tuned from `ustc-community/dfine-large-coco`, 640×640.
 
-**The demo app uses r50-v5 by default**, at counting threshold 0.48. It was chosen on validation under rules fixed before any result, and it is the only model whose test result was a pre-registered evaluation. RF-DETR-M and D-FINE-L are comparison models: the app can download or import them, and it shows a "not validated" banner on their counts. Every model, the default included, carries a "Not validated" tag in the app's model list: none has been validated in the field or by experts, and the release gates (field validation, wording review, data protection, phone latency) are still open.
+**The demo app uses r50-v5 by default**, at counting threshold 0.48. It was chosen on validation under rules fixed before any result, and it is the only model whose test result was a prospectively documented evaluation. RF-DETR-M and D-FINE-L are comparison models: the app can download or import them, and it shows a "not validated" banner on their counts. Every model, the default included, carries a "Not validated" tag in the app's model list: none has been validated in the field or by experts, and the release gates (field validation, wording review, data protection, phone latency) are still open.
 
 Every figure in the cards, with its provenance, is in [`evaluation-record.md`](evaluation-record.md).
 

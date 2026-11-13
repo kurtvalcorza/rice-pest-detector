@@ -158,7 +158,7 @@ An instructor or learner downloads a published model, checks that it is the file
 - **Exclusion**: a family left out, with the reason.
 - **Training run**: a notebook, its settings, its experiment fingerprint, its per-epoch history and its latest and best checkpoints.
 - **Evaluation result**: the metrics of one model on one split at one threshold, with the identity of everything it depends on.
-- **Pre-registered rule**: a written condition, fixed before the results, that decides a model choice or a use of the test split.
+- **Prospectively documented rule**: a written condition, fixed before the results, that decides a model choice or a use of the test split. It is fixed in this repository's history, not lodged with an external registry.
 - **Exported model**: the portable model file with its size, checksum and source checkpoint.
 - **Model description**: the strict, machine-readable summary of an exported model that the app reads.
 - **Model card**: the human-readable account of a model's intended use, limits, figures and licences.

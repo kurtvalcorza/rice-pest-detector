@@ -31,7 +31,7 @@ The first command prints `{"images": {"train": 4948, "val": 253, "test": 252}, "
 1. Open colab.research.google.com in a browser, choose File → Upload notebook and pick, for example, `notebooks/train_colab_r50v5.ipynb`.
 2. Set the runtime to a T4 GPU, choose Run all and accept the Drive prompt.
 3. After a disconnect, choose Run all again; training resumes from Drive.
-4. The last cell stops at the locked test look. Do not set `THRESHOLD` unless a pre-registered rule gives the model the look.
+4. The last cell stops at the locked test look. Do not set `THRESHOLD` unless a prospectively documented rule gives the model the look.
 5. Copy `best.pt`, `history.jsonl` and the `env-*.txt` log from Drive `rice-pest-detector/<run folder>/` to `runs/<run folder>/` (not tracked by git).
 
 ## Judge it on validation (CPU)

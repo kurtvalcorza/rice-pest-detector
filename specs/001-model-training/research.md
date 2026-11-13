@@ -69,7 +69,7 @@ These facts were checked on the downloaded archive before any design decision, a
 
 **Alternatives considered**: Keep the specified 0.5 threshold (rejected after r18-1, whose scores never reached 0.25). Choose the threshold on test (rejected by Principle IV). Widen the grid after D-FINE-L chose its top value, 0.50, in four folds (rejected: the grid was fixed before the results; the possible cap is recorded instead).
 
-## R7. Pre-registered rules and a budget for the test split
+## R7. Prospectively documented rules and a budget for the test split
 
 **Decision**: Before any wave-2 result, four rules were written down (evaluation record, "Wave 2"): A, r50-v5 replaces r50-1 only if it is better on crowded trays and its count accuracy is not lower; B, a challenger replaces r50-v5 only if its count accuracy is higher and it is better on crowded trays; C, the test look goes only to a model with out-of-fold validation count accuracy ≥ 0.80, the best such model, once; D, no model ships without ONNX ≤ 200 MB, parity on 10 validation photos and CPU time ≤ 5 s. Each test result is bound to the weights, manifest, annotations, threshold and evaluator version (`train.evaluation_id`, `check_cached_test`), and the notebooks' test cell refuses to run until a validation-chosen threshold is typed in.
 

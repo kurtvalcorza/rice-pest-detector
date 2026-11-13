@@ -8,7 +8,7 @@
 
 ## Summary
 
-A Python package (`src/rice_pest_detector/`) turns the open light-trap dataset by its authors (Deleña et al.) into a family-grouped, near-duplicate-free 70/15/15 split stored as JSON in `data/`; a generator (`tools/build_notebook.py`) embeds that package and data into Colab notebooks that fine-tune COCO-pretrained detection transformers (RT-DETR, RF-DETR, D-FINE) from Hugging Face `transformers` on a T4; command-line tools in `tools/` choose the counting threshold and calibrate scores on validation only, export the chosen checkpoint to ONNX and check parity with PyTorch; the inference contract (`docs/inference-contract.md`, reference `src/rice_pest_detector/infer.py`) and its golden fixtures hand the model to the apps. The decisions behind each step are in [research.md](research.md); the key ones are the family-grouped re-split (R1), counting accuracy beside a do-nothing baseline as the headline (R4, R5), the move to `transformers` 5.20.1 after the denoising-loss bug (R9) and the choice of r50-v5 by pre-registered rules (R7, R10).
+A Python package (`src/rice_pest_detector/`) turns the open light-trap dataset by its authors (Deleña et al.) into a family-grouped, near-duplicate-free 70/15/15 split stored as JSON in `data/`; a generator (`tools/build_notebook.py`) embeds that package and data into Colab notebooks that fine-tune COCO-pretrained detection transformers (RT-DETR, RF-DETR, D-FINE) from Hugging Face `transformers` on a T4; command-line tools in `tools/` choose the counting threshold and calibrate scores on validation only, export the chosen checkpoint to ONNX and check parity with PyTorch; the inference contract (`docs/inference-contract.md`, reference `src/rice_pest_detector/infer.py`) and its golden fixtures hand the model to the apps. The decisions behind each step are in [research.md](research.md); the key ones are the family-grouped re-split (R1), counting accuracy beside a do-nothing baseline as the headline (R4, R5), the move to `transformers` 5.20.1 after the denoising-loss bug (R9) and the choice of r50-v5 by prospectively documented rules (R7, R10).
 
 ## Technical Context
 
@@ -26,7 +26,7 @@ A Python package (`src/rice_pest_detector/`) turns the open light-trap dataset b
 
 **Performance Goals**: ONNX ≤ 200 MB and CPU time ≤ 5 s per photo (median of 10) on the reference laptop (rule D); training fits a T4 at batch 4 (about 11 min per epoch for r50 at 640 px, from the r50-1 run)
 
-**Constraints**: The test split is used only under pre-registered rules (Principle IV); no image, checkpoint or weight file is committed; 300 detection queries (trays hold up to 106 insects); the input is a square 640 px (576 px for RF-DETR-M) with no normalisation
+**Constraints**: The test split is used only under prospectively documented rules (Principle IV); no image, checkpoint or weight file is committed; 300 detection queries (trays hold up to 106 insects); the input is a square 640 px (576 px for RF-DETR-M) with no normalisation
 
 **Scale/Scope**: 5,453 images (4,948 / 253 / 252), 1,684 families, 1,600 duplicate groups, 71,047 boxes, 4 classes; 10 package modules, 7 Python tools, 5 notebooks; 5 training runs, 3 published models
 
@@ -107,5 +107,5 @@ docs/                    # inference-contract.md, evaluation-record.md, decision
 | Deviation | Why it stands | Simpler alternative rejected because |
 | :-- | :-- | :-- |
 | CI does not run `tools/build_notebook.py --check` (Principle III asks CI to run every `--check`) | The generator's behaviour is covered by `tests/test_build_notebook.py`, and all five committed notebooks matched a fresh build on 2026-10-19; adding the five checks to CI is an open task (T073) | Not a design choice to keep: it is recorded here so that it is fixed, not forgotten |
-| The two challengers were evaluated on the test split after r50-v5's pre-registered look (Principle IV) | As `docs/evaluation-record.md` states: by owner exception, post-hoc, for comparison only, and not used to choose a model; the result files are marked as post-hoc | Leaving the figures out would hide numbers that the README already publishes |
+| The two challengers were evaluated on the test split after r50-v5's prospectively documented look (Principle IV) | As `docs/evaluation-record.md` states: by owner exception, post-hoc, for comparison only, and not used to choose a model; the result files are marked as post-hoc | Leaving the figures out would hide numbers that the README already publishes |
 | D-FINE-L's parity score tolerance (1e-3) is waived (rule D) | Kept detections, classes and boxes are identical at 0.48 and 0.50; scores differ by at most 2.95e-3, which changes no count; recorded in `docs/decisions.md` and the evaluation record; the tolerance stays for any future model | D-FINE-L is a comparison model in the app, not the default |

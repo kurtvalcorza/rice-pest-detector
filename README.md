@@ -84,14 +84,14 @@ Each was fine-tuned from a COCO-pretrained base model on Hugging Face (Apache-2.
 | Architecture, base model | RT-DETR (ResNet-50), `PekingU/rtdetr_r50vd` | RF-DETR (medium), `Roboflow/rf-detr-medium` | D-FINE (large), `ustc-community/dfine-large-coco` |
 | Input size | 640×640 | 576×576 | 640×640 |
 | Counting threshold | 0.48 | 0.48 | 0.50 |
-| Count accuracy, validation (out-of-fold) | 0.834 | 0.846 | 0.822 |
-| Count accuracy, test | **0.849** (the pre-registered test look) | 0.806 (post-hoc) | 0.833 (post-hoc) |
+| Within-tolerance count accuracy, validation (out-of-fold threshold) | 0.834 | 0.846 | 0.822 |
+| Within-tolerance count accuracy, test | **0.849** (the prospectively documented test look) | 0.806 (post-hoc) | 0.833 (post-hoc) |
 | Species mAP50, test | 0.943 | 0.944 | 0.946 |
 | White stemborer error, trays with 30+ insects, test (23 images) | 4.87 | 4.57 | 5.26 |
 | ONNX size | 171.7 MB | 122.0 MB | 125.2 MB |
 | CPU time per photo (median of 10) | 1.14 s | 0.33 s | 0.14 s |
 
-**How r50-v5 was chosen.** Four rules (A–D, see [Evaluation](#evaluation)) were fixed before any wave-2 result. They compared the models on validation only: out-of-fold count accuracy, plus a paired bootstrap on the 18 crowded white-stemborer trays. r50-v5 met rule A against the previous demo model; neither challenger met rule B against r50-v5. Only then was the test split used, once, for r50-v5. The two challengers' test results were computed afterwards at the owner's request and are for comparison only: they played no part in the choice.
+**How r50-v5 was chosen.** Four rules (A–D, see [Evaluation](#evaluation)) were fixed before any wave-2 result. They compared the models on validation only: out-of-fold count accuracy, plus a paired bootstrap on the 18 crowded white-stemborer trays. r50-v5 met rule A against the previous demo model; neither challenger met rule B against r50-v5. Only then was the test split used, once, for r50-v5. (Earlier, run r18-1 had used the specification's single test evaluation, and on 2026-10-16 the test photos were also run once outside the rules to pick workshop samples; neither chose a model, threshold or calibration. The evaluation record lists every read.) The two challengers' test results were computed afterwards at the owner's request and are for comparison only: they played no part in the choice.
 
 **Why the earlier runs scored low.** Runs r18-1 and r50-1 were trained on transformers 4.57.6, whose RT-DETR main loss included the 100 denoising queries; transformers 5.18 fixed it. With the same recipe on 5.20.1, the top validation score rose from 0.31 (r50-1) to 0.94 (r50-v5).
 
@@ -129,8 +129,8 @@ A family is an original photo and its augmented variants. Families stay together
 **Changes made to the published dataset** (full list in [data/README.md](data/README.md)):
 
 - Re-split 70/15/15 by family, with a fixed seed (`20261013`), instead of the published train/valid/test split.
-- Near-duplicate families merged into one group before splitting, so that close copies cannot sit on both sides.
-- 652 label files with polygon rows converted to bounding boxes.
+- Near-duplicate families (perceptual-hash distance 1 or less) merged into one group before splitting, so that those copies cannot sit on both sides. Looser near-duplicates remain possible: 51 validation and 42 test families lie within distance 2 of a training family, and three test/train pairs above 0.95 pixel correlation are still to be inspected by eye ([evaluation record](docs/evaluation-record.md)).
+- 652 source label files with polygon rows converted to axis-aligned bounding boxes (the polygon's minimum and maximum). In the final manifest, 516 of the 5,453 images carry such boxes (12,149 rows).
 - Families with bad labels excluded and listed in `data/exclusions.json` (one family, for a missing label).
 - YOLO labels converted to COCO JSON.
 
@@ -175,7 +175,7 @@ flowchart TB
 
 ### System overview
 
-The open dataset becomes a leakage-free split, the split trains a model on Colab, and the trained checkpoint is exported once to ONNX. The app runs that ONNX file under one inference contract.
+The open dataset becomes a family-grouped, deduplicated split, the split trains a model on Colab, and the trained checkpoint is exported once to ONNX. The app runs that ONNX file under one inference contract.
 
 ```mermaid
 flowchart LR
@@ -408,7 +408,7 @@ Every result, with the command and file it came from, is in [docs/evaluation-rec
 **Metrics** (`src/rice_pest_detector/metrics.py`):
 
 - **Species mAP50** (`map50`, female and male merged) and **four-class mAP50**, via pycocotools with `maxDets = [1, 10, 300]` because trays hold up to 106 insects. mAP uses every detection, so it measures ranking, not the threshold.
-- **Count accuracy** (`count_accuracy`): an image passes when each species' count is within ±10% of the truth, or within ±1 when the true count is below 10. It is always reported beside the **no-detection baseline** (0.456 on test, 0.474 on validation), because the ±1 tolerance lets an image with one insect pass when nothing is detected.
+- **Within-tolerance count accuracy** (`count_accuracy`, "count accuracy" in the tables): an image passes when each species' count is within ±10% of the truth, or within ±1 when the true count is below 10. It is always reported beside the **no-detection baseline** (0.456 on test, 0.474 on validation), because the ±1 tolerance lets an image with one insect pass when nothing is detected.
 - **Count errors** (`count_errors`): per-species mean absolute error, signed bias, exact-count rate, presence recall and mean absolute error by density (1–9, 10–29, 30+ insects).
 - **Confusion** (`confusion`): missed insects, spurious detections and class mix-ups at the counting threshold.
 - **Review flags** (in the app, `counting.dart`): a photo is flagged when any counted detection scores below the model's `review_below` (the raw score that is about 74% likely to be a real insect after calibration, pooled across species: on validation, 91% for rice black bug and 67% for white stemborer), or when more than 30 insects are counted.
@@ -418,12 +418,12 @@ Every result, with the command and file it came from, is in [docs/evaluation-rec
 **Calibration and threshold, on validation only:**
 
 - `tools/calibrate_scores.py` runs the ONNX model on the 253 validation photos, labels each detection true or false (greedy same-species match at IoU ≥ 0.5) and fits Platt scaling, with the expected calibration error before and after.
-- Every count result is **out-of-fold**: 5 folds with photos grouped by family, and the count threshold re-chosen inside each fold.
+- Every count result is **out-of-fold for the threshold**: 5 folds with photos grouped by family, and the count threshold re-chosen inside each fold. The checkpoint itself was chosen earlier, on species mAP50 over the whole validation split, and is not retrained per fold. These are cross-fitted threshold estimates for a validation-selected checkpoint, not a held-out estimate of the whole selection process.
 - `tools/choose_demo_threshold.py` sweeps thresholds from 0.02 to 0.50 in steps of 0.02 and picks the one with the lowest total count error, preferring the higher threshold on ties.
 
 **Dense-tray paired bootstrap.** On the 18 validation photos with 30 or more white stemborers (one per family), the per-photo white-stemborer count errors of two models are paired and resampled 10,000 times (seed 20261017). A model counts as better on crowded trays only when the 95% interval of the mean difference lies entirely below 0. `tools/dense_tray_bootstrap.py` recomputes a saved comparison, and the method and results are in the evaluation record.
 
-**Pre-registered rules** (fixed before any wave-2 result):
+**Prospectively documented rules** (fixed in this repository's history before any wave-2 result; not lodged with an external registry):
 
 - **A.** r50-v5 replaces r50-1 only if it is better on crowded trays (bootstrap) and its count accuracy is not lower. Met.
 - **B.** A challenger (RF-DETR-M or D-FINE-L) replaces r50-v5 only if its count accuracy is higher and it is better on crowded trays. Neither met it.

@@ -224,7 +224,7 @@ A code and peer review of the r50 notebook (2026-10-17, static) was triaged:
 - **Low raw scores are probably structural.** RT-DETR's class loss targets the matched box IoU, so small insects pull scores down whatever the backbone (inferred from the library design, not measured). r50-1 is judged on calibrated counts and crowded-tray error, never on raw counts at 0.5.
 - **Test cell fixed before the test look** (r50 notebook only; r18 unchanged): the protocol check now runs before any cached test numbers are printed, and the result is written atomically.
 
-### Run r50-1: pre-registered decision rules (owner, 2026-10-17)
+### Run r50-1: prospectively documented decision rules (owner, 2026-10-17)
 
 Fixed before any calibrated or count-threshold r50-1 result was computed. While training, the per-epoch logs show only mAP and counts at 0.5, where neither model keeps any detection.
 
@@ -256,14 +256,14 @@ Executed with the Colab CLI on a Colab **T4**. Session started 2026-10-16 17:53 
 
 Calibration error falls from 0.288 to 0.028 out-of-fold with Platt scaling (a = 3.07, b = 9.50). Raw scores remain low, as the review expected: the highest validation score on any image is 0.3149 for r50-1 and 0.2514 for r18-1 (the maximum over the 253 images of each image's top score, from `runs/run-r50/val_dets_onnx.json` and `runs/run-r18/val_dets_onnx.json`). The wave-2 entry below traces the low scores to a training-library bug.
 
-**Pre-registered rules, applied:**
+**Prospectively documented rules, applied:**
 
 1. **Test look: not spent.** r50-1's out-of-fold count accuracy is 0.751, below the 0.80 gate. The owner's one test exception stays unused for the next recipe.
 2. **Replacing r18-1: both conditions met.** (a) On the 18 validation images with 30 or more white stemborers (18 families), the WSB absolute error falls from 15.78 (r18-1) to 11.89 (r50-1). The mean paired difference is −3.89, with a 95% bootstrap interval of [−7.56, −0.44] (10,000 resamples, seed 20261017), entirely below 0. r50-1 is better on 12 images and worse on 4. Signed bias: r18-1 +2.44, r50-1 +0.78. (b) Count accuracy 0.751 ≥ 0.632. Data: `runs/run-r50/dense_wsb_bootstrap.json`.
 
 **r50-1 therefore replaces r18-1 as the demo and workshop model.** It is still exploratory and still below the count gate. The demo threshold stays 0.04, so the workshop's 0.04 wording does not change. The "count accuracy 0.632" caveat becomes 0.751. Raw 0.06 maps to about 74% calibrated probability for r50-1 (77% for r18-1), so the 0.06 review flag stands. Swap done on 2026-10-17: the workshop's sample photos and reference counts were re-run on validation photos, and the emulator steps and quoted numbers were updated. The app pins no model yet; its demo runs r50-1 placed with `demo.json` until a wave-2 model is chosen and released.
 
-## Wave 2 (2026-10-17): the denoising-loss fix and two challengers. Pre-registered; all three results in
+## Wave 2 (2026-10-17): the denoising-loss fix and two challengers. Prospectively documented; all three results in
 
 **Why.** Runs r18-1 and r50-1 were trained on transformers 4.57.6. In that version the main RT-DETR loss is computed over all decoder queries, including the 100 denoising queries: `modeling_rt_detr.py` sets `logits = outputs_class[:, -1]` and `loss_rt_detr.py` passes it to the criterion unsplit. Only the auxiliary outputs are split by `dn_num_split`; this was checked in the installed source on 2026-10-17. Both base configs set `num_denoising=100` and `auxiliary_loss=True`, so the bug was active. transformers v5.18.0 fixed it (PR #48528, "Fix D-FINE / RT-DETR main loss being computed over the denoising queries"). Inferred, not measured: Hungarian matching on the main loss can assign targets to noised ground-truth queries, which could explain the persistently low raw scores.
 
@@ -272,7 +272,7 @@ Calibration error falls from 0.288 to 0.028 out-of-fold with Platt scaling (a = 
 2. **D-FINE-L**: `DFineForObjectDetection` from `ustc-community/dfine-large-coco` (COCO-only weights; the Objects365-pretrained variants may carry that dataset's terms), at 640 px with 300 queries.
 3. **RF-DETR-M**: Apache-2.0 (N/S/M/L only), at its native 576 px. It starts after its preprocessing path is built and tested; runs 1 and 2 go first, in parallel.
 
-**Pre-registered rules** (owner-approved 2026-10-17, before any wave-2 result). Every comparison uses out-of-fold validation counts at each model's validation-chosen threshold (`tools/calibrate_scores.py`, 5 family-grouped folds) and the paired bootstrap on the 18 validation images with 30 or more white stemborers (10,000 resamples, seed 20261017):
+**Prospectively documented rules** (owner-approved 2026-10-17, before any wave-2 result). Every comparison uses out-of-fold validation counts at each model's validation-chosen threshold (`tools/calibrate_scores.py`, 5 family-grouped folds) and the paired bootstrap on the 18 validation images with 30 or more white stemborers (10,000 resamples, seed 20261017):
 
 - **A. r50-v5 vs the current demo (r50-1).** r50-v5 replaces r50-1 only if the 95% interval of mean(r50-v5 error − r50-1 error) lies entirely below 0 and its count accuracy is not below r50-1's 0.751.
 - **B. Challengers vs r50-v5.** D-FINE-L or RF-DETR-M replaces the demo model only if its count accuracy beats r50-v5's and the 95% interval of mean(challenger error − r50-v5 error) lies entirely below 0.
@@ -300,7 +300,7 @@ Both runs were executed with the Colab CLI on Colab **T4**s, 40 epochs each, wit
 - **Threshold grid edge.** The count-optimal search grid stops at 0.50 (`tools/choose_demo_threshold.py`). One r50-v5 fold chose 0.50, so its threshold may be capped by the grid. Recorded, not changed: the grid was fixed before these results.
 - **Early peaks again.** Both runs reach their best validation species mAP50 within the first four epochs and then drift down slowly (r50-v5 0.908 and RF-DETR-M 0.891 at epoch 39), much less steeply than r50-1.
 
-**Pre-registered rules, applied:**
+**Prospectively documented rules, applied:**
 
 - **A. r50-v5 vs r50-1: both conditions met.** On the 18 dense white-stemborer images, the WSB error falls from 11.89 to 8.67. The mean paired difference is −3.22, with a 95% bootstrap interval of [−7.17, −0.17] (10,000 resamples, seed 20261017), entirely below 0. r50-v5 is better on 12 images and worse on 5. Signed bias: r50-1 +0.78, r50-v5 −4.56 (r50-v5 undercounts dense trays). Count accuracy 0.834 ≥ 0.751. **r50-v5 qualifies to replace r50-1.** Data: `runs/run-r50v5/dense_wsb_bootstrap_vs_r50-1.json`. The bootstrap code reproduces the r50-1 vs r18-1 interval above exactly.
 - **B. RF-DETR-M vs r50-v5: not met.** Count accuracy is higher (0.846 > 0.834), but the dense-tray interval is not below 0: WSB 30+ error 9.56 vs 8.67, mean paired difference +0.89, 95% interval [−0.72, +3.11]; better on 6 images, worse on 7. Data: `runs/run-rfdetr-m/dense_wsb_bootstrap_vs_r50-v5.json`.
@@ -335,8 +335,8 @@ Executed with the Colab CLI on a Colab **T4**, 40 epochs, with the committed not
 | `best.pt` SHA-256 | `e0ae635d…` | `758e2d12…` |
 
 - **B. D-FINE-L vs r50-v5: not met.** Count accuracy is lower (0.822 < 0.834), which alone fails the rule. On the 18 dense white-stemborer images the error is a tie: 8.56 vs 8.67, mean paired difference −0.11, 95% interval [−0.89, +0.72] (10,000 resamples, seed 20261017); better on 8 images, worse on 5. Data: `runs/run-dfine-l/dense_wsb_bootstrap_vs_r50-v5.json`.
-- **Threshold grid edge.** Four of five folds chose 0.50, the top of the pre-registered grid (`tools/choose_demo_threshold.py`), so D-FINE-L's count-optimal threshold may lie above it and its count accuracy may be understated. Recorded, not changed: the grid was fixed before any wave-2 result.
-- **D. Ship gates: size and speed met; parity not met at the pre-registered tolerance.** ONNX `rice-pest-dfine-l.onnx` 125.2 MB (SHA-256 `c823f5d8…`); CPU 0.14 s per photo (median of 10). At threshold 0.48 on the 10 parity images (D-FINE-L counts at 0.50; parity was not run there), the kept detections and classes are identical and box IoU is 1.000, but scores differ by up to 2.95e-3, above the spec's 1e-3. At 0.04, query by query, the largest score difference is 7.5e-3 (minimum IoU 0.989) and two images differ by one or two detections near the cut. Data: `runs/run-dfine-l/parity_val10_t048.json`, `runs/run-dfine-l/parity_query_val10.json`.
+- **Threshold grid edge.** Four of five folds chose 0.50, the top of the prospectively documented grid (`tools/choose_demo_threshold.py`), so D-FINE-L's count-optimal threshold may lie above it and its count accuracy may be understated. Recorded, not changed: the grid was fixed before any wave-2 result.
+- **D. Ship gates: size and speed met; parity not met at the prospectively documented tolerance.** ONNX `rice-pest-dfine-l.onnx` 125.2 MB (SHA-256 `c823f5d8…`); CPU 0.14 s per photo (median of 10). At threshold 0.48 on the 10 parity images (D-FINE-L counts at 0.50; parity was not run there), the kept detections and classes are identical and box IoU is 1.000, but scores differ by up to 2.95e-3, above the spec's 1e-3. At 0.04, query by query, the largest score difference is 7.5e-3 (minimum IoU 0.989) and two images differ by one or two detections near the cut. Data: `runs/run-dfine-l/parity_val10_t048.json`, `runs/run-dfine-l/parity_query_val10.json`.
 
 **Result of wave 2.** r50-v5 stays the demo model: it met rule A, and neither challenger met rule B. Three models clear the 0.80 out-of-fold count-accuracy line (RF-DETR-M 0.846, r50-v5 0.834, D-FINE-L 0.822), so the single test look (rule C) is now available, for one model, once.
 
@@ -354,7 +354,7 @@ Executed with the Colab CLI on a Colab **T4**, 40 epochs, with the committed not
 - **Crowded trays.** WSB MAE by density: 1–9 insects 1.62, 10–29 1.68, 30+ 4.87 (23 images). RBB 30+: 3.65 (17 images). Crowded trays stay the weakest case, but less so than on validation (8.67 on 18 images); with this few images the difference may be the photos, not the model.
 - **Confusion.** Most errors are within a species: RBB male read as female 86 times, WSB male as female 60 times. Cross-species errors are rare (8 in total). Missed insects: 180 of 3,320; spurious detections: 349.
 - **Scores.** The median image's top score is 0.85 (p90 0.91, max 0.94): the scores carry over from validation.
-- **Protocol note.** The test split has now had both looks the pre-registered rules allow: once by r18-1 (13 Oct) and once by r50-v5 (this look). The two challengers were also scored on it afterwards, by owner exception, post-hoc and for comparison only (next paragraph). No further test looks remain under the pre-registered rules; a later model needs a new held-out set, such as field photos. One more read happened outside the rules: see "Notebook audit (2026-11-07)".
+- **Protocol note.** The test split has now had both looks the prospectively documented rules allow: once by r18-1 (13 Oct) and once by r50-v5 (this look). The two challengers were also scored on it afterwards, by owner exception, post-hoc and for comparison only (next paragraph). No further test looks remain under the prospectively documented rules; a later model needs a new held-out set, such as field photos. One more read happened outside the rules: see "Notebook audit (2026-11-07)".
 
 **Post-hoc test evaluation of the two challengers (owner exception, 2026-10-18).** After r50-v5's look, the owner asked for RF-DETR-M and D-FINE-L to be evaluated on the same test split, each at its own validation-chosen threshold, with the same code (local CPU). This goes beyond rule C. It is reported for comparison only and was **not** used to choose a model: the demo model was fixed by rules A and B on validation before any test look. Files: `runs/run-rfdetr-m/test_metrics.json`, `runs/run-dfine-l/test_metrics.json` (each marked as a post-hoc exception).
 
@@ -465,7 +465,7 @@ carry a byte copy of it; the fold is a separate step between export and publicat
 
 An adversarial review of the training notebooks and their generator, with no GPU or hosted runs. It found no wrong published number: the test figures reproduce from the saved run files. Corrections and open items:
 
-- **A test-split read outside the rules.** On 2026-10-16, r18-1 was run on all 252 test photos at threshold 0.04 to pick sample photos for the workshop. It was not a pre-registered look and was not recorded here at the time. It chose no model, threshold or calibration: r18-1 was already fixed and was later replaced on validation-only rules. On 2026-10-17 the sample photos moved to validation. The split has therefore been evaluated five times, not four.
+- **A test-split read outside the rules.** On 2026-10-16, r18-1 was run on all 252 test photos at threshold 0.04 to pick sample photos for the workshop. It was not a prospectively documented look and was not recorded here at the time. It chose no model, threshold or calibration: r18-1 was already fixed and was later replaced on validation-only rules. On 2026-10-17 the sample photos moved to validation. The split has therefore been evaluated five times, not four.
 - **Which build ran.** r50-v5 and D-FINE-L started at about 03:20 UTC on 2026-10-17 on the notebooks of commit `665e7a4`; the committed notebooks are a rebuild from `820c298` (04:09 UTC) that adds an input-size option and changes nothing at 640 px. "Run unchanged" above should be read with that in mind. RF-DETR-M first appears in `820c298`.
 - **Kaggle run summary.** `run_summary.json` said PASS whatever the reload report said, if the summary cell was re-run after a failed reload. It now follows the report, and `tools/verify_kaggle_run.py` caught this case before and still does. A Kaggle resume now refuses a `last.pt` without an experiment fingerprint. The editions' source hashes change again. The public Kaggle notebooks keep their verified code; each got one new no-run version on 2026-11-07 that corrects the paragraph on where the labels come from (ledger), and the verified runs stay in their version history.
 - **Known limitations, not changed.** `train.py` stays as the notebooks embed it, so: a disconnect between saving `best.pt` and `last.pt` re-runs that epoch on resume, keeping the higher score; a Colab resume accepts a `last.pt` without a fingerprint, with a printed warning; the Colab notebooks pin `transformers` and take torch and Python from the runtime. Three test/train near-duplicate pairs flagged in the data audit have not been inspected by eye.

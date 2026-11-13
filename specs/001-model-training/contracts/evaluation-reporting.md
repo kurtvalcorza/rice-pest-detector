@@ -42,7 +42,7 @@ Model choice between candidates uses rules A and B (out-of-fold validation count
 
 - Every result names its run, split, date, command and the file it came from (for example `runs/run-r50v5/test_metrics.json`), and its label: built, CPU-tested or hosted-executed.
 - Count accuracy is never shown without the baseline; validation counts are out-of-fold (5 family-grouped folds) whenever a threshold was chosen on the same photos.
-- Rules are written into the record, dated, before the results they govern, and then applied in the record ("Pre-registered rules, applied").
+- Rules are written into the record, dated, before the results they govern, and then applied in the record ("Prospectively documented rules, applied").
 - Limits found after the fact are recorded, not fixed silently: the threshold grid edge, the parity tolerance waiver, the change from order-based to paired parity.
 - Owner decisions not about models go to `docs/decisions.md`.
 - Numbers in the README, model cards and decks are copied from the record, not recomputed.
