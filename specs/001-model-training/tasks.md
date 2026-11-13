@@ -76,7 +76,7 @@ description: "Task list for the rice-pest model training pipeline"
 - [x] T023 [US1] Add tests that read the committed split: no family, group or file hash in two splits, sizes and seed, one image per family in val and test, annotation files equal to the manifest → `tests/test_committed_split.py`
 - [x] T024 [P] [US1] Implement `tools/nn_leakage_check.py` and record the distances for validation and test → `tools/nn_leakage_check.py`, `docs/evaluation-record.md` ("Cross-split nearest-neighbour check")
 - [x] T025 [P] [US1] Credit the dataset and list every change made to it → `data/README.md`, `NOTICE`, README ("Dataset")
-- [ ] T026 [US1] Inspect by eye the three test pairs with pixel correlation above 0.95 (`img_2657` / `img_1918`, `img_2427` / `img_2267`, `img_2569` / `img_2308`) and record the outcome in `docs/evaluation-record.md`
+- [x] T026 [US1] Inspect by eye the three test pairs with pixel correlation above 0.95 (`img_2657` / `img_1918`, `img_2427` / `img_2267`, `img_2569` / `img_2308`) and record the outcome in `docs/evaluation-record.md` — done 2026-11-14: all three are different single insects; no test figure changes
 
 **Checkpoint**: The split exists, is tested and can be rebuilt: the MVP every later number depends on.
 

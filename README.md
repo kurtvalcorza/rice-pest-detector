@@ -129,7 +129,7 @@ A family is an original photo and its augmented variants. Families stay together
 **Changes made to the published dataset** (full list in [data/README.md](data/README.md)):
 
 - Re-split 70/15/15 by family, with a fixed seed (`20261013`), instead of the published train/valid/test split.
-- Near-duplicate families (perceptual-hash distance 1 or less) merged into one group before splitting, so that those copies cannot sit on both sides. Looser near-duplicates remain possible: 51 validation and 42 test families lie within distance 2 of a training family, and three test/train pairs above 0.95 pixel correlation are still to be inspected by eye ([evaluation record](docs/evaluation-record.md)).
+- Near-duplicate families (perceptual-hash distance 1 or less) merged into one group before splitting, so that those copies cannot sit on both sides. Looser near-duplicates remain possible: 51 validation and 42 test families lie within distance 2 of a training family, and the three test/train pairs above 0.95 pixel correlation were inspected by eye and are different insects ([evaluation record](docs/evaluation-record.md)).
 - 652 source label files with polygon rows converted to axis-aligned bounding boxes (the polygon's minimum and maximum). In the final manifest, 516 of the 5,453 images carry such boxes (12,149 rows).
 - Families with bad labels excluded and listed in `data/exclusions.json` (one family, for a missing label).
 - YOLO labels converted to COCO JSON.

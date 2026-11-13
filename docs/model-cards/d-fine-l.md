@@ -263,7 +263,7 @@ Each mitigation below is implemented in this repository and can be inspected.
 - **Overconfidence.** The calibration holds for validation photos only. On other photos, a score of 0.68 may not mean a 74% chance of a real insect, so the review flag can miss doubtful counts.
 - **Automation bias.** A clean-looking count invites trust. Users may accept counts without checking, especially on photos without a flag. Unflagged photos are not guaranteed correct.
 - **Misuse as an official or advisory tool.** Presenting counts as surveillance data or as a basis for spraying could lead to needless or missed pesticide use. Farmers, consumers and the environment would bear that harm.
-- **Undetected leakage.** Deduplication stops at Hamming distance 1. 42 test families lie within distance 2 of a training family, and three close test pairs have not been inspected by eye. Remaining near-duplicates would make the test figures optimistic.
+- **Undetected leakage.** Deduplication stops at Hamming distance 1. 42 test families lie within distance 2 of a training family, and the three closest test pairs were inspected by eye on 2026-11-14 and are different insects. Remaining near-duplicates would make the test figures optimistic.
 - **Reused test split.** The test split had been evaluated three times before this model's post-hoc evaluation. Its test figures are comparison evidence, not an unbiased estimate.
 - **Bias from the data.** The dataset's regions, seasons and trap types are undocumented. Any skew in them passes into the model unmeasured. Users in places unlike the source bear the resulting error.
 

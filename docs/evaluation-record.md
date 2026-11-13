@@ -32,7 +32,7 @@ python -m tools.nn_leakage_check --dataset-root <riceprotek-insects-v28/datasets
 | val | 253 | 2 | 51 | 106 |
 | test | 252 | 2 | 42 | 103 |
 
-Manual inspection of the close pairs: all inspected pairs were single-insect photos with different IMG numbers, pixel correlation 0.74-0.97. Three test pairs above 0.95 are still to be inspected by eye: `img_2657` / `img_1918`, `img_2427` / `img_2267`, `img_2569` / `img_2308`.
+Manual inspection of the close pairs: all inspected pairs were single-insect photos with different IMG numbers, pixel correlation 0.74-0.97. Three test pairs above 0.95 were inspected by eye on 2026-11-14: `img_2657` / `img_1918`, `img_2427` / `img_2267`, `img_2569` / `img_2308`. Each is a different single rice black bug on a plain white background (different leg and antenna positions; in the second pair the test photo shows the underside and the training variants the back). The high correlation comes from the shared background and one dark body, not a shared scene. No pair is a duplicate, so no test figure changes.
 
 The 2% rule protects the split; it is not a definition of a duplicate.
 
@@ -468,7 +468,7 @@ An adversarial review of the training notebooks and their generator, with no GPU
 - **A test-split read outside the rules.** On 2026-10-16, r18-1 was run on all 252 test photos at threshold 0.04 to pick sample photos for the workshop. It was not a prospectively documented look and was not recorded here at the time. It chose no model, threshold or calibration: r18-1 was already fixed and was later replaced on validation-only rules. On 2026-10-17 the sample photos moved to validation. The split has therefore been evaluated five times, not four.
 - **Which build ran.** r50-v5 and D-FINE-L started at about 03:20 UTC on 2026-10-17 on the notebooks of commit `665e7a4`; the committed notebooks are a rebuild from `820c298` (04:09 UTC) that adds an input-size option and changes nothing at 640 px. "Run unchanged" above should be read with that in mind. RF-DETR-M first appears in `820c298`.
 - **Kaggle run summary.** `run_summary.json` said PASS whatever the reload report said, if the summary cell was re-run after a failed reload. It now follows the report, and `tools/verify_kaggle_run.py` caught this case before and still does. A Kaggle resume now refuses a `last.pt` without an experiment fingerprint. The editions' source hashes change again. The public Kaggle notebooks keep their verified code; each got one new no-run version on 2026-11-07 that corrects the paragraph on where the labels come from (ledger), and the verified runs stay in their version history.
-- **Known limitations, not changed.** `train.py` stays as the notebooks embed it, so: a disconnect between saving `best.pt` and `last.pt` re-runs that epoch on resume, keeping the higher score; a Colab resume accepts a `last.pt` without a fingerprint, with a printed warning; the Colab notebooks pin `transformers` and take torch and Python from the runtime. Three test/train near-duplicate pairs flagged in the data audit have not been inspected by eye.
+- **Known limitations, not changed.** `train.py` stays as the notebooks embed it, so: a disconnect between saving `best.pt` and `last.pt` re-runs that epoch on resume, keeping the higher score; a Colab resume accepts a `last.pt` without a fingerprint, with a printed warning; the Colab notebooks pin `transformers` and take torch and Python from the runtime. Three test/train near-duplicate pairs flagged in the data audit have not been inspected by eye. (Inspected 2026-11-14: different insects; see the cross-split check above.)
 
 ## Calibration audit (2026-11-07)
 
@@ -479,3 +479,31 @@ An adversarial review of `tools/calibrate_scores.py` and `tools/choose_demo_thre
 - **"Count-optimal" in this record** means the lowest summed count MAE, not the highest count accuracy. On a wider grid the rule's preference for the higher threshold on ties would choose 0.54 over 0.48 for r50-v5, at count accuracy 0.810 rather than 0.838; the published grid stops at 0.50, so no published choice is affected.
 - **Tools.** The dense-tray bootstrap was a one-off with no code; `tools/dense_tray_bootstrap.py` now reproduces all four saved intervals exactly. `choose_demo_threshold.py` had its own inference loop without the photo guard, and now uses the one in `calibrate_scores.py`. A calibration fit with no real or no false detections now stops instead of writing NaN.
 - **D-FINE-L.** Its validation figures were measured on Kaggle version 3. On version 4, which the app uses, the count accuracy was checked again (0.822 on both), but the calibration was not run again.
+
+## Detection metrics beyond AP50 (2026-11-14): validation only
+
+`tools/validation_detection_report.py` adds the stricter COCO measures and the operating-point figures that AP50 and count accuracy leave out. Inputs are fresh validation caches from `tools/calibrate_scores.py --cache` (all 253 validation photos, score floor 0.01) for the ONNX files the app uses: r50-v5 `dc3927ae…`, RF-DETR-M `07161f11…`, D-FINE-L version 4 `3cf578df…`. The test split was not read.
+
+**Checks against published figures.** Species AP50 from these caches is 0.937, 0.934 and 0.940, against the recorded PyTorch validation mAP50 of 0.937, 0.933 and 0.940. Raw calibration error is 0.046, 0.035 and 0.048, and the counting threshold 0.48, 0.48 and 0.50, as published. For D-FINE-L this is the first calibration run on version 4 (see Calibration audit); it agrees with version 3.
+
+| Validation, 253 photos | r50-v5 | RF-DETR-M | D-FINE-L |
+| :-- | :-- | :-- | :-- |
+| Species AP50:95 / AP50 / AP75 | 0.658 / 0.937 / 0.768 | 0.638 / 0.934 / 0.736 | 0.669 / 0.940 / 0.766 |
+| Rice black bug AP50:95 / AP75 | 0.755 / 0.912 | 0.737 / 0.891 | 0.771 / 0.916 |
+| White stemborer AP50:95 / AP75 | 0.561 / 0.624 | 0.538 / 0.581 | 0.567 / 0.616 |
+| Four-class AP50:95 / AP50 | 0.609 / 0.861 | 0.576 / 0.836 | 0.607 / 0.848 |
+| At the counting threshold: precision / recall | 0.899 / 0.919 | 0.911 / 0.900 | 0.897 / 0.919 |
+| False positives per photo, RBB / WSB | 0.23 / 0.96 | 0.26 / 0.75 | 0.28 / 0.93 |
+| White stemborer recall on photos with 1–9 / 10–29 / 30+ of them | 0.906 / 0.920 / 0.834 | 0.863 / 0.896 / 0.800 | 0.893 / 0.917 / 0.834 |
+| Rice black bug recall, same bins | 0.976 / 0.968 / 0.991 | 0.959 / 0.978 / 0.987 | 0.969 / 0.978 / 0.993 |
+
+Truth boxes: 1,206 rice black bug and 1,707 white stemborer. Precision and recall use the same labels as calibration: a detection is real when it claims an unclaimed same-species truth box at IoU ≥ 0.5.
+
+**What this shows.**
+
+- **Localisation is the weak part for white stemborer.** Its AP drops from about 0.90 at IoU 0.50 to about 0.60 at 0.75, while rice black bug keeps about 0.90. White-stemborer boxes are found but drawn loosely, which fits the elongated, often overlapping moths.
+- **Counting errors on crowded trays are mostly missed white stemborers.** On photos with 30 or more of them, 17 to 20% are not found at the counting threshold; rice black bug recall stays near 0.99 at every density.
+- **Spurious detections are mostly white stemborer too:** about one false white stemborer per photo, against a quarter of one for rice black bug.
+- **The three models remain within a few hundredths of each other.** One training run each is not enough to rank them; that needs repeated seeds.
+
+Reproduce: `python -m tools.calibrate_scores --onnx <model.onnx> --dataset-root <dataset> --out <calibration.json> --cache <val-dets.json>`, then `python -m tools.validation_detection_report --cache <val-dets.json> --threshold <0.48 or 0.50> --out <report.json>`.
