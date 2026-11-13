@@ -311,7 +311,7 @@ Optional dependency groups (`pyproject.toml`):
 
 | Extra | Adds | Needed for |
 | :-- | :-- | :-- |
-| `dev` | pytest, ruff, pycocotools, nbformat | tests, notebook build |
+| `dev` | pytest, ruff, pycocotools, nbformat, hypothesis | tests (including the property-based tests), notebook build |
 | `train` | torch, transformers 5.20.1, pycocotools, scipy | training code, export. Must be 5.18 or later (see [Models](#models)) |
 | `export` | onnx, onnxruntime | ONNX export, parity, calibration |
 
@@ -598,6 +598,7 @@ rice-pest-detector/
 │   ├── dense_tray_bootstrap.py   # paired bootstrap of crowded-tray count errors
 │   └── run_emulator.ps1 / .sh    # start an emulator and run the demo app
 ├── tests/                    # pytest suite
+├── formal/                   # Lean 4 proofs and the fixtures the tests check the code against (formal/README.md)
 ├── .specify/                 # Spec Kit: constitution (memory/), templates, scripts
 ├── specs/                    # Spec Kit features: 001 model, 002 phone app, 003 desktop app (planned), 004 advanced workshop
 ├── workshop/advanced/        # advanced track: verifier, workflow, mutation check, starters, patches, tests

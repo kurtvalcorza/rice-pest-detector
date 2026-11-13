@@ -139,7 +139,7 @@ The `torch` line installs the CPU build of PyTorch, which is much smaller than t
 | numpy, pillow | Everything: image loading, preprocessing, metrics |
 | torch, transformers 5.20.1, scipy, pycocotools | Loading checkpoints, evaluation (COCO mAP), ONNX export. transformers must be 5.18 or later: earlier versions have a training-loss bug for RT-DETR and D-FINE (see the evaluation record) |
 | onnx, onnxruntime | ONNX export, PyTorch–ONNX parity, calibration and threshold tools |
-| pytest, ruff, nbformat | Tests, lint, the notebook generator |
+| pytest, ruff, nbformat, hypothesis | Tests (hypothesis for the property-based tests), lint, the notebook generator |
 
 `pyproject.toml` is the source of truth; `requirements.txt` mirrors it, and a test fails if they drift apart. If you use [uv](https://docs.astral.sh/uv/), `uv pip install -r requirements.txt` works the same way.
 
