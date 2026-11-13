@@ -1,0 +1,20 @@
+name = "rice_pest_formal"
+defaultTargets = ["RicePest", "AxiomAudit", "fixtures"]
+
+[[lean_lib]]
+name = "RicePest"
+# Every module under RicePest/, not only the ones RicePest.lean imports, so none skips the check.
+globs = ["RicePest", "RicePest.+"]
+
+# Built by default: fails the build if a RicePest declaration uses a non-standard axiom.
+[[lean_lib]]
+name = "AxiomAudit"
+
+[[lean_exe]]
+name = "fixtures"
+root = "Fixtures"
+
+# A proof left as `sorry` is only a warning by default; make every warning fail the build.
+# AxiomAudit.lean also catches a `sorry` that opts out of this, and any non-standard axiom.
+[leanOptions]
+warningAsError = true
