@@ -10,13 +10,16 @@ a measurement, recorded in [docs/evaluation-record.md](../docs/evaluation-record
 | `RicePest/Postprocess.lean` | `infer.postprocess`, `app/lib/inference/postprocess.dart` | output is sorted by score with ties in query order; it keeps exactly the queries at or above the threshold; filter-then-sort equals sort-then-filter; a higher threshold keeps a prefix, so species counts never rise; the class is the first highest logit |
 | `RicePest/Families.lean` | `dedup.group_families` | close families (any hashes within `max_distance` bits) always share a group, so any split chosen per group keeps them together (no train/test leakage); families share a group only if a chain of close families links them |
 
-The proofs use Lean's core library only (no Mathlib): a build from scratch takes under a minute.
+The proofs use Lean's core library only (no Mathlib). The CI job takes under a minute; a build
+from scratch on a small machine can take a couple of minutes, most of it the axiom audit.
+
 `lake build` fails if a proof is incomplete or cheats:
 - `lakefile.toml` turns warnings into errors, so a `sorry` fails, and it builds every module under
   `RicePest/`, imported or not;
 - `AxiomAudit.lean` fails if any `RicePest` declaration depends on an axiom other than `propext`,
   `Classical.choice` and `Quot.sound`. That catches a new `axiom`, `native_decide`, and a `sorry`
-  even under `set_option warningAsError false`.
+  even under `set_option warningAsError false`. It sees only modules that `RicePest.lean` imports,
+  so CI also checks that every file under `RicePest/` is imported there.
 
 ## How the proofs reach the real code
 
@@ -31,9 +34,12 @@ A proof is about the Lean model, not about the Python or Dart source. The link i
 
 The grouping is proved for a simpler algorithm than the Python union-find: labels spread the
 smallest family index across close families until nothing changes. The fixtures check that the
-union-find gives the same groups on 60 generated cases, 23 of which need a chain to merge. The
+union-find gives the same groups on 60 generated cases, 24 of which need a chain to merge. The
 proof assumes the rounds settle within `n + 1` (the generator fails if they do not), and the
-fixture hashes use 63 bits, not 64, so the Dart tests can read the same file.
+fixture hashes use 63 bits, not 64, so the Dart tests can read the same file (a mistake confined
+to the top bits, such as ignoring bit 63 or 62, would pass them). `groups` is slow to evaluate as written, since each round
+re-evaluates the previous one: fine for the fixtures' 10 families, but expect it to stall past
+about 12.
 
 The model scores queries by logit, which matches scoring by probability because the sigmoid is
 increasing. In float64 that holds for the fixtures' logits in [-3, 3]. It stops holding once two

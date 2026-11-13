@@ -71,6 +71,17 @@ jobs:
           build: true
           use-mathlib-cache: false
 
+      # The axiom audit sees only modules that RicePest.lean imports, and Lake does not rebuild it for a
+      # new file nothing imports, so every module under RicePest/ must be imported there.
+      - name: Check every Lean module is imported, so the axiom audit sees it
+        run: |
+          missing=0
+          for f in $(find RicePest -name '*.lean' | sort); do
+            mod=$(echo "${f%.lean}" | tr '/' '.')
+            grep -qx "import $mod" RicePest.lean || { echo "::error::$f is not imported by RicePest.lean"; missing=1; }
+          done
+          exit $missing
+
       # The Python and Dart tests check the real code against these fixtures, so they must match a fresh
       # run of the proved specification.
       - name: Check the Lean fixtures

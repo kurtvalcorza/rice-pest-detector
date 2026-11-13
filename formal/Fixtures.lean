@@ -78,6 +78,7 @@ def familiesCase (seed : Nat) : Json := Id.run do
     st := st'
     bases := bases.push h
   st := lcg st
+  -- At most 10: `groups` re-evaluates earlier rounds, so its cost grows quickly with n.
   let nFamilies := 2 + st % 9
   st := lcg st
   let d := st % 9
