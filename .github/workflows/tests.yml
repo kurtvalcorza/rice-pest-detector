@@ -76,7 +76,9 @@ jobs:
       - name: Check every Lean module is imported, so the axiom audit sees it
         run: |
           missing=0
-          for f in $(find RicePest -name '*.lean' | sort); do
+          files=$(find RicePest -name '*.lean' | sort)
+          [ -n "$files" ] || { echo "::error::no Lean files found under formal/RicePest"; exit 1; }
+          for f in $files; do
             mod=$(echo "${f%.lean}" | tr '/' '.')
             grep -qx "import $mod" RicePest.lean || { echo "::error::$f is not imported by RicePest.lean"; missing=1; }
           done
