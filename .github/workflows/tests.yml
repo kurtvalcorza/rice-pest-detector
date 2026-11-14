@@ -51,6 +51,44 @@ jobs:
           python -m tools.export_app_fixtures --check
           python app/tool/export_resize_fixtures.py --check
 
+  lean:
+    name: Lean proofs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: formal
+    steps:
+      - uses: actions/checkout@v7
+
+      # Installs the toolchain named in formal/lean-toolchain and runs `lake build`, which fails on any
+      # proof that does not check, on `sorry` (formal/lakefile.toml sets warningAsError), and on any
+      # axiom beyond Lean's standard three (formal/AxiomAudit.lean). No Mathlib: core library only.
+      - uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee # v1.7.1
+        with:
+          lake-package-directory: formal
+          auto-config: false
+          build: true
+          use-mathlib-cache: false
+
+      # The axiom audit sees only modules that RicePest.lean imports, and Lake does not rebuild it for a
+      # new file nothing imports, so every module under RicePest/ must be imported there.
+      - name: Check every Lean module is imported, so the axiom audit sees it
+        run: |
+          missing=0
+          files=$(find RicePest -name '*.lean' | sort)
+          [ -n "$files" ] || { echo "::error::no Lean files found under formal/RicePest"; exit 1; }
+          for f in $files; do
+            mod=$(echo "${f%.lean}" | tr '/' '.')
+            grep -qx "import $mod" RicePest.lean || { echo "::error::$f is not imported by RicePest.lean"; missing=1; }
+          done
+          exit $missing
+
+      # The Python and Dart tests check the real code against these fixtures, so they must match a fresh
+      # run of the proved specification.
+      - name: Check the Lean fixtures
+        run: lake exe fixtures --check
+
   app:
     name: Flutter app tests
     runs-on: ubuntu-24.04
