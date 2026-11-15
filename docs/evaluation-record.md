@@ -512,7 +512,7 @@ Reproduce: `python -m tools.calibrate_scores --onnx <model.onnx> --dataset-root 
 
 Each published Kaggle edition is run again with training seeds 20261114 and 20261115, fixed before any run (the published runs used 20261013). The seed notebooks (`notebooks/kaggle/seed-runs/`) carry the editions' code unchanged plus a wrapper that sets the seed and turns on PyTorch's deterministic CUDA settings in warn-only mode. They are private on Kaggle and have no test-look cell. Each run is checked for integrity (executed source and lock match the declaration, no errors, artifact hashes, recomputed metrics) but not against the reference figures, since a different seed is expected to land elsewhere. Verification records: `docs/kaggle-runs/seed-runs/`.
 
-**Not bit-reproducible.** Two operations these models use have no deterministic CUDA version and only warned: the backward pass of `grid_sampler_2d` (deformable attention) and memory-efficient attention. The runs are seeded, not exactly repeatable. The settings cost 5.7% of training time on r50-v5 (25,914 s against 24,520 s for the published Kaggle run).
+**Not bit-reproducible.** Two operations these models use have no deterministic CUDA version and only warned: the backward pass of `grid_sampler_2d` (deformable attention) and memory-efficient attention. The runs are seeded, not exactly repeatable. **Run time** (corrected 2026-11-15; an earlier note here and in a commit message said 5.7%, comparing one run's training time with another's whole-run time): whole runs took 7–14% longer than the published Kaggle runs (r50-v5: 27,358 s and 26,308 s against 24,520 s; RF-DETR-M: 23,497 s against 20,644 s). The published runs recorded only whole-run times, and the data download alone varied from 104 s to 1,173 s, so the cost of the deterministic settings is not separated out.
 
 | r50-v5, validation | Colab, seed 20261013 | Kaggle, seed 20261013 | Kaggle, seed 20261114 | Kaggle, seed 20261115 |
 | :-- | :-- | :-- | :-- | :-- |
@@ -535,4 +535,14 @@ The Kaggle count accuracies use the fixed 0.48 threshold on all 253 photos; the 
 
 - **mAP50 hardly moves with the seed; count accuracy does.** Three seeds of one recipe spread count accuracy over 3.6 points, more than the 2.4-point spread between the three architectures' validation figures (0.822–0.846). On this evidence the differences in count accuracy between r50-v5, RF-DETR-M and D-FINE-L cannot be attributed to the architecture.
 - **The best epoch moves too** (1, 3, 4, 6 across the four runs), so the checkpoint picked by validation mAP50 is itself a source of variation in counts.
-- Three seeds give a rough spread, not a confidence interval. RF-DETR-M and D-FINE-L seed runs follow.
+- Three seeds give a rough spread, not a confidence interval.
+
+| RF-DETR-M, validation | Colab, seed 20261013 | Kaggle, seed 20261013 | Kaggle, seed 20261114 | Kaggle, seed 20261115 |
+| :-- | :-- | :-- | :-- | :-- |
+| Best epoch | 3 | 8 | 6 | pending |
+| Species mAP50 | 0.933 | 0.933 | 0.935 | pending |
+| Four-class mAP50 | 0.837 | 0.841 | 0.833 | pending |
+| Count accuracy at 0.48 | 0.846 (out-of-fold) | 0.834 | 0.830 | pending |
+| White stemborer MAE, 30+ trays (18 photos) | 9.56 | 8.67 | 9.56 | pending |
+
+D-FINE-L seed runs follow.

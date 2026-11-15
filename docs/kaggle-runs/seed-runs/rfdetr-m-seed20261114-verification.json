@@ -1,0 +1,79 @@
+{
+ "variant": "rfdetr-m-seed20261114",
+ "kernel": "kurtvalcorza/rice-pest-seed-20261114-rf-detr-m",
+ "kernel_version": 1,
+ "code_commit": "85528ba",
+ "source": {
+  "declared": "d2890d30a260bd3a3784e90debf0d40f610a8ab47bd797b65dbab8d56822199a",
+  "observed": "d2890d30a260bd3a3784e90debf0d40f610a8ab47bd797b65dbab8d56822199a",
+  "match": true
+ },
+ "errors_in_executed_notebook": 0,
+ "lock": {
+  "declared": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "observed": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "match": true
+ },
+ "gpu": "Tesla T4",
+ "artifacts": {
+  "best.pt": "match",
+  "model.onnx": "match"
+ },
+ "recomputed_equal": true,
+ "reload_check": [],
+ "comparisons": [
+  {
+   "metric": "best_val_map50_species",
+   "kaggle": 0.9352538930135266,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "map50_four_class",
+   "kaggle": 0.8329335240743566,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "count_accuracy",
+   "kaggle": 0.8300395256916996,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "wsb30_mae",
+   "kaggle": 9.555555555555555,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "onnx_bytes",
+   "kaggle": 121956743,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  }
+ ],
+ "local_onnx_check": "SKIPPED (no images)",
+ "training_seconds": 23497.1,
+ "verdict": "VERIFIED-REMOTE",
+ "findings": [],
+ "seed": 20261114,
+ "validation": {
+  "map50_species": 0.9352538930135266,
+  "map50_four_class": 0.8329335240743566,
+  "count_accuracy": 0.8300395256916996,
+  "count_accuracy_no_detection_baseline": 0.4743083003952569,
+  "wsb30_mae": 9.555555555555555
+ },
+ "best_epoch": 6,
+ "fit_seconds": 23238.7,
+ "nondeterministic_ops_warned": [
+  "grid_sampler_2d_backward_cuda",
+  "memory-efficient attention"
+ ]
+}
