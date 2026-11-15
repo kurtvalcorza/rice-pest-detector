@@ -328,3 +328,15 @@ def test_no_receipt_without_a_verified_run(tmp_path, monkeypatch):
     ledger.write_text(LEDGER + f"| 2026-10-22 | {VARIANT} | 2 | b | abc… | Tesla T4 | 6.4 h | DIFFERS | r50v5/v.json |\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="no VERIFIED run"):
         vk.receipt("kurtvalcorza/rice-pest-detector-train-rt-detr-r50", ledger, "2026-10-25", 2)
+
+
+def test_a_seed_run_is_recorded_not_compared_with_the_reference():
+    from tools import verify_kaggle_run as vk
+
+    summary = {"training": {"best_val_map50_species": 0.5},
+               "validation": {"map50_four_class": 0.4, "count_accuracy": 0.3, "wsb30_mae": 20.0},
+               "artifacts": {"model.onnx": {"bytes": 1}}}
+    rows = vk.compare("r50v5-seed20261114", summary)
+    assert {r["verdict"] for r in rows} == {"RECORDED"} and len(rows) == 5
+    assert rows[0] == {"metric": "best_val_map50_species", "kaggle": 0.5, "recorded": None,
+                       "tolerance": "seed run, not compared", "verdict": "RECORDED"}

@@ -30,8 +30,8 @@
   "platform": "x86_64-manylinux_2_28"
  },
  "generator": {
-  "tools/build_notebook.py": "bf34d4cfd821b32fe20f607b8524537536157ed6",
-  "tools/kaggle_cells.py": "1b4c7e4a10f102b53ca1816aa96abcd7a4f90c66"
+  "tools/build_notebook.py": "8e91a5127c51bd83f9a9a07425fd60c4c00c05fd",
+  "tools/kaggle_cells.py": "1a6f4873fbfceaf76a4b355d5cb8edfff6613e89"
  },
  "model": {
   "base_model": "PekingU/rtdetr_r50vd",

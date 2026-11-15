@@ -632,3 +632,53 @@ def test_editions_name_a_kernel_for_papermill(built):
     # Kaggle executes with papermill, which fails at once without a kernelspec (2026-10-20, version 1).
     for variant, (_, nb) in built.items():
         assert nb.metadata["kernelspec"]["name"] == "python3", variant
+
+
+# ------------------------------------------------------------------ repeated-seed runs (2026-11-14)
+
+
+def test_seed_runs_are_private_validation_only_and_change_only_the_seed():
+    assert set(bn.SEEDS) == {20261114, 20261115} and len(bn.SEED_VARIANTS) == 6
+    for name, v in bn.SEED_VARIANTS.items():
+        base = bn.VARIANTS[f"{v['source']}-kaggle"]
+        assert v["public"] is False and bn.kernel_metadata(name)["is_private"] is True
+        assert len(v["title"]) < 40 and v["run"] != base["run"]
+        edition = bn.kaggle_edition(name)
+        assert edition.pop("seed") == v["seed"]
+        assert {k: x for k, x in edition.items() if k != "variant"} == \
+            {k: x for k, x in bn.kaggle_edition(f"{v['source']}-kaggle").items() if k != "variant"}
+
+
+def test_seed_notebooks_carry_the_published_sources_and_no_test_look(tmp_path):
+    for name in ("r50v5-seed20261114", "dfine-l-seed20261115"):
+        seed_nb = json.loads(bn.build(tmp_path / name / "nb.ipynb", variant=name).read_bytes())
+        base = bn.VARIANTS[name.split("-seed")[0] + "-kaggle"]
+        pub_nb = json.loads(bn.committed_path(f"{base['source']}-kaggle").read_bytes())
+        ids = [c["id"] for c in seed_nb["cells"]]
+        assert "test-look" not in ids and {"seed-run", "seed-driver", "seed-stage"} <= set(ids)
+        pub = {c["id"]: c["source"] for c in pub_nb["cells"]}
+        for c in seed_nb["cells"]:  # every carried module and the lock are the published bytes
+            if c["id"].startswith("module-") or c["id"] in ("lock", "carried", "carrier", "fit", "export"):
+                assert c["source"] == pub[c["id"]], c["id"]
+
+
+def test_the_seed_wrapper_replaces_only_the_seed_and_hands_over_to_the_driver(tmp_path):
+    import subprocess
+    import sys
+
+    from tools import kaggle_cells as kc
+
+    (tmp_path / "edition.json").write_text(json.dumps({"seed": 20261114}))
+    (tmp_path / "kaggle_driver.py").write_text(
+        "import dataclasses, sys\n"
+        "@dataclasses.dataclass\nclass Cfg:\n    seed: int = 20261013\n    lr: float = 1e-4\n"
+        "def train_config(edition):\n    return Cfg()\n"
+        "def main():\n    c = train_config({})\n    print('cfg', c.seed, c.lr, sys.argv[1:])\n    return 0\n")
+    body = kc.SEED_DRIVER_SOURCE.split("\n", 1)[1]  # drop the %%writefile line
+    (tmp_path / "seed_driver.py").write_text(body)
+    out = subprocess.run([sys.executable, str(tmp_path / "seed_driver.py"), "--stage", "fit"],
+                         check=False, capture_output=True, text=True, timeout=300)
+    assert out.returncode == 0, out.stderr
+    assert "cfg 20261114 0.0001 ['--stage', 'fit']" in out.stdout
+    assert "deterministic CUDA settings on" in out.stdout
+    assert kc.seed_stage_source().count("'seed_driver.py'") == 1 and "'kaggle_driver.py'" not in kc.seed_stage_source()

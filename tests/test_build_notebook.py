@@ -196,8 +196,8 @@ def test_check_all_checks_every_committed_notebook_and_fails_on_any_difference(m
     seen = []
     monkeypatch.setattr(bn, "check", lambda variant, revision=None: seen.append(variant) or [])
     assert bn.check_all() == 0
-    assert seen == [*bn.COLAB_VARIANTS, *bn.KAGGLE_VARIANTS] and len(seen) == 8
-    assert "8 of 8 notebooks match" in capsys.readouterr().out
+    assert seen == [*bn.COLAB_VARIANTS, *bn.KAGGLE_VARIANTS, *bn.SEED_VARIANTS] and len(seen) == 14
+    assert "14 of 14 notebooks match" in capsys.readouterr().out
     monkeypatch.setattr(bn, "check", lambda variant, revision=None: ["x.ipynb"] if variant == "dfine-l-kaggle" else [])
     assert bn.check_all() == 1
 
@@ -233,3 +233,16 @@ def test_new_variants_carry_the_dataset_credit_and_run_notebooks_stay_unchanged(
     assert "doi.org/10.5281/zenodo.20066074" in intro and "CC BY 4.0" in intro
     old = json.loads(bn.build(tmp_path / "r50v5.ipynb", rev, "r50v5").read_text(encoding="utf-8"))
     assert "zenodo" not in "".join(old["cells"][0]["source"])
+
+
+def test_new_colab_variants_pin_the_scientific_packages_and_the_recorded_ones_do_not(tmp_path: Path, monkeypatch):
+    import tools.build_notebook as bn
+
+    assert bn.BUILT_BEFORE_PINS == set(bn.COLAB_VARIANTS)
+    monkeypatch.setitem(bn.VARIANTS, "r50v5-pinned", {**bn.VARIANTS["r50v5"], "run": "run-r50v5-pinned"})
+    env = lambda nb: next(c.source for c in nb.cells if "pip -q install" in c.source)
+    import nbformat
+    pinned = nbformat.read(build(tmp_path / "new.ipynb", variant="r50v5-pinned"), as_version=4)
+    recorded = nbformat.read(bn.committed_path("r50v5"), as_version=4)
+    assert env(pinned).endswith("pycocotools==2.0.11 scipy==1.16.3")
+    assert env(recorded).endswith("pycocotools scipy")

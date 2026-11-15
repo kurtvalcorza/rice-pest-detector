@@ -1,0 +1,79 @@
+{
+ "variant": "r50v5-seed20261114",
+ "kernel": "kurtvalcorza/rice-pest-seed-20261114-r50-v5",
+ "kernel_version": 1,
+ "code_commit": "85528ba",
+ "source": {
+  "declared": "d2ae946ee74e0babbc0b7432d8e50c57cd0b556aea7576ec5ea04b769d59165b",
+  "observed": "d2ae946ee74e0babbc0b7432d8e50c57cd0b556aea7576ec5ea04b769d59165b",
+  "match": true
+ },
+ "errors_in_executed_notebook": 0,
+ "lock": {
+  "declared": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "observed": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "match": true
+ },
+ "gpu": "Tesla T4",
+ "artifacts": {
+  "best.pt": "match",
+  "model.onnx": "match"
+ },
+ "recomputed_equal": true,
+ "reload_check": [],
+ "comparisons": [
+  {
+   "metric": "best_val_map50_species",
+   "kaggle": 0.9358255095248013,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "map50_four_class",
+   "kaggle": 0.8514402463342645,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "count_accuracy",
+   "kaggle": 0.8458498023715415,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "wsb30_mae",
+   "kaggle": 8.444444444444445,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "onnx_bytes",
+   "kaggle": 171744970,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  }
+ ],
+ "local_onnx_check": "SKIPPED (no images)",
+ "training_seconds": 27358.0,
+ "verdict": "VERIFIED-REMOTE",
+ "findings": [],
+ "seed": 20261114,
+ "validation": {
+  "map50_species": 0.9358255095248013,
+  "map50_four_class": 0.8514402463342645,
+  "count_accuracy": 0.8458498023715415,
+  "count_accuracy_no_detection_baseline": 0.4743083003952569,
+  "wsb30_mae": 8.444444444444445
+ },
+ "best_epoch": 4,
+ "fit_seconds": 25914.1,
+ "nondeterministic_ops_warned": [
+  "grid_sampler_2d_backward_cuda",
+  "memory-efficient attention"
+ ]
+}

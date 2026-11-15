@@ -341,3 +341,57 @@ Version 1. Zenodo. [doi:10.5281/zenodo.20066074](https://doi.org/10.5281/zenodo.
 6. Rice pest detector, the project repository. \
 [github.com/kurtvalcorza/rice-pest-detector](https://github.com/kurtvalcorza/rice-pest-detector)
 7. Rice pest detector, the published models on Kaggle. [kaggle.com/models/kurtvalcorza/rice-pest-detector](https://www.kaggle.com/models/kurtvalcorza/rice-pest-detector)"""
+
+
+# ---------------------------------------------------------------- repeated-seed runs (2026-11-14)
+# A seed run is a published edition with a different training seed and deterministic CUDA settings. The carried
+# package and kaggle_driver.py stay byte-identical; this wrapper changes the seed and the settings, then hands over
+# to the driver's own main(). Stages look train_config up at call time, so the replacement reaches fit and resume.
+SEED_DRIVER_SOURCE = f"""\
+%%writefile {WORK}/seed_driver.py
+\"\"\"Seed run: the published kaggle_driver.py with the edition's training seed and deterministic CUDA settings.\"\"\"
+import dataclasses
+import json
+import os
+import sys
+from pathlib import Path
+
+os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')  # before CUDA starts
+import torch  # noqa: E402
+
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+# warn_only: some kernels these models use have no deterministic CUDA version; they warn instead of stopping.
+torch.use_deterministic_algorithms(True, warn_only=True)
+
+sys.path.insert(0, str(Path(__file__).parent))
+import kaggle_driver  # noqa: E402
+
+_published = kaggle_driver.train_config
+SEED = json.loads(Path(__file__).with_name('edition.json').read_text())['seed']
+
+
+def train_config(edition):
+    return dataclasses.replace(_published(edition), seed=SEED)
+
+
+kaggle_driver.train_config = train_config
+print('seed run: training seed', SEED, '| deterministic CUDA settings on (warn only)', flush=True)
+sys.exit(kaggle_driver.main())"""
+
+
+def seed_stage_source() -> str:
+    """run_stage as the carrier cell defines it, pointed at the seed wrapper."""
+    return RUN_STAGE_SOURCE.replace("'kaggle_driver.py'", "'seed_driver.py'")
+
+
+def seed_text(ed: dict) -> str:
+    return f"""\
+## Seed run: {ed['label']}, training seed {ed['seed']}
+
+This is a **repeated-seed run**, not a published edition. It runs the published {ed['label']} recipe with \
+training seed **{ed['seed']}** instead of 20261013, with PyTorch's deterministic CUDA settings on, to measure how \
+much the results vary from one training run to the next. Everything else (split, recipe, epochs, checkpoint rule, \
+export and reload) is the published edition's. The test split is not read: this notebook has no test-look cell. \
+Its verified figures are recorded in the repository's `docs/evaluation-record.md`; the notebook itself stays \
+private on Kaggle."""

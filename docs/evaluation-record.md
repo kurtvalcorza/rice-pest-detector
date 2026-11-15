@@ -507,3 +507,32 @@ Truth boxes: 1,206 rice black bug and 1,707 white stemborer. Precision and recal
 - **The three models remain within a few hundredths of each other.** One training run each is not enough to rank them; that needs repeated seeds.
 
 Reproduce: `python -m tools.calibrate_scores --onnx <model.onnx> --dataset-root <dataset> --out <calibration.json> --cache <val-dets.json>`, then `python -m tools.validation_detection_report --cache <val-dets.json> --threshold <0.48 or 0.50> --out <report.json>`.
+
+## Repeated-seed runs (from 2026-11-14): validation only
+
+Each published Kaggle edition is run again with training seeds 20261114 and 20261115, fixed before any run (the published runs used 20261013). The seed notebooks (`notebooks/kaggle/seed-runs/`) carry the editions' code unchanged plus a wrapper that sets the seed and turns on PyTorch's deterministic CUDA settings in warn-only mode. They are private on Kaggle and have no test-look cell. Each run is checked for integrity (executed source and lock match the declaration, no errors, artifact hashes, recomputed metrics) but not against the reference figures, since a different seed is expected to land elsewhere. Verification records: `docs/kaggle-runs/seed-runs/`.
+
+**Not bit-reproducible.** Two operations these models use have no deterministic CUDA version and only warned: the backward pass of `grid_sampler_2d` (deformable attention) and memory-efficient attention. The runs are seeded, not exactly repeatable. The settings cost 5.7% of training time on r50-v5 (25,914 s against 24,520 s for the published Kaggle run).
+
+| r50-v5, validation | Colab, seed 20261013 | Kaggle, seed 20261013 | Kaggle, seed 20261114 | Kaggle, seed 20261115 |
+| :-- | :-- | :-- | :-- | :-- |
+| Best epoch | 1 | 3 | 4 | 6 |
+| Species mAP50 | 0.937 | 0.935 | 0.936 | 0.935 |
+| Four-class mAP50 | 0.861 | 0.859 | 0.851 | 0.846 |
+| Count accuracy at 0.48 | 0.834 (out-of-fold) | 0.810 | 0.846 | 0.814 |
+| White stemborer MAE, 30+ trays (18 photos) | 8.67 | 8.61 | 8.44 | 8.39 |
+
+The Kaggle count accuracies use the fixed 0.48 threshold on all 253 photos; the Colab figure re-chose the threshold inside each of five folds, so it is not directly comparable. Seed 20261115 trained in 25,806 s.
+
+**r50-v5 across its three Kaggle seeds** (20261013 without the deterministic settings, 20261114 and 20261115 with them):
+
+| Validation | Mean | Standard deviation | Range |
+| :-- | :-- | :-- | :-- |
+| Species mAP50 | 0.935 | 0.0006 | 0.001 |
+| Four-class mAP50 | 0.852 | 0.007 | 0.014 |
+| Count accuracy at 0.48 | 0.824 | 0.020 | 0.036 (0.810–0.846) |
+| White stemborer MAE, 30+ trays | 8.48 | 0.12 | 0.22 |
+
+- **mAP50 hardly moves with the seed; count accuracy does.** Three seeds of one recipe spread count accuracy over 3.6 points, more than the 2.4-point spread between the three architectures' validation figures (0.822–0.846). On this evidence the differences in count accuracy between r50-v5, RF-DETR-M and D-FINE-L cannot be attributed to the architecture.
+- **The best epoch moves too** (1, 3, 4, 6 across the four runs), so the checkpoint picked by validation mAP50 is itself a source of variation in counts.
+- Three seeds give a rough spread, not a confidence interval. RF-DETR-M and D-FINE-L seed runs follow.

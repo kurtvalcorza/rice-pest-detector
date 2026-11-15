@@ -88,12 +88,15 @@ def _equal(a, b) -> bool:
 
 
 def compare(variant: str, summary: dict) -> list[dict]:
-    rec, out = RECORDED[variant], []
     observed = {"best_val_map50_species": summary["training"]["best_val_map50_species"],
                 "map50_four_class": summary["validation"]["map50_four_class"],
                 "count_accuracy": summary["validation"]["count_accuracy"],
                 "wsb30_mae": summary["validation"]["wsb30_mae"],
                 "onnx_bytes": summary["artifacts"]["model.onnx"]["bytes"]}
+    if variant in bn.SEED_VARIANTS:  # another seed is expected to land elsewhere: record, do not compare
+        return [{"metric": m, "kaggle": v, "recorded": None, "tolerance": "seed run, not compared",
+                 "verdict": "RECORDED"} for m, v in observed.items()]
+    rec, out = RECORDED[variant], []
     for metric, value in observed.items():
         tol = TOLERANCE[metric]
         limit = tol * rec[metric] if metric == "onnx_bytes" else tol

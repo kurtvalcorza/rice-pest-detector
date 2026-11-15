@@ -1,0 +1,79 @@
+{
+ "variant": "r50v5-seed20261115",
+ "kernel": "kurtvalcorza/rice-pest-seed-20261115-r50-v5",
+ "kernel_version": 1,
+ "code_commit": "85528ba",
+ "source": {
+  "declared": "68dc1657dbcc48c5a43b791c558329e1ed449b4b4e2256ec8a7bbd362d94d405",
+  "observed": "68dc1657dbcc48c5a43b791c558329e1ed449b4b4e2256ec8a7bbd362d94d405",
+  "match": true
+ },
+ "errors_in_executed_notebook": 0,
+ "lock": {
+  "declared": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "observed": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "match": true
+ },
+ "gpu": "Tesla T4",
+ "artifacts": {
+  "best.pt": "match",
+  "model.onnx": "match"
+ },
+ "recomputed_equal": true,
+ "reload_check": [],
+ "comparisons": [
+  {
+   "metric": "best_val_map50_species",
+   "kaggle": 0.9346640559470034,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "map50_four_class",
+   "kaggle": 0.8455968724090027,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "count_accuracy",
+   "kaggle": 0.8142292490118577,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "wsb30_mae",
+   "kaggle": 8.38888888888889,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "onnx_bytes",
+   "kaggle": 171744970,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  }
+ ],
+ "local_onnx_check": "SKIPPED (no images)",
+ "training_seconds": 26308.4,
+ "verdict": "VERIFIED-REMOTE",
+ "findings": [],
+ "seed": 20261115,
+ "validation": {
+  "map50_species": 0.9346640559470034,
+  "map50_four_class": 0.8455968724090027,
+  "count_accuracy": 0.8142292490118577,
+  "count_accuracy_no_detection_baseline": 0.4743083003952569,
+  "wsb30_mae": 8.38888888888889
+ },
+ "best_epoch": 6,
+ "fit_seconds": 25806.3,
+ "nondeterministic_ops_warned": [
+  "grid_sampler_2d_backward_cuda",
+  "memory-efficient attention"
+ ]
+}

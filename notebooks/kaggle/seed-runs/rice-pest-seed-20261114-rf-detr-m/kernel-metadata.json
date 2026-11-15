@@ -1,0 +1,22 @@
+{
+ "id": "kurtvalcorza/rice-pest-seed-20261114-rf-detr-m",
+ "title": "Rice pest seed 20261114: RF-DETR-M",
+ "code_file": "train_kaggle_rfdetr-m_seed20261114.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_tpu": false,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": [],
+ "model_sources": [
+  "kurtvalcorza/rice-pest-detector/onnx/rf-detr-m/3"
+ ],
+ "keywords": [
+  "agriculture",
+  "deep-learning",
+  "object-detection"
+ ]
+}

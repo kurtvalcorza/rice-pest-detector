@@ -171,6 +171,10 @@ DATA_CREDIT = ("Data: Deleña, R.; Balleras, G.; Dequiña, B. J.; Jumawan, R.; F
 # These variants were run, and their notebooks' SHA-256 values recorded, before the credit was added. They are
 # built without it so that `--check` still matches the committed files. Every later variant carries the credit.
 BUILT_BEFORE_CREDIT = {"r18", "r50", "r50v5", "dfine-l", "rfdetr-m"}
+# The same variants installed pycocotools and scipy unpinned. Every later variant pins the versions all five
+# recorded runs used (their env logs), so a new build installs what the evidence ran on.
+BUILT_BEFORE_PINS = {"r18", "r50", "r50v5", "dfine-l", "rfdetr-m"}
+COLAB_PINS = "pycocotools==2.0.11 scipy==1.16.3"
 
 # Kaggle editions (spec 010): reference notebooks that run the published recipe end to end on a Kaggle T4. They reuse
 # the Colab variant's model, revision and recipe; the threshold, review level and input size come from the manifest.
@@ -249,7 +253,8 @@ def build(out: Path, revision: str | None = None, variant: str = "r18") -> Path:
         _cell(new_code_cell, "drive", drive_source),
         _cell(new_code_cell, "env",
               "!nvidia-smi\nimport torch, sys\nprint(sys.version, torch.__version__, torch.version.cuda)\n"
-              f"!pip -q install transformers=={v.get('transformers', '4.57.6')} pycocotools scipy"),
+              f"!pip -q install transformers=={v.get('transformers', '4.57.6')} "
+              + ("pycocotools scipy" if variant in BUILT_BEFORE_PINS else COLAB_PINS)),
         _cell(new_code_cell, "versions",
               "import transformers\nprint('transformers', transformers.__version__)\n"
               "if not torch.cuda.is_available():\n"
@@ -283,6 +288,21 @@ def slugify(title: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
 
 
+# Repeated-seed runs (2026-11-14): each published edition again with another training seed and deterministic CUDA
+# settings, to measure run-to-run spread. Private on Kaggle, validation only (no test-look cell); the seeds were
+# fixed before any run. The editions themselves keep seed 20261013.
+SEEDS = (20261114, 20261115)
+SEED_VARIANTS: dict[str, dict] = {}
+for _base in KAGGLE_VARIANTS:
+    _b = VARIANTS[_base]
+    for _seed in SEEDS:
+        _title = f"Rice pest seed {_seed}: {_b['label']}"
+        SEED_VARIANTS[f"{_b['source']}-seed{_seed}"] = {
+            **_b, "seed": _seed, "public": False, "title": _title, "slug": slugify(_title),
+            "run": f"{_b['run']}-seed{_seed}", "file": f"train_kaggle_{_b['source']}_seed{_seed}.ipynb"}
+VARIANTS.update(SEED_VARIANTS)
+
+
 def _text_bytes(path: Path) -> bytes:
     """A text file as the notebook embeds it: read with universal newlines, so the bytes match on any checkout."""
     return path.read_text(encoding="utf-8").encode("utf-8")
@@ -306,7 +326,8 @@ def kaggle_edition(variant: str, revision: str | None = None) -> dict:
             "revision": revision or v["revision"], "input_size": manifest["input_size"],
             "threshold": manifest["threshold"], "review_below": manifest["review_below"], "epochs": 40,
             "batch_size": 4, "score_tolerance_enforced": v["score_tolerance_enforced"],
-            "score_waiver": None if v["score_tolerance_enforced"] else D_FINE_WAIVER}
+            "score_waiver": None if v["score_tolerance_enforced"] else D_FINE_WAIVER,
+            **({"seed": v["seed"]} if "seed" in v else {})}
 
 
 def carried_files() -> list[tuple[str, Path, bool]]:
@@ -371,7 +392,9 @@ def _kaggle_cells(variant: str, revision: str) -> list:
                           f"{v['label']} resizes them to {edition['input_size']} × {edition['input_size']}, its "
                           "native input size.")}
     md, code = new_markdown_cell, new_code_cell
-    cells = [_cell(md, "intro", kc.intro(ed)), _cell(md, "problem", kc.problem(ed, DATA_CREDIT)),
+    seed_run = "seed" in v
+    cells = [_cell(md, "intro", kc.intro(ed)), *([_cell(md, "seed-run", kc.seed_text(ed))] if seed_run else []),
+             _cell(md, "problem", kc.problem(ed, DATA_CREDIT)),
              _cell(code, "runtime", kc.RUNTIME_SOURCE),
              _cell(code, "paths", kc.paths(ed, pprint.pformat(edition, sort_dicts=False, width=100)))]
     carried, modules, data_paths = {}, 0, []
@@ -390,6 +413,8 @@ def _kaggle_cells(variant: str, revision: str) -> list:
     cells += [
         _cell(code, "carried", kc.carried(carried)),
         _cell(code, "carrier", kc.CARRIER_SOURCE),
+        *([_cell(code, "seed-driver", kc.SEED_DRIVER_SOURCE), _cell(code, "seed-stage", kc.seed_stage_source())]
+          if seed_run else []),
         _cell(code, "env-log", kc.ENV_LOG_SOURCE),
         _cell(code, "fetch", kc.FETCH_SOURCE),
         _cell(code, "validate", kc.VALIDATE_SOURCE),
@@ -400,7 +425,7 @@ def _kaggle_cells(variant: str, revision: str) -> list:
         _cell(code, "export", kc.EXPORT_SOURCE),
         _cell(code, "reload", kc.RELOAD_SOURCE),
         _cell(code, "inference", kc.INFERENCE_SOURCE),
-        _cell(code, "test-look", kc.TEST_LOOK_SOURCE),
+        *([] if seed_run else [_cell(code, "test-look", kc.TEST_LOOK_SOURCE)]),
         _cell(code, "summary", kc.SUMMARY_SOURCE),
         _cell(md, "interpret", kc.interpret(ed)),
         _cell(md, "did-not-work", kc.DID_NOT_WORK),
@@ -475,7 +500,7 @@ def build_kaggle(out: Path, variant: str, revision: str) -> Path:
 def committed_path(variant: str) -> Path:
     v = VARIANTS[variant]
     if v.get("platform") == "kaggle":
-        return KAGGLE_DIR / v["slug"] / v["file"]
+        return KAGGLE_DIR / ("seed-runs" if "seed" in v else "") / v["slug"] / v["file"]
     return ROOT / "notebooks" / ("train_colab.ipynb" if variant == "r18" else f"train_colab_{variant}.ipynb")
 
 
@@ -492,7 +517,7 @@ def check(variant: str, revision: str | None = None) -> list[str]:
 
 
 def check_all() -> int:
-    variants = [*COLAB_VARIANTS, *KAGGLE_VARIANTS]
+    variants = [*COLAB_VARIANTS, *KAGGLE_VARIANTS, *SEED_VARIANTS]
     failed = 0
     for variant in variants:
         diff = check(variant)
