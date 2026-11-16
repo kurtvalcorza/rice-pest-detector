@@ -1,0 +1,65 @@
+{
+ "variant": "dfine-l-seed20261114",
+ "kernel": "kurtvalcorza/rice-pest-seed-20261114-d-fine-l",
+ "kernel_version": 1,
+ "code_commit": "85528ba",
+ "source": {
+  "declared": "681e9feb1f805e14226f866ae84b84ff52d103cc89b7c96c073ebdf46caaf661",
+  "observed": "681e9feb1f805e14226f866ae84b84ff52d103cc89b7c96c073ebdf46caaf661",
+  "match": true
+ },
+ "errors_in_executed_notebook": 0,
+ "lock": {
+  "declared": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "observed": "89739ff35383c466b4143bd13af5a10a0f6529a71a587b18702b6ca60cd737ee",
+  "match": true
+ },
+ "gpu": "Tesla T4",
+ "artifacts": {
+  "best.pt": "match",
+  "model.onnx": "match"
+ },
+ "recomputed_equal": true,
+ "reload_check": [],
+ "comparisons": [
+  {
+   "metric": "best_val_map50_species",
+   "kaggle": 0.9363804803847764,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "map50_four_class",
+   "kaggle": 0.8469554662528403,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "count_accuracy",
+   "kaggle": 0.8142292490118577,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "wsb30_mae",
+   "kaggle": 7.0,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  },
+  {
+   "metric": "onnx_bytes",
+   "kaggle": 125213572,
+   "recorded": null,
+   "tolerance": "seed run, not compared",
+   "verdict": "RECORDED"
+  }
+ ],
+ "local_onnx_check": "SKIPPED (no images)",
+ "training_seconds": 27339.3,
+ "verdict": "VERIFIED-REMOTE",
+ "findings": []
+}

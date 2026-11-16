@@ -512,7 +512,7 @@ Reproduce: `python -m tools.calibrate_scores --onnx <model.onnx> --dataset-root 
 
 Each published Kaggle edition is run again with training seeds 20261114 and 20261115, fixed before any run (the published runs used 20261013). The seed notebooks (`notebooks/kaggle/seed-runs/`) carry the editions' code unchanged plus a wrapper that sets the seed and turns on PyTorch's deterministic CUDA settings in warn-only mode. They are private on Kaggle and have no test-look cell. Each run is checked for integrity (executed source and lock match the declaration, no errors, artifact hashes, recomputed metrics) but not against the reference figures, since a different seed is expected to land elsewhere. Verification records: `docs/kaggle-runs/seed-runs/`.
 
-**Not bit-reproducible.** Two operations these models use have no deterministic CUDA version and only warned: the backward pass of `grid_sampler_2d` (deformable attention) and memory-efficient attention. The runs are seeded, not exactly repeatable. **Run time** (corrected 2026-11-15; an earlier note here and in a commit message said 5.7%, comparing one run's training time with another's whole-run time): whole runs took 7–14% longer than the published Kaggle runs (r50-v5: 27,358 s and 26,308 s against 24,520 s; RF-DETR-M: 23,497 s against 20,644 s). The published runs recorded only whole-run times, and the data download alone varied from 104 s to 1,173 s, so the cost of the deterministic settings is not separated out.
+**Not bit-reproducible.** Two operations these models use have no deterministic CUDA version and only warned: the backward pass of `grid_sampler_2d` (deformable attention) and memory-efficient attention. The runs are seeded, not exactly repeatable. **Run time** (corrected 2026-11-15; an earlier note here and in a commit message said 5.7%, comparing one run's training time with another's whole-run time): whole runs took 7–17% longer than the published Kaggle runs (r50-v5: 27,358 s and 26,308 s against 24,520 s; RF-DETR-M: 23,497 s and 23,594 s against 20,644 s; D-FINE-L: 27,339 s and 29,092 s against 24,845 s). The published runs recorded only whole-run times, and the data download alone varied from 104 s to 1,173 s, so the cost of the deterministic settings is not separated out.
 
 | r50-v5, validation | Colab, seed 20261013 | Kaggle, seed 20261013 | Kaggle, seed 20261114 | Kaggle, seed 20261115 |
 | :-- | :-- | :-- | :-- | :-- |
@@ -539,10 +539,46 @@ The Kaggle count accuracies use the fixed 0.48 threshold on all 253 photos; the 
 
 | RF-DETR-M, validation | Colab, seed 20261013 | Kaggle, seed 20261013 | Kaggle, seed 20261114 | Kaggle, seed 20261115 |
 | :-- | :-- | :-- | :-- | :-- |
-| Best epoch | 3 | 8 | 6 | pending |
-| Species mAP50 | 0.933 | 0.933 | 0.935 | pending |
-| Four-class mAP50 | 0.837 | 0.841 | 0.833 | pending |
-| Count accuracy at 0.48 | 0.846 (out-of-fold) | 0.834 | 0.830 | pending |
-| White stemborer MAE, 30+ trays (18 photos) | 9.56 | 8.67 | 9.56 | pending |
+| Best epoch | 3 | 8 | 6 | 4 |
+| Species mAP50 | 0.933 | 0.933 | 0.935 | 0.935 |
+| Four-class mAP50 | 0.837 | 0.841 | 0.833 | 0.839 |
+| Count accuracy at 0.48 | 0.846 (out-of-fold) | 0.834 | 0.830 | 0.822 |
+| White stemborer MAE, 30+ trays (18 photos) | 9.56 | 8.67 | 9.56 | 9.44 |
 
-D-FINE-L seed runs follow.
+**Two models, three Kaggle seeds each** (validation):
+
+| | r50-v5 mean (SD, range) | RF-DETR-M mean (SD, range) |
+| :-- | :-- | :-- |
+| Species mAP50 | 0.935 (0.0006, 0.001) | 0.935 (0.0011, 0.002) |
+| Four-class mAP50 | 0.852 (0.007, 0.014) | 0.838 (0.004, 0.008) |
+| Count accuracy at 0.48 | 0.824 (0.020, 0.036) | 0.829 (0.006, 0.012) |
+| White stemborer MAE, 30+ trays | 8.48 (0.12, 0.22) | 9.22 (0.48, 0.89) |
+
+- **Count accuracy does not separate the two models.** Their means differ by half a point (0.829 against 0.824), well inside r50-v5's own seed range of 3.6 points.
+- **Species mAP50 is the same to three places.** Four-class mAP50 is the one measure where r50-v5 is ahead (0.852 against 0.838) with ranges that do not overlap, and white stemborer error on crowded trays is lower for r50-v5 (8.48 against 9.22), with three seeds each.
+- **RF-DETR-M varies less from seed to seed** on count accuracy (range 1.2 points against 3.6).
+
+| D-FINE-L, validation | Colab, seed 20261013 | Kaggle, seed 20261013 | Kaggle, seed 20261114 | Kaggle, seed 20261115 |
+| :-- | :-- | :-- | :-- | :-- |
+| Best epoch | 3 | 6 | 7 | 3 |
+| Species mAP50 | 0.940 | 0.933 | 0.936 | 0.932 |
+| Four-class mAP50 | 0.848 | 0.851 | 0.847 | 0.855 |
+| Count accuracy at 0.50 | 0.822 (out-of-fold) | 0.814 | 0.814 | 0.814 |
+| White stemborer MAE, 30+ trays (18 photos) | 8.56 | 8.28 | 7.00 | 8.22 |
+
+D-FINE-L counts at its own threshold, 0.50. Its three Kaggle runs each counted 206 of the 253 photos within tolerance. This is a coincidence of totals, not a repeated result: the two new seeds have different detection files and disagree on 22 photos (each passes 11 the other fails).
+
+**Three models, three Kaggle seeds each** (validation; mean, then sample standard deviation and range):
+
+| | r50-v5 | RF-DETR-M | D-FINE-L |
+| :-- | :-- | :-- | :-- |
+| Species mAP50 | 0.935 (0.0006, 0.001) | 0.935 (0.0011, 0.002) | 0.934 (0.0021, 0.004) |
+| Four-class mAP50 | 0.852 (0.007, 0.014) | 0.838 (0.004, 0.008) | 0.851 (0.004, 0.008) |
+| Count accuracy (0.48, 0.48, 0.50) | 0.824 (0.020, 0.036) | 0.829 (0.006, 0.012) | 0.814 (0.000, 0.000) |
+| White stemborer MAE, 30+ trays | 8.48 (0.12, 0.22) | 9.22 (0.48, 0.89) | 7.83 (0.72, 1.28) |
+
+- **Count accuracy does not separate the three models.** The means span 1.5 points (0.814 to 0.829), less than r50-v5's own seed range of 3.6 points. RF-DETR-M's three runs are all above D-FINE-L's, by 0.8 to 2.0 points, but r50-v5's seeds alone cover that gap. D-FINE-L's threshold sits at the top of the prospectively documented grid, so its count accuracy may be understated (see D-FINE-L, 2026-10-18).
+- **Species mAP50 is level** (0.934 to 0.935).
+- **Four-class mAP50:** r50-v5 and D-FINE-L are level (0.852 and 0.851); both are above RF-DETR-M (0.838). D-FINE-L's range (0.847–0.855) does not overlap RF-DETR-M's (0.833–0.841).
+- **White stemborer error on crowded trays orders the models** D-FINE-L (7.00–8.28), r50-v5 (8.39–8.61), RF-DETR-M (8.67–9.56), with ranges that do not overlap. It rests on 18 photos and three seeds; D-FINE-L also varies most from seed to seed (1.28). The earlier paired comparison of single runs (D-FINE-L against r50-v5, 95% interval [−0.89, +0.72]) found a tie.
+- **No model leads on every measure.** These are validation reruns; they do not reopen the wave-2 choice of r50-v5 as the demo model, which was made under rules A and B before the test look. Three seeds give a rough spread, not a confidence interval.
