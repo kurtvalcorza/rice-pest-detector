@@ -66,7 +66,7 @@ On a work or school laptop, installs may be blocked: ask your IT team first, or 
 
 ## Models
 
-Three models were trained in the second round ("wave 2"), all on Colab T4s for 40 epochs with the same split and recipe. r50-v5 is the demo model; the other two are kept for comparison.
+Three models were trained in the second round ("wave 2"), all on Colab T4s for 40 epochs with the same split and recipe. r50-v5 is the demo model; the other two are kept for comparison. The comparison is descriptive, not a controlled test of the architectures: RF-DETR-M runs at its native 576 px, and on three training seeds per model the differences in count accuracy stay inside one model's seed-to-seed spread ([evaluation record](docs/evaluation-record.md), "Repeated-seed runs").
 
 Each was fine-tuned from a COCO-pretrained base model on Hugging Face (Apache-2.0). Each model has two badges: Hugging Face opens the base model it was fine-tuned from, at the exact revision used; Kaggle opens the fine-tuned ONNX weights published from this project.
 

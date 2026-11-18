@@ -20,7 +20,7 @@ rpd-m6/                 the throwaway worktree you create in step 2 (removed in 
 
 If your practice folder is somewhere else, change `../agents-practice` in the commands. Run every command from the folder the step names. Where bash (macOS, Linux, Git Bash) and PowerShell (Windows) differ, both are given. Keep the quotes around `"--junitxml={junit}"`: PowerShell would otherwise read the braces as code.
 
-**Tested with** `uv` 0.13.5 and Git on Windows 11 (PowerShell 7 and Git Bash), 27 October 2026. macOS and Linux runs are still to be recorded.
+**Tested with** `uv` 0.13.5 and Git on Windows 11 (PowerShell 7 and Git Bash), 27 October 2026. The light test command was timed from an empty `uv` cache on 18 November 2026: Windows 11 with `uv` 0.13.7, 9 packages in 25 seconds; Linux (Ubuntu 24.04) with `uv` 0.12.22, 8 packages in 4 seconds. macOS is still to be recorded.
 
 ## What you will learn
 

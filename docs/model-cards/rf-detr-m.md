@@ -338,7 +338,7 @@ Each record below is one execution, as recorded in [`docs/evaluation-record.md`]
 **Training run**
 
 - **Date:** 2026-10-17
-- **Subject:** `notebooks/train_colab_rfdetr-m.ipynb`, the committed notebook run unchanged. The evaluation record does not name the exact git revision executed.
+- **Subject:** `notebooks/train_colab_rfdetr-m.ipynb`, the committed notebook run unchanged. **Executed and committed build:** commit `820c298`, the only commit that has touched this notebook (evaluation record, "Notebook audit (2026-11-07)").
 - **Runtime:** Google Colab, NVIDIA T4 GPU, `transformers==5.20.1` as pinned in the notebook. Python and PyTorch versions are not recorded in the evaluation record.
 - **Procedure:** all cells run through the Colab command-line interface; batch 4, 40 epochs at 576×576; the last cell stopped at the locked test cell, as designed.
 - **Observed result:** 21,108 s wall clock (5.9 h); best validation `map50_species` 0.933 at epoch 3, four-class 0.837; 0.891 at epoch 39; highest validation score on any photo 0.9485; `best.pt` SHA-256 beginning `5122c68a`.

@@ -342,7 +342,7 @@ Each record below is one execution, as recorded in [`docs/evaluation-record.md`]
 **Training run**
 
 - **Date:** 2026-10-17 (finished 17:47 UTC)
-- **Subject:** `notebooks/train_colab_dfine-l.ipynb`, the committed notebook run unchanged. The evaluation record does not name the exact git revision executed.
+- **Subject:** `notebooks/train_colab_dfine-l.ipynb`, the committed notebook run unchanged. **Executed build:** the first attempt started on the notebook of commit `665e7a4` (about 03:20 UTC); the record does not say which build the resumed session (10:40 UTC) ran, though at 640 px the two do not differ; **committed build:** a rebuild from `820c298` (04:09 UTC) that adds an input-size option and changes nothing at 640 px (evaluation record, "Notebook audit (2026-11-07)").
 - **Runtime:** Google Colab, NVIDIA T4 GPU, `transformers==5.20.1` as pinned in the notebook. Python and PyTorch versions are not recorded in the evaluation record.
 - **Procedure:** all cells run through the Colab command-line interface; batch 4, 40 epochs. The first attempt was interrupted when the computer driving the session restarted; the run resumed from its saved checkpoint at epoch 3. The last cell stopped at the locked test cell, as designed.
 - **Observed result:** 25,617 s wall clock for the resumed part; best validation `map50_species` 0.940 at epoch 3, four-class 0.848; highest validation score on any photo 0.9590; `best.pt` SHA-256 beginning `758e2d12`.
