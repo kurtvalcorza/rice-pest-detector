@@ -2,6 +2,8 @@
 
 The pages that teach this material are in [docs/workshop-advanced/](../../docs/workshop-advanced/); start with [Module 6](../../docs/workshop-advanced/module-6-engineer.md). The design is in [specs/004-advanced-workshop/](../../specs/004-advanced-workshop/).
 
+**This repository is a teaching demo.** Passing its tests, including the ones in this folder, shows that the code does what its written contract says. It does not show that the model is accurate, validated in the field or suitable for decisions about crops.
+
 | Folder | What it holds |
 | :-- | :-- |
 | `solutions/` | The reference scripts (`verify.py`, the fail-closed verifier; `workflow.py`, the bounded state machine; `mutation_check.py`, which plants one bug per requirement) and two reference traces. CI tests these |
