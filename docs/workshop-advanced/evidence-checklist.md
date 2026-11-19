@@ -2,6 +2,8 @@
 
 Each module ends with a short list of things to check. Every item is checked from a file, a command's output or a link, never from the agent's account of what it did. That is the point of the track: an agent's "done" is a claim, and the files are the evidence.
 
+**This repository is a teaching demo.** Passing its tests shows that the code does what its written contract says. It does not show that the model is accurate, validated in the field or suitable for decisions about crops, and a complete evidence bundle does not change that.
+
 **Where to keep it.** Keep each module's evidence in your practice folder, `agents-practice/advanced-evidence/<module>/` (`m6`, `m7`, `m8`), outside your clone and outside any worktree, so removing a worktree keeps it. **Keep it free of secrets:** before you share a bundle with anyone, check that nothing in it holds a token, key, password or personal data. The verifier writes paths as you gave them, so give relative paths if you will share the folder.
 
 ## Module 6: Engineer
